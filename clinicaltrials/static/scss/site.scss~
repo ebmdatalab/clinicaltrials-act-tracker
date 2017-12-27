@@ -1,0 +1,1146 @@
+/****************************************************************/
+/* Importing */
+
+@import "variables";
+
+@import "../bootstrap-sass-3.3.7/stylesheets/_bootstrap";
+
+/* Load fonts from same domain, not from Google */
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 400;
+  src: local("Oswald"), url(/static/fonts/Oswald-Regular.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 500;
+  src: local("Oswald"), url(/static/fonts/Oswald-Medium.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 700;
+  src: local("Oswald-Bold"), local("Oswald-Bold"), url(/static/fonts/Oswald-Bold.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  src: local("Lato"), url(/static/fonts/Lato-Regular.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  src: local("Lato-Black"), local("Lato-Black"), url(/static/fonts/Lato-Black.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: 'Hind';
+  font-style: normal;
+  font-weight: 700;
+  src: local("Hind-Bold"), url(/static/fonts/Hind-Bold.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: 'FiraSans';
+  font-style: normal;
+  font-weight: 700;
+  src: local("FiraSans-Bold"), local("FarSans-Bold"), url(/static/fonts/FiraSans-Bold.ttf) format("truetype");
+}
+
+@import "bootswatch";
+
+/****************************************************************/
+/* All pages */
+
+/* Used as base size for measuring rem sizes against.
+   For much of the page, this is overriden by the <body>
+   font-size, and we use px for fonts. For the front page
+   and sponsor page infographics we use rem, so this can 
+   easily adjust size of them */
+html {
+  font-size: 0.8px;
+}
+
+body {
+  font-size: 20px;
+  padding-top: 50px;
+  padding-bottom: 20px;
+}
+
+body#taking-screenshot {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+a {
+  font-weight: bold;
+   &:hover, &:focus {
+	  color: #fff;
+	  background-color: $gray-dark;
+	}
+}
+.nav a {
+  font-weight: normal;
+}
+
+.page-header {
+  border-bottom: none; 
+  padding-bottom: 0;
+}
+
+.prominent_link {
+  margin-top: 24px;
+  font-size: 21px;
+}
+
+*[data-toggle="tooltip"] {
+  cursor: default;
+}
+
+a > span[data-toggle="tooltip"] {
+  cursor: pointer;
+}
+
+.glyphicon-question-sign, .glyphicon-info-sign {
+  vertical-align: text-bottom;
+  margin-left: 6px;
+}
+
+.label-warning {
+  color: $brand-primary;
+  border: 3px solid $brand-warning;
+  background-color: $body-bg;
+}
+
+.label-early {
+  background-color: $gray;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  text-transform: uppercase;
+  color: $brand-primary;
+  font-weight: normal;
+}
+
+h2 {
+  margin-top: 33px;
+}
+
+body#taking-screenshot .jumbotron {
+  margin-bottom: 0;
+  padding-top: 16px;
+  padding-bottom: 48px;
+}
+
+.jumbotron {
+  h1 {
+    color: $text-color;
+    font-size: 54px;
+    width: 100%;
+    text-decoration: none;
+    margin-bottom: 16px;
+    position: relative;
+  }
+}
+
+/****************************************************************/
+/* Loading spinner */
+
+.glyphicon.spinning {
+  animation: spin 1s infinite linear;
+  -webkit-animation: spin2 1s infinite linear;
+}
+
+.glyphicon-refresh.spinning {
+  transform-origin: 50% 49%;
+}
+
+@keyframes spin {
+  from {
+    transform: scale(1) rotate(0deg);
+  }
+
+  to {
+    transform: scale(1) rotate(360deg);
+  }
+}
+
+@-webkit-keyframes spin2 {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+.navbar {
+  font-family: $font-family-lato;
+  font-weight: 400;
+
+  @media (min-width: 1370px) {
+    .container {
+        width: 1370px;
+    }
+  }
+
+  li {
+    margin-top: 4px;
+    margin-bottom: -4px;
+  }
+}
+
+.navbar-brand {
+  font-family: $font-family-firasans;
+  font-weight: 700;
+  font-size: 30px;
+  text-transform: none;
+}
+
+/****************************************************************/
+/* All tables */
+
+.dataTables_length {
+  margin-top: 12px;
+}
+
+#table-pills {
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+#table-pills li {
+  vertical-align: middle;
+}
+
+.nav-pills > li.active a h2 {
+  background-color: $gray !important;
+}
+
+.nav-pills > li.active a {
+  background-color: $gray !important;
+}
+
+.nav-pills > li a h2 {
+  color: $gray;
+}
+
+.nav-pills > li.active > a .badge {
+  color: $gray;
+  background-color: $component-active-color;
+}
+
+.nav-pills > li > a .badge {
+  background-color: $gray;
+  color: $component-active-color;
+}
+
+.table .label {
+  line-height: 20px;
+}
+
+.input-group-btn .spacer {
+  padding-left: 8px;
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.hidden_column {
+  display: none;
+}
+
+.nav-tabs .badge {
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+li.search-pill a {
+  margin-bottom: -1px;
+  padding-top: 18px;
+  padding-bottom: 14px;
+}
+
+#table-pills h2 {
+  margin-top: 6px;
+  font-weight: 500;
+
+  /* Use Oswald Medium (not Regular) */
+}
+
+#table-pills .badge {
+  margin-left: 8px;
+}
+
+.nav-pills > li.active a h2,
+.nav-pills > li.active a:hover h2,
+.nav-pills > li.active a:focus h2 {
+  color: #fff;
+  background-color: $brand-primary;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+  float: left !important;
+  text-align: left !important;
+  padding-top: 1em !important;
+  margin-left: -8px !important;
+}
+
+.dataTables_wrapper .dataTables_length {
+  float: right !important;
+  margin-top: 22px !important;
+
+  label {
+    font-weight: normal;
+  }
+}
+
+/****************************************************************/
+/* Front page */
+
+/* Measurements in rem's relative to width of 1200em. Scaled
+by <html> element's pix value. */
+
+.frontpage-preamble {
+  padding-bottom: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+
+  .container {
+    width: 944px;
+  }
+
+  h1 {
+    font-size: 54rem;
+    width: 100%;
+    border-bottom: 9rem solid $text-color;
+    text-align: center; /* for Safari, which doesn't support text-align-last */
+    text-align-last: justify;
+    padding-bottom: 8rem;
+  }
+
+  .first-column, .second-column {
+    width: 536rem;
+    display: inline-block;
+    text-transform: uppercase;
+    text-align: center; /* for Safari, which doesn't support text-align-last */
+    text-align-last: justify;
+    margin-top: 20rem;
+  }
+
+  .first-column {
+    margin-right: 32rem;
+    font-family: $font-family-oswald;
+    font-weight: 500;
+  }
+
+  .second-column {
+    margin-left: 32rem;
+    font-family: $font-family-lato;
+    vertical-align: top;
+  }
+
+  #preamble-frontpage {
+    font-weight: 400;
+    text-align: justify;
+    font-size: 40rem;
+    line-height: 51rem;
+    color: $gray-dark;
+  }
+/*  #wrap-0 {
+    font-size: 60rem;
+    line-height: 60rem;
+  }
+
+  #preamble-1 {
+    font-size: 60rem;
+    line-height: 60rem;
+    color: $gray-dark;
+  }
+  #preamble-comma {
+    font-size: 30rem;
+    line-height: 30rem;
+    color: $gray-dark;
+  }
+
+  #preamble-2 {
+    font-size: 30rem;
+    line-height: 30rem;
+    color: $gray-dark;
+  }
+
+  #preamble-3 {
+    font-size: 75rem;
+    line-height: 75rem;
+    color: $brand-success;
+  }
+
+  #preamble-4 {
+    font-size: 35rem;
+    line-height: 45rem;
+    color: $gray-dark;
+  }
+
+  #preamble-5 {
+    font-size: 25rem;
+    line-height: 25rem;
+    color: $gray-dark;
+  }
+
+  #preamble-6 {
+    font-size: 90rem;
+    line-height: 90rem;
+    color: $brand-success;
+  }
+
+  #wrap-1 {
+    text-align: left;
+    text-align-last: left;
+    margin-top: -4rem;
+    margin-bottom: -22rem;
+  }
+
+  #white-line {
+    border-bottom: solid 5rem white;
+    text-align: left;
+    text-align-last: left;
+    font-size: 15rem;
+    right: 32rem;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #white-line:after {
+    content: "\200B";
+    background-image: url("/static/images/pill-for-line-trans.svg");
+    position: relative;
+    left: 300rem;
+    background-color: $gray-lighter;
+    min-width: 70rem;
+    display: inline-block;
+    top: 13rem;
+  }
+
+  #preamble-7 {
+    position: relative;
+    top: -24rem;
+    font-size: 30rem;
+    color: $gray-dark;
+    text-align: left;
+    text-align-last: left;
+    background-color: $gray-lighter;
+    padding-right: 8rem;
+  }
+
+  #preamble-8 {
+    font-size: 25rem;
+    line-height: 25rem;
+    color: $gray-dark;
+  }
+
+  #preamble-9 {
+    font-size: 44rem;
+    line-height: 50rem;
+    color: $gray-dark;
+  }
+
+  #preamble-10 {
+    font-size: 35rem;
+    line-height: 40rem;
+    color: $gray-dark;
+  }
+  */
+
+  #learn-more {
+    font-size: 30rem;
+    text-align: right;
+    text-align-last: right;
+    margin-right: 40rem;
+    margin-top: 16rem;
+
+    a {
+      color: $brand-learn-more;
+    }
+  }
+
+  #preamble-11 {
+    font-size: 48rem;
+    line-height: 53rem;
+    color: $brand-sharp;
+  }
+
+  #preamble-12 {
+    font-size: 66rem;
+    line-height: 72rem;
+    color: $gray-dark;
+  }
+
+  #preamble-brash-number {
+    font-size: 210rem;
+    line-height: 210rem;
+    font-family: $font-family-hind;
+    font-weight: 700;
+    color: $brand-danger;
+    margin-top: 20rem;
+    margin-bottom: 12rem;
+  }
+
+  #preamble-brash-percent {
+    font-size: 175rem;
+    line-height: 175rem;
+    font-family: $font-family-hind;
+    font-weight: 700;
+    color: $brand-danger;
+    vertical-align: top;
+  }
+
+  #preamble-due-trials {
+    font-size: 21rem;
+    line-height: 30rem;
+    color: $gray-dark;
+    width: 160rem;
+    position: relative;
+    top: -83rem;
+    left: 380rem;
+    margin-bottom: -45rem;
+  }
+
+  .first-subcolumn, .slash-subcolumn, .second-subcolumn {
+    display: inline-block;
+    color: $gray-dark;
+  }
+  .first-subcolumn, .second-subcolumn {
+    width: 242rem;
+  }
+  .slash-subcolumn {
+    width: 20rem;
+  }
+
+  /* .second-subcolumn {
+    padding-left: 16rem;
+    vertical-align: top;
+    border-left: 4rem solid $text-color;
+  }
+  */
+  .slash-subcolumn {
+    content: "/";
+    font-size: 70rem;
+    position: relative;
+    right: 2px;
+    top: 0px;
+    border-left: none;
+    padding-left: 0;
+  }
+
+
+  #preamble-13 {
+    font-size: 25rem;
+    line-height: 29rem;
+  }
+
+  #preamble-14 {
+    font-size: 30rem;
+    line-height: 34rem;
+  }
+
+  #preamble-15 {
+    font-size: 23rem;
+    line-height: 29rem;
+  }
+
+  #preamble-16 {
+    font-size: 30rem;
+    line-height: 34rem;
+  }
+
+  @media (max-width: 990px) {
+    h1 {
+      position: relative;
+      text-align: center;
+      text-align-last: center;
+      padding-left: 45rem;
+      padding-right: 45rem;
+      border-bottom: none;
+    }
+
+    h1:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -8rem;
+      height: 1rem;
+      width: 50%;
+      margin-left: 25%;
+      border-bottom: 9rem solid $text-color;
+    }
+
+    .first-column {
+      display: block;
+      margin-top: 45rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .second-column {
+      display: block;
+      margin-top: 45rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  @media (max-width: 428px) {
+    .first-column, .second-column {
+      width: auto;
+      text-align: center;
+      text-align-last: center;
+    }
+    #preamble-2 {
+      display: block;
+    }
+    #preamble-brash-number {
+      font-size: 175rem;
+      line-height: 175rem;
+    }
+    #white-line {
+      display: none;
+    }
+    #preamble-7 {
+      display: block;
+      position: static;
+      top: 0rem;
+      text-align: center;
+      text-align-last: center;
+      padding-right: 0;
+      line-height: 30rem;
+      margin-bottom: 26rem;
+    }
+    #preamble-due-trials {
+      position: static;
+      width: auto;
+      margin-bottom: 8rem;
+      margin-top: -50rem;
+    }
+    .first-subcolumn {
+      padding-right: 0;
+    }
+    .second-subcolumn {
+      border-left: none;
+      padding-left: 0;
+    }
+  }
+
+
+}
+
+#sponsor_table_loading {
+  display: none;
+}
+
+#search_sponsors {
+  display: none;
+  width: 566px;
+  @media (max-width: 566px) {
+    width: 100%;
+  }
+}
+
+#search_sponsors input.not-showing-all {
+  pointer-events: none;
+}
+
+/****************************************************************/
+/* Sponsor page */
+
+#trials_table_loading {
+  display: none;
+}
+
+.nav > li.full-interface-tab {
+  display: none;
+}
+
+.trials_preamble > * {
+  display: none;
+}
+
+#all_trials {
+  display: visible;
+}
+
+#search_trials {
+  display: none;
+  width: 428px;
+  @media (max-width: 428px) {
+    width: 100%;
+  }
+}
+
+.related-sponsors {
+  margin-top: 48px;
+
+  .glyphicon {
+    font-size: 12px;
+    margin-top: -4px;
+    vertical-align: middle;
+  }
+}
+
+#trials-bar-chart {
+  width: 100%;
+  height: 384rem;
+  min-height: 100%;
+  position: relative;
+
+  div {
+    white-space: pre-line;
+  }
+}
+
+#trials-bar-caption {
+  width: 314rem;
+  position: absolute;
+  padding-bottom: 2em;
+  text-align: center;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+#reported-bar {
+  position: absolute;
+  bottom: 0px;
+  left: 10%;
+  background-color: $brand-success;
+  width: 20%;
+  border-top: 1px solid white;
+}
+
+#not-reported-bar {
+  position: absolute;
+  bottom: 0px;
+  left: 10%;
+  background-color: $brand-danger;
+  width: 20%;
+}
+
+#caption-1 {
+  position: absolute;
+  left: 5%;
+  width: 30%;
+  margin-top: 8px;
+}
+
+#not-due-bar {
+  position: absolute;
+  bottom: 0px;
+  left: 40%;
+  background-color: $gray-light;
+  width: 20%;
+}
+
+#caption-2 {
+  position: absolute;
+  left: 35%;
+  width: 30%;
+  margin-top: 8px;
+}
+
+#inconsistent-data-bar {
+  position: absolute;
+  bottom: 0px;
+  right: 10%;
+  left: auto;
+  top: auto;
+  background-color: $brand-warning;
+  width: 20%;
+}
+
+#caption-3 {
+  position: absolute;
+  right: 5%;
+  width: 30%;
+  margin-top: 8px;
+}
+
+.caption-bar {
+  position: absolute;
+  bottom: 0;
+  margin-bottom: -32px;
+  width: 100%;
+  left: 0;
+  color: $text-color;
+}
+
+#inconsistent-data-bar .caption-bar {
+  margin-bottom: -56px;
+}
+
+.sponsor-blurb {
+  margin-top: 24px;
+}
+
+/* Measurements in rem's relative to width of 1200em. Scaled
+by <html> element's pix value. */
+
+.sponsor-charts:before {
+  content: "";
+  background-image: url("/static/images/white-45degree-syringe-trans2.svg");
+  background-repeat: no-repeat;
+  background-size: 800px auto;
+  background-position: top -80px left 60%;
+  opacity: 0.2;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: -16px;
+}
+
+.sponsor-charts {
+  padding-bottom: 64rem;
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+
+  .container {
+    width: 960px;
+  }
+
+  #canvas-sub {
+    padding-top: 87rem;
+    padding-bottom: 87rem;
+    line-height: 1rem;
+  }
+
+  .first-column, .second-column, .third-column {
+    display: inline-block;
+    margin-top: 20rem;
+  }
+
+  .first-column, .third-column {
+    text-transform: uppercase;
+    text-align: center; /* for Safari, which doesn't support text-align-last */
+    text-align-last: justify;
+  }
+
+  .first-column {
+    width: 377rem;
+    margin-left: 16rem;
+    margin-right: 16rem;
+  }
+
+  .second-column {
+    width: 314rem;
+    text-align: center;
+    text-align-last: center;
+  }
+
+  .first-column, .second-column {
+    font-family: $font-family-lato;
+  }
+
+  .third-column {
+    width: 361rem;
+    margin-left: 24rem;
+    margin-right: 24rem;
+    font-family: $font-family-oswald;
+  }
+
+  #chartcopy-brash-1, #chartcopy-brash-1grey, #chartcopy-brash-2, .first-column:after, .third-column:before {
+    font-size: 135rem;
+    line-height: 135rem;
+    font-family: $font-family-hind;
+    font-weight: 700;
+    text-align: center;
+    text-align-last: center;
+    color: $brand-warning;
+  }
+  .chartcopy-none {
+    font-size: 120rem !important;
+    line-height: 120rem !important;
+  }
+  .chartcopy-bland {
+    color: $brand-success !important;
+  }
+
+  .first-column {
+    position: relative;
+  }
+
+  #chartcopy-1 {
+    font-size: 36rem;
+    line-height: 36rem;
+    color: $gray-dark;
+    text-align: center;
+    text-align-last: center;
+  }
+
+  #chartcopy-2 {
+    font-size: 36rem;
+    line-height: 36rem;
+    color: $gray-dark;
+  }
+
+  #chartcopy-3 {
+    font-size: 46rem;
+    line-height: 46rem;
+    color: $gray-dark;
+  }
+
+  .third-column {
+    position: relative;
+  }
+
+  #chartcopy-4 {
+    margin-top: -4rem;
+    font-size: 32rem;
+    line-height: 32rem;
+    margin-bottom: 8rem;
+    color: $gray-dark;
+    text-align: center;
+    text-align-last: center;
+  }
+
+  #chartcopy-5 {
+    font-size: 38rem;
+    line-height: 44rem;
+    color: $gray-dark;
+  }
+
+  #chartcopy-spacer-0 {
+    left: 0;
+    width: 100%;
+    position: absolute;
+    line-height: 36rem;
+    background-color: $brand-warning;
+  }
+
+  #chartcopy-6 {
+    font-size: 36rem;
+    line-height: 36rem;
+    color: $gray-dark;
+    text-align: center;
+    text-align-last: center;
+    background-color: $gray-lighter;
+    width: 92rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 3rem;
+    position: relative;
+    z-index: 100;
+  }
+
+  #chartcopy-7 {
+    font-size: 44rem;
+    line-height: 44rem;
+    color: $gray-dark;
+    font-weight: 500;
+    padding-bottom: 6rem;
+  }
+
+  #chartcopy-spacer-1 {
+    left: 0;
+    min-width: 100%;
+    position: absolute;
+    line-height: 40rem;
+    background-color: $brand-warning;
+  }
+
+  #chartcopy-8 {
+    padding-top: 42rem;
+    font-size: 43rem;
+    line-height: 43rem;
+    color: $gray-dark;
+  }
+
+  #chartcopy-9 {
+    font-size: 30rem;
+    line-height: 30rem;
+    color: $gray-dark;
+  }
+
+  @media (max-width: 990px) {
+    h1 {
+  	  text-align: center;
+  	  text-align-last: center;
+  	}
+    #canvas-sub {
+      display: none;
+    }
+  	.first-column, .second-column, .third-column {
+      display: block;
+  	  margin-top: 45rem;
+  	  margin-left: auto;
+  	  margin-right: auto;
+  	}
+    .first-column:after {
+      display: block;
+      content: " ";
+      background-image: url("/static/images/mobile-arrow-red.svg");
+      background-repeat: no-repeat;
+      position: relative;
+      width: 86rem;
+      height: 41rem;
+      bottom: -16rem;     
+      left: 58rem;
+      line-height: 36rem;
+    }
+    .third-column:before {
+      display: block;
+      content: " ";
+      background-image: url("/static/images/mobile-arrow-grey.svg");
+      background-repeat: no-repeat;
+      position: relative;
+      width: 86rem;
+      height: 41rem;
+      top: 8rem;     
+      left: 238rem;
+      margin-bottom: 16rem;
+      line-height: 36rem;
+    }
+    .pointer-holder {
+      display: none;
+    }
+  }
+}
+
+/* Funky orange dynamic stretching pointers */
+.pointer-holder {
+  position: absolute;
+}
+.pointer-top {
+  background-image: url("/static/images/lhs-pointer-red-top.png");
+  background-repeat: no-repeat;
+  background-size: 45px 24px;
+  position: relative;
+  top: 0px;
+  left: -22px;
+  width: 45px;
+  height: 24px;
+}
+.pointer-mid {
+  background-image: url("/static/images/lhs-pointer-red-mid.png");
+  background-repeat: repeat;
+  background-size: 45px 15px;
+  position: absolute;
+  left: -22px;
+  width: 45px;
+}
+.pointer-bottom {
+  background-image: url("/static/images/lhs-pointer-red-bottom.png");
+  background-repeat: no-repeat;
+  background-size: 45px 24px;
+  position: absolute;
+  left: -22px;
+  width: 45px;
+  height: 24px;
+}
+.pointer-xflip {
+  .pointer-top {
+    background-image: url("/static/images/lhs-pointer-red-xflip-top.png");
+  }
+  .pointer-bottom {
+    background-image: url("/static/images/lhs-pointer-red-xflip-bottom.png");
+  }
+}
+.pointer-grey {
+  .pointer-top {
+    background-image: url("/static/images/lhs-pointer-grey-top.png");
+  }
+  .pointer-mid {
+    background-image: url("/static/images/lhs-pointer-grey-mid.png");
+  }
+  .pointer-bottom {
+    background-image: url("/static/images/lhs-pointer-grey-bottom.png");
+  }
+}
+.pointer-grey.pointer-xflip {
+  .pointer-top {
+    background-image: url("/static/images/lhs-pointer-grey-xflip-top.png");
+  }
+  .pointer-bottom {
+    background-image: url("/static/images/lhs-pointer-grey-xflip-bottom.png");
+  }
+}
+
+
+/****************************************************************/
+/* About page */
+
+//https://github.com/twbs/bootstrap/issues/1768
+#about-page *[id]:before {
+  display: block;
+  content: " ";
+  margin-top: -75px;
+  height: 75px;
+  visibility: hidden;
+}
+
+#about-page + hr + footer {
+  margin-bottom: 80em;
+}
+
+/****************************************************************/
+/* Stripes (mainly on chart on sponsor page) */
+
+/* From https://codepen.io/lbebber/pen/BzoHi */
+
+$foreground-color: $brand-danger;
+$background-color: #fff;
+$distance: 8px;
+$cut-distance: 3px;
+$strips-size: 12px;
+$strips-ratio: 50%;
+$strips-angle: 45deg;
+
+.dashed-animation {
+  position: relative;
+  display: inline-block;
+  color: $foreground-color;
+}
+
+@keyframes dash-animation {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 550% -550%;
+  }
+}
+
+.dashed-animation:before {
+  content: " ";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+
+  $color: $background-color;
+  $size: $strips-ratio / 2;
+  $halfSize: $size / 2;
+  $p1: $halfSize;
+  $p2: 50% - $halfSize;
+  $p3: 50% + $halfSize;
+  $p4: 100% - $halfSize;
+  $transparent: transparentize($color, 1);
+
+  background-image: linear-gradient($strips-angle, $color $p1, $transparent $p1, $transparent $p2, $color $p2, $color $p3, $transparent $p3, $transparent $p4, $color $p4);
+  background-size: $strips-size $strips-size;
+}
+
+.dashed-animation:hover:before {
+  animation: dash-animation 30s infinite linear;
+}

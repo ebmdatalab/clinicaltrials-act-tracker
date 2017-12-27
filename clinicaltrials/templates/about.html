@@ -1,0 +1,161 @@
+{% extends "_base.html" %}
+
+{% block social_title %}{% block title %}
+	About &mdash; EU Trials Tracker
+{% endblock %}{% endblock %}
+
+{% block social_description %}
+	By EU law, from December 2016, all trials on the European Union Clinical
+	Trials Register (EUCTR) must post results within 12 months of completion.
+	This is the first legislation enacted anywhere in the world which requires
+	such trial publication.
+
+	EU Trials Tracker shows which organisations are compliant and which 
+	aren't.
+{% endblock %}
+
+{% block content %}
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="container" id="about-page">
+
+	<div class="page-header">
+    <h1>About the EU Trials Tracker</h1>
+	</div>
+
+	<p class="lead">Non-reporting of clinical trial results is an 
+		<a href="http://www.nature.com/news/make-journals-report-clinical-trials-properly-1.19280">ongoing global public health problem</a>.
+	</p>
+
+	<p>By EU law, from December 2016, all trials on the 
+	<a href="https://www.clinicaltrialsregister.eu">European Union Clinical
+	Trials Register</a> (EUCTR) must post results within 12 months of completion
+    of the trial.
+	This is the first legislation enacted anywhere in the world which requires
+	this.
+	</p>
+
+	<p>EU Trials Tracker shows which organisations are compliant and which 
+	aren't.
+	</p>
+
+	<h2 id="clinical-trial">What's a clinical trial?</h2>
+
+	<p>
+	To find out if a new drug or medical treatment actually helps patients, it is vital
+	to carefully test it in real use. A clinical trial can involve hundreds of
+	people in half a dozen countries, and run for several years.
+	</p>
+
+	<h2 id="improtant">Why's it so important that outcomes are reported?</h2>
+
+	<p>
+	At the outset, those conducting clinical trials are supposed to publicly
+	declare what measurements they will take to assess the relative benefits of the
+	treatments being compared. This is long-standing best practice, because an
+	outcome such as ‘cardiovascular health’ could be measured in many ways. So
+	researchers are expected to list the specific blood tests and symptom-rating
+	scales that they will use, for example, alongside the dates on which
+	measurements will be taken, and any cut-off values they will apply to turn
+	continuous data into categorical variables.
+	</p>
+
+	<p>
+	This is all done to prevent researchers from ‘data-dredging’ their results. If
+	researchers switch from these pre-specified outcomes, without explaining that
+	they have done so, then they break the assumptions of their statistical tests.
+	That carries a significant risk of exaggerating findings, or simply getting
+	them wrong, and this in turn helps to explain why so many trial results
+	eventually turn out to be incorrect.
+	</p>
+
+	<h2 id="journal-paper">Where can I read the journal paper about this?</h2>
+	<p>Full details of our research is published in the academic paper 
+	"Failure to Comply with Results-Reporting Requirements on the EU Clinical
+	Trials Register: a Cohort Study" by 
+	Ben Goldacre, Nicholas J DeVito, Carl Heneghan, Seb Bacon, Jessica
+	Fleminger, Helen Curtis and Open Knowledge International.
+	</p>
+
+	<h2 id="who">Who made the EU Trials Tracker?</h2>
+	<p>The <a href="https://ebmdatalab.net/">Evidence-Based Medicine Data Lab</a>
+	at Oxford University. Francis Irving made the site with Ben Goldacre,
+	Nick DeVito, Seb Bacon, Helen Curtis and Lisa French.
+	</p>
+
+	<h2 id="contact">How do we contact you?</h2>
+	<p>Email us <a href="mailto:hello@ebmdatalab.net">hello@ebmdatalab.net</a>. We'd particularly
+	like to hear about any errors, omissions or ideas.
+	</p>
+	
+	<h2 id="when-updated">When was the data updated?</h2>
+	<p>The current data was taken from the register over a period of
+	a few days starting on {{ scrape_date }}.
+	Roughly, all clinical trials conducted in Europe since 2004 are in the
+	register. For full details, see the register's
+	<a href="https://www.clinicaltrialsregister.eu/about.html">about page</a>.
+	</p>
+
+	<h2 id="due">What does "due" mean?</h2>
+
+	<p>When more than a year has passed since the completion of a trial, 
+	the results should be published, and we call it "due".</p>
+
+	<p>Specifically, we take the last global end of trial data listed for
+	any of the trial's protocols. Then add a year (the legal limit)
+	and 3 weeks (time for results to get published on the register after filing).
+	If that is earlier than the date the data was updated, then the trial is due.
+
+	<p>Currently, any trial completed on days strictly earlier than {{ due_date_cutoff }} is due.
+	</p>
+	
+	<h2 id="major-sponsor">What's a major sponsor?</h2>
+	<p>The initial table on the <a href="/">front page</a> shows only sponsors
+	with 50 or more total trials in the register.
+	</p>
+
+	<h2 id="inconsistent-data">What does "inconsistent data" mean for a trial?</h2>
+	<p>Some trials have problematic data on the registry. There
+	are three reasons for this:
+	</p>
+
+	<ol>
+		<li>
+		All the sites are listed as completed, so there should be a
+		completion date; and yet there is no completion date for the trial. 
+		</li>
+		<li>
+		There is a date for the “global end of the trial”; and yet some of
+		the sites are still listed as ongoing. 
+		</li>
+		<li>
+		For some, the trial status is left entirely blank. 
+		</li>
+	</ol>
+
+	<p>These errors may be due to trialists’ errors, or failures at the
+	registry. However, we think the EU registry managers could and should
+	automatically identify trials with inconsistent data, as we have done; and
+	then require trialists to correct their records. More details are in our
+	paper.
+	</p>
+
+	<h2 id="part-of">What happens when sponsors merge or split?</h2>
+
+	<p>Over time organisations can merge, or split.</p>
+
+	<p>If we think an organisation is now effectively part of another, we
+	say so at the bottom of its page.</p>
+
+	<p>Conversely, if an organisation now effectively includes other organisations, and
+	so is responsible for their trials, we list those at the bottom of its page.
+	The trials of the smaller organisations are not included in the 
+	counts of the larger one. 
+	</p>
+
+	<p>We've made every effort to get these relationships right.
+	However, if they are wrong, please <a href="#contact">tell us</a>.
+	</p>
+
+    </div>
+
+{% endblock %}

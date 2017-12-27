@@ -1,0 +1,4 @@
+export CLINICALTRIALS_SECRET_KEY=asd # random longish string for sessions
+export CLINICALTRIALS_DEBUG=yes # yes or no
+export CLINICALTRIALS_GOOGLE_TRACKING_ID=asd # optional Analytics id, e.g. UA-nnnnnnnn-n
+

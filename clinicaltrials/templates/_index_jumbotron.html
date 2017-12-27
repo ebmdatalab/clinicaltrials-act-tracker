@@ -1,0 +1,35 @@
+<div class="frontpage-preamble jumbotron">
+  <div class="container">
+    <h1>Who's not sharing ClinicalTrials.gov results?</h1>
+    <div class="first-column">
+      <div id="preamble-frontpage">
+        By law, all clinical trials in ClinicalTrials.gov
+        must report their results, in the registry, within a
+        year of completion. This site tracks which universities and
+        pharmaceutical companies are doing this, and which aren't.
+      </div>
+
+      <div id="learn-more">
+        <a href="/about">Learn more &raquo;</a>
+      </div>
+    </div>
+    <div class="second-column">
+      <div id="preamble-11">Trial sponsors have</div>
+      <div id="preamble-12"><b>not reported</b></div>
+      <div id="preamble-brash-number">{{percent_without_results}}<span id="preamble-brash-percent">%</span>
+      </div>
+      <div id="preamble-due-trials"><b>of due trials</b></div>
+      <div class="first-subcolumn">
+        <div id="preamble-13">That's <b>{{due_trials_without_results}}</b> trials </div>
+        <div id="preamble-14"><b>not reported</b></div>
+      </div>
+      <div class="slash-subcolumn">
+        /
+      </div>
+      <div class="second-subcolumn">
+        <div id="preamble-15">out of <b>{{due_trials}}</b> trials</div>
+        <div id="preamble-16"><b>due to report</b></div>
+      </div>
+    </div>
+  </div>
+</div>

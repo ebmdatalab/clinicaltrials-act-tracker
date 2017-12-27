@@ -1,0 +1,65 @@
+{% load render_nan %}
+
+<div class="container">
+  <div id="sponsor_table_loading">
+    <span class="glyphicon glyphicon-refresh spinning"></span>
+  </div>
+
+  <ul class="nav nav-pills" id="table-pills">
+    <li id="major_sponsors" role="presentation" class="{% if not showing_all_sponsors %}active{% endif %}" title="Sponsors with more than 50 trials in total listed in EUCTR">
+      <a href="/"><h2>Major sponsors <span class="badge">{{ major_sponsors_count }}</span></h2></a>
+    </li>
+    <li id="all_sponsors" role="presentation" class="{% if showing_all_sponsors %}active{% endif %}" title="Sponsors with at least one completed, due trial">
+      <a href="/?all"><h2>All sponsors <span class="badge">{{ all_sponsors_count }}</span></h2></a>
+    </li>
+    <li id="search_sponsors" class="search-pill" role="presentation">
+      <a href="#">
+      <div class="input-group">
+        <input type="text" class="form-control {% if not showing_all_sponsors %}not-showing-all{% endif %}" placeholder="Search sponsors" {% if activate_search %}autofocus{% endif %}>
+        <span class="input-group-btn">
+          <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+          <div class="spacer">
+            <span class="badge">{{ all_sponsors_count }}</span>
+          </div>
+        </span>
+      </div>
+    </a></li>
+  </ul>
+
+  <table id="sponsor_table" class="display" cellspacing="0" width="100%">
+    <script>
+      hide_sponsor_datatable()
+    </script>
+
+    <thead>
+      <tr>
+        <th>Sponsor name</th>
+        <th>Trials on EUCTR</th>
+        <th>Trials due to report results</th>
+        <th>% Unreported</th>
+        <th>Trials with inconsistent data</th>
+        <th class="hidden_column">Major?</th>
+      </tr>
+    </thead>
+
+    {% for sponsor in table %}
+      <tr>
+        <td> <a href="/sponsor/{{ sponsor.slug }}">{{ sponsor.sponsor_name }}</a></td>
+        <td> {{ sponsor.total_trials }} </td>
+        <td> {{ sponsor.total_due }} </td>
+        <td> {{ sponsor.percent_unreported | custom_percent }} </td>
+        <td> {{ sponsor.inconsistent_trials }} </td>
+        {% if sponsor.total_trials >= 50 %}
+        <td class="hidden_column">major</td>
+        {% else %}
+        <td class="hidden_column">minor</td>
+        {% endif %}
+      </tr> 
+    {% endfor %}
+
+  </table>
+</div>
+
+<script>
+  activate_sponsor_datatable()
+</script>

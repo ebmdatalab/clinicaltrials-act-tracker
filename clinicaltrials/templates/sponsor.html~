@@ -1,0 +1,228 @@
+{% extends "_base.html" %}
+{% load render_nan %}
+
+{% block social_title %}{% block title %}
+  Is {{ sponsor_name }} late reporting EU clinical trials?
+{% endblock %}{% endblock %}
+{% block social_description %}
+  {{ sponsor_name }} hasn't reported {{percent_unreported | custom_percent}} of 
+  trials which they must report by law on the EU Clinical Trials Register. Find
+  out which trials they are, and how consistent {{ sponsor_name }}'s reporting is.
+{% endblock %}
+
+{% block content %}
+
+  {% include "_sponsor_charts.html" %}
+
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+	<p class="lead sponsor-blurb">All clinical trials on the 
+	<a href="https://www.clinicaltrialsregister.eu/">
+	  European Union Clinical Trials Register (EUCTR)
+	</a>
+	<b>must</b> report their results in the registry within a year of
+	completion. This site tracks who's doing this and who isn't.
+	<a href="/about">Learn more &raquo;</a>
+	</p>
+      </div>
+     </div>
+  </div>
+
+  <div class="container">
+    {% if total_trials > 0 %}
+
+    <div id="trials_table_loading">
+      <span class="glyphicon glyphicon-refresh spinning"></span>
+    </div>
+   
+    <ul class="nav nav-pills trials-pills" id="table-pills">
+      <li id="due_trials" role="presentation" class="active full-interface-tab">
+	<a href="#"><h2>Due trials<span class="badge">{{ total_due }}</span></h2></a>
+      </li>
+      <li id="not_yet_due_trials" role="presentation" class="full-interface-tab">
+	<a href="#"><h2>Not due<span class="badge">{{ not_yet_due_trials }}</span></h2></a>
+      </li>
+      <li id="bad_data_trials" role="presentation" class="full-interface-tab">
+	<a href="#"><h2>Inconsistent data<span class="badge">{{ inconsistent_trials }}</span></h2></a>
+      </li>
+      <li id="search_trials" class="search-pill full-interface-tab" role="presentation">
+	<a href="#">
+	<div class="input-group">
+	  <input type="text" class="form-control" placeholder="Search trials">
+	  <span class="input-group-btn">
+	    <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+	    <div class="spacer">
+	      <span class="badge">{{ total_trials }}</span>
+	    </div>
+	  </span>
+	</div>
+      </a></li>
+      <li id="all_trials" role="presentation" class="active">
+	<a href="#"><h2>All trials<span class="badge">{{ total_trials }}</span></h2></a>
+      </li>
+    </ul>
+
+    <div class="trials_preamble">
+      <p class="due_trials_preamble lead">
+	These trials completed more than 12 months ago and should have reported
+	results. 
+	{% if total_unreported > 0 %}
+	Some have, some have not.
+	{% endif %}
+      </p>
+      <p class="not_yet_due_preamble lead">
+	These trials are not yet due to report results: some are ongoing, some
+	completed within the past 12 months. 
+      </p>
+      <div class="bad_data_preamble">
+	<p class="lead">
+	These trials have problematic data on the registry. 
+	<a href="/about#inconsistent-data">Details why &raquo;</a>
+	</p>
+
+      </div>
+    </div>
+
+
+    <table id="trials_table" class="display" cellspacing="0" width="100%">
+      <script>
+        hide_trials_datatable()
+      </script>
+
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Trial ID</th>
+          <th>Title</th>
+          <th>Completion date</th>
+	  <th class="hidden_column">Category</th>
+        </tr>
+      </thead>
+
+      {% for trial in trials %}
+        {% if trial.has_results == 0 %}
+        <tr class="no_results">
+        {% else %}
+        <tr>
+        {% endif %}
+          <td>
+	    <!-- Due -->
+	    {% if trial.overall_status == "reported" %}
+	      <span class="label label-success">
+	      Reported results</span></span>
+	    {% elif trial.overall_status == "completed-due" %}
+	      <span class="label label-danger">
+	      Not reported</span>
+
+	    <!-- Not yet due -->
+	    {% elif trial.overall_status == "ongoing" %}
+	      <span class="label label-default">
+	      Ongoing</span>
+	    {% elif trial.overall_status == "ongoing-reported-early"%}
+	      <span class="label label-default label-early">
+	      Ongoing, reported early</span>
+	    {% elif trial.overall_status == "completed-not-due" %}
+	      <span class="label label-info">
+	      Completed, report not yet due</span>
+	    {% elif trial.overall_status == "completed-reported-early"%}
+	      <span class="label label-default">
+	      Completed, reported early</span>
+	    {% elif trial.overall_status == "other" %}
+	      <span class="label label-info"> <!-- XXX white -->
+	      Other
+	      </span>
+	      <span data-toggle="tooltip" data-placement="right" title="Suspended, withdrawn, not authorised or prohibited by Country Authority" class="glyphicon glyphicon-question-sign"></span>
+
+	    <!-- Inconsistent data -->
+	    {% elif trial.overall_status == "error-ongoing-has-comp-date" %}
+	      <span class="label label-warning">
+	      Listed as ongoing, but also has a completion date
+	      {% if trial.has_results%}and reported results{% endif %}
+	      </span>
+	    {% elif trial.overall_status == "error-completed-no-comp-date" %}
+	      <span class="label label-warning">
+	      Completed, but no date{% if trial.has_results%}, and reported results{% endif %}
+	      </span>
+	    {% elif trial.overall_status == "no-trial-status" %}
+	      <span class="label label-default">
+	      No trial status on register</span>
+	    {% else %}
+	      EU Trials Tracker internal error &mdash; {{ trial.overall_status }}
+	    {% endif %}
+	 </td>
+
+	  <td><a href="{{ trial.trial_url}}">{{ trial.trial_id }}</a></td>
+          <td>{{ trial.trial_title }}</td>
+
+          <td>{{ trial.max_end_date | default_if_invalid:"-"}}</td>
+
+	  <td class="hidden_column">
+	    <!-- Due -->
+	    {% if trial.overall_status == "reported" %}
+	      due-trials
+	    {% elif trial.overall_status == "completed-due" %}
+	      due-trials
+	    <!-- Not yet due -->
+	    {% elif trial.overall_status == "ongoing" %}
+	      not-yet-due
+	    {% elif trial.overall_status == "ongoing-reported-early"%}
+	      not-yet-due
+	    {% elif trial.overall_status == "completed-not-due" %}
+	      not-yet-due
+	    {% elif trial.overall_status == "completed-reported-early"%}
+	      not-yet-due
+	    {% elif trial.overall_status == "other" %}
+	      not-yet-due
+	    <!-- Inconsistent data -->
+	    {% elif trial.overall_status == "error-ongoing-has-comp-date" %}
+	      bad-data
+	    {% elif trial.overall_status == "error-completed-no-comp-date" %}
+	      bad-data
+	    {% elif trial.overall_status == "no-trial-status" %}
+	      bad-data
+	    {% else %}
+	      bad-data
+	    {% endif %}
+        </tr>
+      {% endfor %}
+    </table>
+
+    <script>
+      activate_trials_datatable()
+    </script>
+
+    {% else %}
+      <p class="lead">{{ sponsor_name }} does not itself have any trials on the register. 
+      However, there are organisations related to it which have trials.
+      </p>
+    {% endif %}
+
+    {% if parents or children %}
+      <div class="related-sponsors"> 
+	 <h2>Related organisations</h2>
+  	 <p>
+	  Over time organisations can merge, or split.
+	  <a href="/about#part-of">
+	    <span class="glyphicon glyphicon-question-sign"></span>
+	  </a>
+	 </p>
+    {% endif %}
+      {% if parents %}
+         <p>We think {{ sponsor_name }} is now effectively part of
+	 {% for parent in parents %}
+	   <a href="/sponsor/{{ parent.slug }}">{{ parent.name }}</a>{% if forloop.last %}.{% else %}{% ifequal forloop.revcounter 2 %} and {% else %}, {% endifequal %}{% endif %}
+	 {% endfor %}
+      {% endif %}
+      {% if children %}
+	  We think {{ sponsor_name }} is now also responsible for the trials of:
+	  <ul>
+	  {% for child in children %}
+	    <li><a href="/sponsor/{{ child.slug }}">{{ child.name }}</a></li>
+	  {% endfor %}
+	  </ul>
+      {% endif %}
+  </div>
+
+
+{% endblock%}

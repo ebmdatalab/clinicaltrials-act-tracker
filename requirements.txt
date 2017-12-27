@@ -1,1 +1,15 @@
-xmltodict
+Django==1.10.5
+django_compressor==2.1.1
+django-libsass==0.7
+csscompressor==0.9.4
+pandas==0.19.2
+gevent==1.2.1
+gunicorn==19.6.0
+psycopg2==2.7.1
+selenium==3.5.0
+atomicwrites==1.1.5
+xlrd==1.0.0
+scrapy==1.4.0
+sqlalchemy==1.1.14
+dataset==1.0.1
+scrapy-crawlera==1.2.4

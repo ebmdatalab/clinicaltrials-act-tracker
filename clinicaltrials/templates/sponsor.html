@@ -1,0 +1,109 @@
+{% extends "_base.html" %}
+{% load render_nan %}
+
+{% block social_title %}{% block title %}
+  Is {{ sponsor }} late reporting EU clinical trials?
+{% endblock %}{% endblock %}
+{% block social_description %}
+  {{ sponsor }} hasn't reported {{percent_unreported }} of
+  trials which they must report by law on the EU Clinical Trials Register. Find
+  out which trials they are, and how consistent {{ sponsor_name }}'s reporting is.
+{% endblock %}
+
+{% block content %}
+
+  <div class="container">
+
+    <div id="trials_table_loading">
+      <span class="glyphicon glyphicon-refresh spinning"></span>
+    </div>
+
+    <ul class="nav nav-pills trials-pills" id="table-pills">
+      <li id="due_trials" role="presentation" class="active full-interface-tab">
+        <a href="#"><h2>Due trials<span class="badge">{{ total_due }}</span></h2></a>
+      </li>
+      <li id="not_yet_due_trials" role="presentation" class="full-interface-tab">
+        <a href="#"><h2>Not due<span class="badge">{{ not_yet_due_trials }}</span></h2></a>
+      </li>
+      <li id="search_trials" class="search-pill full-interface-tab" role="presentation">
+        <a href="#">
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Search trials">
+          <span class="input-group-btn">
+            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+            <div class="spacer">
+              <span class="badge">{{ total_trials }}</span>
+            </div>
+          </span>
+        </div>
+      </a></li>
+      <li id="all_trials" role="presentation" class="active">
+        <a href="#"><h2>All trials<span class="badge">{{ total_trials }}</span></h2></a>
+      </li>
+    </ul>
+
+    <div class="trials_preamble">
+      <p class="due_trials_preamble lead">
+        These trials completed more than 12 months ago and should have reported
+        results.
+        {% if total_unreported > 0 %}
+        Some have, some have not.
+        {% endif %}
+      </p>
+      <p class="not_yet_due_preamble lead">
+        These trials are not yet due to report results: some are ongoing, some
+        completed within the past 12 months.
+      </p>
+      <div class="bad_data_preamble">
+        <p class="lead">
+        These trials have problematic data on the registry.
+        <a href="/about#inconsistent-data">Details why &raquo;</a>
+        </p>
+
+      </div>
+    </div>
+
+
+    <table id="trials_table" class="display" cellspacing="0" width="100%">
+      <script>
+        hide_trials_datatable()
+      </script>
+
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Trial ID</th>
+          <th>Title</th>
+          <th>Completion date</th>
+          <th class="hidden_column">Category</th>
+        </tr>
+      </thead>
+
+      {% for trial in reported_trials %}
+        <tr>
+          <td>
+            <!-- Due -->
+              <span class="label label-success">
+              Reported results</span></span>
+         </td>
+
+          <td><a href="{{ trial.trial_url}}">{{ trial.nct_id }}</a></td>
+          <td>{{ trial.trial_title }}</td>
+
+          <td>{{ trial.completion_date }}</td>
+
+          <td class="hidden_column">
+            due-trials
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+
+    <script>
+      activate_trials_datatable()
+    </script>
+
+  </div>
+
+
+{% endblock%}
