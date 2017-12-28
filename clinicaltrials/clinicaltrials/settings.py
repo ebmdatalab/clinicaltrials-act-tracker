@@ -109,12 +109,15 @@ WSGI_APPLICATION = 'clinicaltrials.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
 DATABASES = {
-    #'default': {
-    #    'ENGINE': 'django.db.backends.sqlite3',
-    #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    #}
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'clinicaltrials',
+        'USER': 'root', # XXX change this!
+        'PASSWORD': 'root',
+        'HOST': 'localhost',
+        'CONN_MAX_AGE': 0  # Must be zero, see api/view_utils#db_timeout
+    },
 }
 
 
