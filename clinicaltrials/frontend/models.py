@@ -67,7 +67,9 @@ class Sponsor(models.Model):
 
 
 class Trial(models.Model):
-    sponsor = models.ForeignKey(Sponsor, related_name='trials')
+    sponsor = models.ForeignKey(
+        Sponsor, related_name='trials',
+        on_delete=models.CASCADE)
     registry_id = models.CharField(max_length=50, unique=True)
     publication_url = models.URLField()
     title = models.TextField()
