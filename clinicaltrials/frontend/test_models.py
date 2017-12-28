@@ -5,9 +5,89 @@ from datetime import timedelta
 
 from frontend.models import Sponsor
 from frontend.models import Trial
+from frontend.models import Ranking
 
 
-class BasicTestCase(TestCase):
+class RankingTestCase(TestCase):
+    def setUp(self):
+        self.date1 = date(2016, 1, 1)
+        self.date2 = date(2016, 2, 1)
+        self.date3 = date(2016, 3, 1)
+        self.sponsor1 = Sponsor.objects.create(name="Sponsor 1")
+        self.sponsor2 = Sponsor.objects.create(name="Sponsor 2")
+        self.sponsor1_ranking1 = Ranking.objects.create(
+            sponsor=self.sponsor1,
+            date=self.date1,
+            due=1,
+            reported=0
+        )
+        self.sponsor1_ranking2 = Ranking.objects.create(
+            sponsor=self.sponsor1,
+            date=self.date2,
+            due=2,
+            reported=1
+        )
+        self.sponsor2_ranking1 = Ranking.objects.create(
+            sponsor=self.sponsor2,
+            date=self.date1,
+            due=2,
+            reported=2
+        )
+        self.sponsor2_ranking2 = Ranking.objects.create(
+            sponsor=self.sponsor2,
+            date=self.date2,
+            due=2,
+            reported=0
+        )
+        self.sponsor2_ranking3 = Ranking.objects.create(
+            sponsor=self.sponsor2,
+            date=self.date3,
+            due=2,
+            reported=2
+        )
+        self.sponsor1_ranking3 = Ranking.objects.create(
+            sponsor=self.sponsor1,
+            date=self.date3,
+            due=2,
+            reported=2
+        )
+
+    def test_percentage_set(self):
+        self.assertEqual(self.sponsor1_ranking1.percentage, 0.0)
+        self.assertEqual(self.sponsor1_ranking2.percentage, 50.0)
+        self.assertEqual(self.sponsor1_ranking3.percentage, 100.0)
+        self.assertEqual(self.sponsor2_ranking1.percentage, 100.0)
+        self.assertEqual(self.sponsor2_ranking2.percentage, 0.0)
+        self.assertEqual(self.sponsor2_ranking3.percentage, 100.0)
+
+    def test_compute_ranks(self):
+        Ranking.objects.compute_ranks()
+        ranks = Ranking.objects.filter(date=self.date1).all()
+        self.assertEqual(ranks[0].rank, 1)
+        self.assertEqual(ranks[0].sponsor, self.sponsor2)
+        self.assertEqual(ranks[1].rank, 2)
+        self.assertEqual(ranks[1].sponsor, self.sponsor1)
+
+        ranks = Ranking.objects.filter(date=self.date2).all()
+        self.assertEqual(ranks[0].rank, 1)
+        self.assertEqual(ranks[0].sponsor, self.sponsor1)
+        self.assertEqual(ranks[1].rank, 2)
+        self.assertEqual(ranks[1].sponsor, self.sponsor2)
+
+        ranks = Ranking.objects.filter(date=self.date3).all()
+        self.assertEqual(ranks[0].rank, 1)
+        self.assertEqual(ranks[0].sponsor, self.sponsor1)
+        self.assertEqual(ranks[1].rank, 1)
+        self.assertEqual(ranks[1].sponsor, self.sponsor2)
+
+    def test_set_current(self):
+        self.assertEqual(Ranking.objects.filter(is_current=True).count(), 0)
+        Ranking.objects.set_current()
+        self.assertEqual(Ranking.objects.filter(is_current=True).count(), 2)
+        self.sponsor2.refresh_from_db()
+        self.assertEqual(self.sponsor2.current_rank().percentage, 100.0)
+
+class SponsorTrialsTestCase(TestCase):
 
     def setUp(self):
         self.sponsor = Sponsor.objects.create(name="Sponsor 1")
@@ -86,7 +166,7 @@ class BasicTestCase(TestCase):
     def test_trials_overdue(self):
         self.assertCountEqual(
             self.sponsor.trials.overdue(),
-            [self.unreported_trial])
+            [self.due_trial])
 
     def test_trials_reported_early(self):
         self.assertCountEqual(

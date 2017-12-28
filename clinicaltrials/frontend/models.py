@@ -1,8 +1,9 @@
 from datetime import date
 
+from django.db import connection
 from django.db import models
+from django.db import transaction
 from django.utils.text import slugify
-
 
 class SponsorQuerySet(models.QuerySet):
     def annotated(self):
@@ -56,6 +57,7 @@ class TrialQuerySet(models.QuerySet):
 
 
 
+
 class Sponsor(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField()
@@ -64,6 +66,9 @@ class Sponsor(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         super(Sponsor, self).save(*args, **kwargs)
+
+    def current_rank(self):
+        return self.rankings.get(is_current=True)
 
 
 class Trial(models.Model):
@@ -78,3 +83,50 @@ class Trial(models.Model):
     due_date = models.DateField()
     completion_date = models.DateField(null=True, blank=True)
     objects = TrialQuerySet.as_manager()
+
+
+class RankingManager(models.Manager):
+    def compute_ranks(self):
+        sql = ("WITH ranked AS (SELECT ranking.id, RANK() OVER ("
+               "  PARTITION BY date "
+               "ORDER BY percentage DESC"
+               ") AS computed_rank "
+               "FROM frontend_ranking ranking "
+               ")")
+
+        sql += ("UPDATE "
+                " frontend_ranking "
+                "SET "
+                " rank = ranked.computed_rank "
+                "FROM ranked "
+                "WHERE ranked.id = frontend_ranking.id")
+        with connection.cursor() as c:
+                c.execute(sql)
+
+    def set_current(self):
+        latest = Ranking.objects.all().latest('date').date
+        with transaction.atomic():
+            Ranking.objects.update(is_current=False)
+            Ranking.objects.filter(date=latest).update(is_current=True)
+
+
+class Ranking(models.Model):
+    sponsor = models.ForeignKey(
+        Sponsor, related_name='rankings',
+        on_delete=models.CASCADE)
+    date = models.DateField()
+    is_current = models.BooleanField(default=False)
+    rank = models.IntegerField(null=True)
+    due = models.IntegerField()
+    reported = models.IntegerField()
+    percentage = models.IntegerField()
+
+    objects = RankingManager()
+
+    def save(self, *args, **kwargs):
+        self.percentage = float(self.reported)/self.due * 100
+        super(Ranking, self).save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ('sponsor', 'date',)
+        ordering = ('rank', 'sponsor__name',)
