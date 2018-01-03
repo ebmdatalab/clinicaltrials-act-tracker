@@ -1,12 +1,10 @@
 import csv
-import json
-from collections import Counter
-from collections import OrderedDict
-from collections import defaultdict
-from datetime import datetime
 
-from django.utils.text import slugify
+from django.db import transaction
 from django.core.management.base import BaseCommand
+from frontend.models import Trial
+from frontend.models import Sponsor
+from frontend.models import Ranking
 
 
 def add_ranking(scores):
@@ -31,50 +29,24 @@ class Command(BaseCommand):
         '''
         '''
         f = open(options['input_csv'])
-        sponsors = {}
+        with transaction.atomic():
+            Trial.objects.all().delete()
+            for row in csv.DictReader(f):
+                has_act_flag = int(row['act_flag']) > 0
 
-        scores = OrderedDict()
-        reported_trials = defaultdict(list)
-        unreported_trials = defaultdict(list)
-        for row in csv.DictReader(f):
-            slug = slugify(row['sponsor'])
-            has_act_flag = int(row['act_flag']) > 0
-
-            if has_act_flag:
-                sponsors[slug] = {
-                    'sponsor': row['sponsor'],
-                    'sponsor_slug': slug
-                }
-                if slug in scores:
-                    scores[slug]['due'] += 1
-                else:
-                    scores[slug] = {}
-                    scores[slug]['due'] = 1
-                    scores[slug]['reported'] = 0
-                d = {
-                    'nct_id': row['nct_id'],
-                    'trial_url': row['url'],
-                    'trial_title': row['title'],
-                    'has_certificate': row['has_certificate'],
-                    'sponsor': row['sponsor'],
-                    'sponsor_slug': slug,
-                    'start_date': row['start_date'],
-                    'completion_date': row['available_completion_date']
-                }
-                dt = row['available_completion_date']
-                completion_date = dt and datetime.strptime(dt, "%Y-%m-%d")
-                if completion_date and completion_date <= datetime.today():
-                    scores[slug]['reported'] += 1
-                    reported_trials[slug].append(d)
-                else:
-                    unreported_trials[slug].append(d)
-        scores = add_ranking(scores)
-        with open('../scores.json', 'w') as fp:
-            json.dump(scores, fp, indent=2)
-        with open('../reported_trials.json', 'w') as fp:
-            json.dump(reported_trials, fp, indent=2)
-        with open('../unreported_trials.json', 'w') as fp:
-            json.dump(unreported_trials, fp, indent=2)
-        with open('../sponsors.json', 'w') as fp:
-            json.dump(sponsors, fp, indent=2)
-1
+                if has_act_flag:
+                    sponsor, created = Sponsor.objects.get_or_create(name=row['sponsor'])
+                    d = {
+                        'registry_id': row['nct_id'],
+                        'publication_url': row['url'],
+                        'title': row['title'],
+                        'has_exemption': bool(row['has_certificate']),
+                        'sponsor': sponsor,
+                        'start_date': row['start_date'],
+                        'completion_date': row['available_completion_date']
+                    }
+                    Trial.objects.create(**d)
+            print("Setting current rankings")
+            Ranking.objects.set_current()
+            print("Computing rankings")
+            Ranking.objects.compute_ranks()

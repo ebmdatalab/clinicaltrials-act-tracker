@@ -1,9 +1,12 @@
 from datetime import date
+from datetime import timedelta
 
 from django.db import connection
 from django.db import models
 from django.db import transaction
 from django.utils.text import slugify
+from django.utils.dateparse import parse_date
+
 
 class SponsorQuerySet(models.QuerySet):
     def annotated(self):
@@ -60,7 +63,7 @@ class TrialQuerySet(models.QuerySet):
 
 class Sponsor(models.Model):
     name = models.CharField(max_length=200)
-    slug = models.SlugField()
+    slug = models.SlugField(max_length=200)
     objects = SponsorQuerySet.as_manager()
 
     def save(self, *args, **kwargs):
@@ -71,11 +74,15 @@ class Sponsor(models.Model):
         return self.rankings.get(is_current=True)
 
 
+def compute_due_date(start_date):
+    return parse_date(start_date) + timedelta(days=365)
+
+
 class Trial(models.Model):
     sponsor = models.ForeignKey(
         Sponsor, related_name='trials',
         on_delete=models.CASCADE)
-    registry_id = models.CharField(max_length=50, unique=True)
+    registry_id = models.CharField(max_length=100, unique=True)
     publication_url = models.URLField()
     title = models.TextField()
     has_exemption = models.BooleanField(default=False)
@@ -83,6 +90,10 @@ class Trial(models.Model):
     due_date = models.DateField()
     completion_date = models.DateField(null=True, blank=True)
     objects = TrialQuerySet.as_manager()
+
+    def save(self, *args, **kwargs):
+        self.due_date = compute_due_date(self.start_date)
+        super(Trial, self).save(*args, **kwargs)
 
 
 class RankingManager(models.Manager):
@@ -104,10 +115,13 @@ class RankingManager(models.Manager):
                 c.execute(sql)
 
     def set_current(self):
-        latest = Ranking.objects.all().latest('date').date
         with transaction.atomic():
             Ranking.objects.update(is_current=False)
-            Ranking.objects.filter(date=latest).update(is_current=True)
+            try:
+                latest = Ranking.objects.all().latest('date')
+                Ranking.objects.filter(date=latest.date).update(is_current=True)
+            except Ranking.DoesNotExist:
+                Ranking.objects.all().update(is_current=True)
 
 
 class Ranking(models.Model):
