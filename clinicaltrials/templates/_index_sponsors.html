@@ -44,13 +44,13 @@
       </tr>
     </thead>
 
-    {% for sponsor in table %}
+    {% for ranking in table %}
       <tr>
-        <td>{{ sponsor.rank }}</td>
-        <td><a href="/sponsor/{{ sponsor.slug }}">{{ sponsor.name }}</a></td>
-        <td> {{ sponsor.due }} </td>
-        <td> {{ sponsor.reported }} </td>
-        <td> {{ sponsor.percent | custom_percent }} </td>
+        <td>{{ ranking.rank }} </td>
+        <td><a href="/sponsor/{{ ranking.sponsor.slug }}">{{ ranking.sponsor.name }}</a></td>
+        <td> {{ ranking.due }} </td>
+        <td> {{ ranking.reported }} </td>
+        <td> {{ ranking.percentage }} </td>
         <td class="hidden_column">major</td>
       </tr>
     {% endfor %}

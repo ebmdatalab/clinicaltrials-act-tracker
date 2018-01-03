@@ -1,4 +1,6 @@
 import csv
+import datetime
+
 
 from django.db import transaction
 from django.core.management.base import BaseCommand
@@ -30,12 +32,16 @@ class Command(BaseCommand):
         '''
         f = open(options['input_csv'])
         with transaction.atomic():
+            today = datetime.datetime.today()
             Trial.objects.all().delete()
             for row in csv.DictReader(f):
                 has_act_flag = int(row['act_flag']) > 0
 
                 if has_act_flag:
-                    sponsor, created = Sponsor.objects.get_or_create(name=row['sponsor'])
+                    sponsor, created = Sponsor.objects.get_or_create(
+                        name=row['sponsor'])
+                    sponsor.updated_date = today
+                    sponsor.save()
                     d = {
                         'registry_id': row['nct_id'],
                         'publication_url': row['url'],
@@ -48,5 +54,3 @@ class Command(BaseCommand):
                     Trial.objects.create(**d)
             print("Setting current rankings")
             Ranking.objects.set_current()
-            print("Computing rankings")
-            Ranking.objects.compute_ranks()

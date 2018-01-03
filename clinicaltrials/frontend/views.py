@@ -11,18 +11,7 @@ from . import models
 # Index page
 
 def index(request):
-    scores = models.get_scores()
-    scores_array = []
-    for k, v in scores.items():
-        scores_array.append({
-            'slug': k,
-            'name': models.get_sponsor(k)['sponsor'],
-            "percent": v['percent'],
-            "due": v['due'],
-            "reported": v['reported'],
-            "rank": v['rank']
-        })
-    context = {'scores': scores_array}
+    context = {'scores': models.Ranking.objects.current_ranks()}
     return render(request, "index.html", context=context)
 
 

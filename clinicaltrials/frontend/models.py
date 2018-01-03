@@ -64,6 +64,7 @@ class TrialQuerySet(models.QuerySet):
 class Sponsor(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200)
+    updated_date = models.DateField(default=date.today)
     objects = SponsorQuerySet.as_manager()
 
     def save(self, *args, **kwargs):
@@ -71,7 +72,7 @@ class Sponsor(models.Model):
         super(Sponsor, self).save(*args, **kwargs)
 
     def current_rank(self):
-        return self.rankings.get(is_current=True)
+        return self.rankings.get(date=self.updated_date)
 
 
 def compute_due_date(start_date):
@@ -102,7 +103,7 @@ class RankingManager(models.Manager):
                "  PARTITION BY date "
                "ORDER BY percentage DESC"
                ") AS computed_rank "
-               "FROM frontend_ranking ranking "
+               "FROM frontend_ranking ranking WHERE percentage IS NOT NULL "
                ")")
 
         sql += ("UPDATE "
@@ -116,29 +117,38 @@ class RankingManager(models.Manager):
 
     def set_current(self):
         with transaction.atomic():
-            Ranking.objects.update(is_current=False)
-            try:
-                latest = Ranking.objects.all().latest('date')
-                Ranking.objects.filter(date=latest.date).update(is_current=True)
-            except Ranking.DoesNotExist:
-                Ranking.objects.all().update(is_current=True)
+            for sponsor in Sponsor.objects.all():
+                sponsor.rankings.create(
+                    date=sponsor.updated_date,
+                    due=Trial.objects.due().filter(
+                        sponsor=sponsor).count(),
+                    reported=Trial.objects.reported().filter(
+                        sponsor=sponsor).count()
+                )
+            self.compute_ranks()
+
+    def current_ranks(self):
+        # XXX not optimal performance-wise
+        latest = self.latest('date')
+        return self.filter(
+            date=latest.date, percentage__isnull=False).select_related('sponsor')
 
 
 class Ranking(models.Model):
     sponsor = models.ForeignKey(
         Sponsor, related_name='rankings',
         on_delete=models.CASCADE)
-    date = models.DateField()
-    is_current = models.BooleanField(default=False)
+    date = models.DateField(db_index=True)
     rank = models.IntegerField(null=True)
     due = models.IntegerField()
     reported = models.IntegerField()
-    percentage = models.IntegerField()
+    percentage = models.IntegerField(null=True)
 
     objects = RankingManager()
 
     def save(self, *args, **kwargs):
-        self.percentage = float(self.reported)/self.due * 100
+        if self.due:
+            self.percentage = float(self.reported)/self.due * 100
         super(Ranking, self).save(*args, **kwargs)
 
     class Meta:
