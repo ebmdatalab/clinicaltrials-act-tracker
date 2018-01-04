@@ -45,6 +45,7 @@ class TrialStatusFilter(FilterSet):
         label='Trial status',
         method='status_filter',
         choices=STATUS_CHOICES)
+
     def status_filter(self, queryset, name, value):
         if 'due' in value:
             queryset = queryset.due()
@@ -69,7 +70,9 @@ class TrialStatusFilter(FilterSet):
 class RankingViewSet(viewsets.ModelViewSet):
     queryset = Ranking.objects.current_ranks()
     serializer_class = RankingSerializer
-    filter_fields = ('percentage', 'sponsor',)
+    filter_fields = {'percentage': ['gte', 'lte'],
+                     'due': ['gte', 'lte'],
+                     'sponsor__name': ['icontains']}
 
 
 class TrialViewSet(viewsets.ModelViewSet):
