@@ -170,6 +170,9 @@ class Ranking(models.Model):
 
     objects = RankingManager()
 
+    def __str__(self):
+        return "{}: {} at {}% on {}".format(self.rank, self.sponsor, self.percentage, self.date)
+
     def save(self, *args, **kwargs):
         if self.due:
             self.percentage = float(self.reported)/self.due * 100
@@ -177,4 +180,4 @@ class Ranking(models.Model):
 
     class Meta:
         unique_together = ('sponsor', 'date',)
-        ordering = ('rank', 'sponsor__name',)
+        ordering = ('date', 'rank', 'sponsor__name',)

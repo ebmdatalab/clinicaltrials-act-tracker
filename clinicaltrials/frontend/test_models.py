@@ -8,6 +8,50 @@ from frontend.models import Trial
 from frontend.models import Ranking
 
 
+trial_counter = 0
+def _makeTrial(sponsor, is_due, is_reported):
+    global trial_counter
+    tomorrow = date.today() + timedelta(days=1)
+    trial_counter += 1
+    start_date = date(2015, 1, 1)
+    if is_due:
+        due_date = date(2016, 1, 1)
+    else:
+        due_date = tomorrow
+    if is_reported:
+        completion_date = date(2016, 1, 1)
+    else:
+        completion_date = None
+    return Trial.objects.create(
+        sponsor=sponsor,
+        registry_id='id_{}'.format(trial_counter),
+        publication_url='http://bar.com/{}'.format(trial_counter),
+        title='Trial {}'.format(trial_counter),
+        start_date=start_date,
+        due_date=due_date,
+        completion_date=completion_date)
+
+def _simulateImport(test_trials):
+    """Do the same as the import script, but for an array of tuples
+    """
+    last_date = None
+    for updated_date, sponsor, due, reported in test_trials:
+        if updated_date != last_date:
+            # simulate a new import; this means deleting all
+            # existing Trials and updating rankings (see below)
+            Ranking.objects.set_current()
+            Trial.objects.all().delete()
+        sponsor.updated_date = updated_date
+        sponsor.save()
+        _makeTrial(
+            sponsor,
+            is_due=due,
+            is_reported=reported
+        )
+        last_date = updated_date
+    Ranking.objects.set_current()
+
+
 class RankingTestCase(TestCase):
     def setUp(self):
         self.date1 = date(2016, 1, 1)
@@ -15,53 +59,35 @@ class RankingTestCase(TestCase):
         self.date3 = date(2016, 3, 1)
         self.sponsor1 = Sponsor.objects.create(name="Sponsor 1")
         self.sponsor2 = Sponsor.objects.create(name="Sponsor 2")
-        self.sponsor1_ranking1 = Ranking.objects.create(
-            sponsor=self.sponsor1,
-            date=self.date1,
-            due=1,
-            reported=0
-        )
-        self.sponsor1_ranking2 = Ranking.objects.create(
-            sponsor=self.sponsor1,
-            date=self.date2,
-            due=2,
-            reported=1
-        )
-        self.sponsor2_ranking1 = Ranking.objects.create(
-            sponsor=self.sponsor2,
-            date=self.date1,
-            due=2,
-            reported=2
-        )
-        self.sponsor2_ranking2 = Ranking.objects.create(
-            sponsor=self.sponsor2,
-            date=self.date2,
-            due=2,
-            reported=0
-        )
-        self.sponsor2_ranking3 = Ranking.objects.create(
-            sponsor=self.sponsor2,
-            date=self.date3,
-            due=2,
-            reported=2
-        )
-        self.sponsor1_ranking3 = Ranking.objects.create(
-            sponsor=self.sponsor1,
-            date=self.date3,
-            due=2,
-            reported=2
-        )
+        self.sponsor3 = Sponsor.objects.create(name="Sponsor 3")
+
+        test_trials = [
+            # date,  sponsor, due, reported
+            (self.date1, self.sponsor1, True, False),
+            (self.date1, self.sponsor2, True, True),
+            (self.date1, self.sponsor2, True, True),
+
+            (self.date2, self.sponsor1, True, False),
+            (self.date2, self.sponsor1, True, True),
+            (self.date2, self.sponsor2, True, False),
+            (self.date2, self.sponsor2, True, False),
+
+            (self.date3, self.sponsor2, True, True),
+            (self.date3, self.sponsor2, True, True),
+            (self.date3, self.sponsor1, True, True),
+            (self.date3, self.sponsor1, True, True),
+        ]
+        _simulateImport(test_trials)
 
     def test_percentage_set(self):
-        self.assertEqual(self.sponsor1_ranking1.percentage, 0.0)
-        self.assertEqual(self.sponsor1_ranking2.percentage, 50.0)
-        self.assertEqual(self.sponsor1_ranking3.percentage, 100.0)
-        self.assertEqual(self.sponsor2_ranking1.percentage, 100.0)
-        self.assertEqual(self.sponsor2_ranking2.percentage, 0.0)
-        self.assertEqual(self.sponsor2_ranking3.percentage, 100.0)
+        self.assertEqual(self.sponsor1.rankings.get(date=self.date1).percentage, 0.0)
+        self.assertEqual(self.sponsor1.rankings.get(date=self.date2).percentage, 50.0)
+        self.assertEqual(self.sponsor1.rankings.get(date=self.date3).percentage, 100.0)
+        self.assertEqual(self.sponsor2.rankings.get(date=self.date1).percentage, 100.0)
+        self.assertEqual(self.sponsor2.rankings.get(date=self.date2).percentage, 0.0)
+        self.assertEqual(self.sponsor2.rankings.get(date=self.date3).percentage, 100.0)
 
     def test_compute_ranks(self):
-        Ranking.objects.set_current()
         ranks = Ranking.objects.filter(date=self.date1).all()
         self.assertEqual(ranks[0].rank, 1)
         self.assertEqual(ranks[0].sponsor, self.sponsor2)
@@ -79,30 +105,6 @@ class RankingTestCase(TestCase):
         self.assertEqual(ranks[0].sponsor, self.sponsor1)
         self.assertEqual(ranks[1].rank, 1)
         self.assertEqual(ranks[1].sponsor, self.sponsor2)
-
-
-counter = 0
-def _makeTrial(sponsor, is_due, is_reported):
-    global counter
-    tomorrow = date.today() + timedelta(days=1)
-    counter += 1
-    start_date = date(2015, 1, 1)
-    if is_due:
-        due_date = date(2016, 1, 1)
-    else:
-        due_date = tomorrow
-    if is_reported:
-        completion_date = date(2016, 1, 1)
-    else:
-        completion_date = None
-    return Trial.objects.create(
-        sponsor=sponsor,
-        registry_id='id_{}'.format(counter),
-        publication_url='http://bar.com/{}'.format(counter),
-        title='Trial {}'.format(counter),
-        start_date=start_date,
-        due_date=due_date,
-        completion_date=completion_date)
 
 
 class SponsorTrialsTestCase(TestCase):
