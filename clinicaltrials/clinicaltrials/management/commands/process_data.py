@@ -9,16 +9,6 @@ from frontend.models import Sponsor
 from frontend.models import Ranking
 
 
-def add_ranking(scores):
-    for slug, score in scores.items():
-        score['percent'] = round(float(score['reported']) / score['due'] * 100)
-    scores = OrderedDict(sorted(scores.items(), key=lambda x: (0-x[1]['percent'], x[0])))
-    unique_percent_vals = list(reversed(list(Counter([x['percent'] for x in scores.values()]))))
-    for slug, score in scores.items():
-        score['rank'] = unique_percent_vals.index(score['percent']) + 1
-    return scores
-
-
 class Command(BaseCommand):
     help = 'Converts CSV to useful JSON formats'
 
