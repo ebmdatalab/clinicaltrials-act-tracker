@@ -10,41 +10,44 @@ from django.utils.dateparse import parse_date
 
 class SponsorQuerySet(models.QuerySet):
     def annotated(self):
-        return self.annotate(num_trials=models.Count('trials'))
+        return self.annotate(num_trials=models.Count('trial'))
 
     def with_trials_due(self):
         return self.filter(
-            trials__due_date__lte=date.today()
+            trial__due_date__lte=date.today()
         ).annotated()
 
     def with_trials_unreported(self):
         return self.filter(
-            trials__completion_date__isnull=True,
-            trials__isnull=False
+            trial__completion_date__isnull=True,
+            trial__isnull=False
         ).annotated()
 
     def with_trials_reported(self):
         return self.filter(
-            trials__completion_date__lte=date.today()
+            trial__completion_date__lte=date.today()
         ).annotated()
 
     def with_trials_overdue(self):
         return self.filter(
-            trials__due_date__lte=date.today(),
-            trials__completion_date__isnull=True,
-            trials__isnull=False
+            trial__due_date__lte=date.today(),
+            trial__completion_date__isnull=True,
+            trial__isnull=False
         ).annotated()
 
     def with_trials_reported_early(self):
         return self.filter(
-            trials__completion_date__lte=date.today(),
-            trials__due_date__gt=date.today()
+            trial__completion_date__lte=date.today(),
+            trial__due_date__gt=date.today()
         ).annotated()
 
 
 class TrialQuerySet(models.QuerySet):
     def due(self):
         return self.filter(due_date__lte=date.today())
+
+    def not_due(self):
+        return self.filter(due_date__gt=date.today())
 
     def unreported(self):
         return self.filter(completion_date__isnull=True)
@@ -59,13 +62,16 @@ class TrialQuerySet(models.QuerySet):
         return self.reported().filter(due_date__gt=date.today())
 
 
-
-
 class Sponsor(models.Model):
+    slug = models.SlugField(max_length=200, primary_key=True)
     name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200)
+    major = models.BooleanField(default=False)
     updated_date = models.DateField(default=date.today)
     objects = SponsorQuerySet.as_manager()
+
+    def __str__(self):
+        return self.name
+
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -74,14 +80,18 @@ class Sponsor(models.Model):
     def current_rank(self):
         return self.rankings.get(date=self.updated_date)
 
+    def trials(self):
+        return TrialQuerySet(Trial).filter(sponsor=self)
 
 def compute_due_date(start_date):
-    return parse_date(start_date) + timedelta(days=365)
+    if isinstance(start_date, str):
+        start_date = parse_date(start_date)
+    return start_date + timedelta(days=365)
 
 
 class Trial(models.Model):
     sponsor = models.ForeignKey(
-        Sponsor, related_name='trials',
+        Sponsor,
         on_delete=models.CASCADE)
     registry_id = models.CharField(max_length=100, unique=True)
     publication_url = models.URLField()
@@ -92,13 +102,17 @@ class Trial(models.Model):
     completion_date = models.DateField(null=True, blank=True)
     objects = TrialQuerySet.as_manager()
 
+    def __str__(self):
+        return "{}: {}".format(self.registry_id, self.title)
+
     def save(self, *args, **kwargs):
-        self.due_date = compute_due_date(self.start_date)
+        if self.due_date is None:
+            self.due_date = compute_due_date(self.start_date)
         super(Trial, self).save(*args, **kwargs)
 
 
 class RankingManager(models.Manager):
-    def compute_ranks(self):
+    def _compute_ranks(self):
         sql = ("WITH ranked AS (SELECT ranking.id, RANK() OVER ("
                "  PARTITION BY date "
                "ORDER BY percentage DESC"
@@ -118,20 +132,30 @@ class RankingManager(models.Manager):
     def set_current(self):
         with transaction.atomic():
             for sponsor in Sponsor.objects.all():
-                sponsor.rankings.create(
-                    date=sponsor.updated_date,
-                    due=Trial.objects.due().filter(
-                        sponsor=sponsor).count(),
-                    reported=Trial.objects.reported().filter(
+                due = Trial.objects.due().filter(
+                    sponsor=sponsor).count()
+                reported = Trial.objects.reported().filter(
                         sponsor=sponsor).count()
-                )
-            self.compute_ranks()
+                try:
+                    ranking = sponsor.rankings.get(
+                        date=sponsor.updated_date)
+                    ranking.due = due
+                    ranking.reported = reported
+                    ranking.save()
+                except Ranking.DoesNotExist:
+                    ranking = sponsor.rankings.create(
+                        date=sponsor.updated_date,
+                        due=due,
+                        reported=reported
+                    )
+            self._compute_ranks()
 
     def current_ranks(self):
         # XXX not optimal performance-wise
         latest = self.latest('date')
         return self.filter(
-            date=latest.date, percentage__isnull=False).select_related('sponsor')
+            date=latest.date,
+            percentage__isnull=False).select_related('sponsor')
 
 
 class Ranking(models.Model):
