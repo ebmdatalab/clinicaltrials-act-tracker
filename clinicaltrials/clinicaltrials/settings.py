@@ -47,10 +47,22 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'compressor',
-
+    'rest_framework',
+    'django_filters',
     'frontend',
     'clinicaltrials'
 ]
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -113,6 +125,14 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'clinicaltrials',
+        'USER': 'root', # XXX change this!
+        'PASSWORD': 'root',
+        'HOST': 'localhost',
+        'CONN_MAX_AGE': 0  # Must be zero, see api/view_utils#db_timeout
+    },
+    'test_clinicaltrials': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'test_clinicaltrials',
         'USER': 'root', # XXX change this!
         'PASSWORD': 'root',
         'HOST': 'localhost',
