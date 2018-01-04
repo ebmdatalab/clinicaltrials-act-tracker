@@ -80,43 +80,39 @@ class RankingTestCase(TestCase):
         self.assertEqual(ranks[1].rank, 1)
         self.assertEqual(ranks[1].sponsor, self.sponsor2)
 
-    def xtest_set_current(self):
-        self.assertEqual(Ranking.objects.filter(is_current=True).count(), 0)
-        Ranking.objects.set_current()
-        self.assertEqual(Ranking.objects.filter(is_current=True).count(), 2)
-        self.sponsor2.refresh_from_db()
-        self.assertEqual(self.sponsor2.current_rank().percentage, 100.0)
+
+counter = 0
+def _makeTrial(sponsor, is_due, is_reported):
+    global counter
+    tomorrow = date.today() + timedelta(days=1)
+    counter += 1
+    start_date = date(2015, 1, 1)
+    if is_due:
+        due_date = date(2016, 1, 1)
+    else:
+        due_date = tomorrow
+    if is_reported:
+        completion_date = date(2016, 1, 1)
+    else:
+        completion_date = None
+    return Trial.objects.create(
+        sponsor=sponsor,
+        registry_id='id_{}'.format(counter),
+        publication_url='http://bar.com/{}'.format(counter),
+        title='Trial {}'.format(counter),
+        start_date=start_date,
+        due_date=due_date,
+        completion_date=completion_date)
+
 
 class SponsorTrialsTestCase(TestCase):
 
     def setUp(self):
         self.sponsor = Sponsor.objects.create(name="Sponsor 1")
         self.sponsor2 = Sponsor.objects.create(name="Sponsor 2")
-        self.due_trial = Trial.objects.create(
-            sponsor=self.sponsor,
-            registry_id='a1',
-            publication_url='http://bar.com/1',
-            title='Trial 1',
-            start_date=date(2016, 1, 1),
-            due_date=date(2016, 2, 1))
-        self.reported_trial = Trial.objects.create(
-            sponsor=self.sponsor,
-            registry_id='a2',
-            publication_url='http://bar.com/2',
-            title='Trial 2',
-            start_date=date(2016, 1, 2),
-            due_date=date(2016, 2, 1),
-            completion_date=date(2016, 2, 1),
-        )
-        tomorrow = date.today() + timedelta(days=1)
-        self.not_due_trial = Trial.objects.create(
-            sponsor=self.sponsor,
-            registry_id='a3',
-            publication_url='http://bar.com/3',
-            title='Trial 3',
-            start_date=date(2016, 1, 3),
-            due_date=tomorrow
-        )
+        self.due_trial = _makeTrial(self.sponsor, True, False)
+        self.reported_trial = _makeTrial(self.sponsor, True, True)
+        self.not_due_trial = _makeTrial(self.sponsor, False, False)
 
     def test_slug(self):
         self.assertEqual(self.sponsor.slug, 'sponsor-1')
