@@ -53,7 +53,7 @@ class TrialQuerySet(models.QuerySet):
         return self.filter(completion_date__isnull=True)
 
     def reported(self):
-        return self.filter(completion_date__lte=date.today())
+        return self.filter(completion_date__isnull=False)
 
     def overdue(self):
         return self.due().unreported()
@@ -109,6 +109,17 @@ class Trial(models.Model):
         if self.due_date is None:
             self.due_date = compute_due_date(self.start_date)
         super(Trial, self).save(*args, **kwargs)
+
+    @property
+    def status(self):
+        if Trial.objects.overdue().filter(pk=self.pk).first():
+            return "overdue"
+        elif Trial.objects.not_due().filter(pk=self.pk).first():
+            return "not due"
+        elif Trial.objects.reported().filter(pk=self.pk).first():
+            return "reported"
+        elif Trial.objects.reported_early().filter(pk=self.pk).first():
+            return "reported early"
 
 
 class RankingManager(models.Manager):

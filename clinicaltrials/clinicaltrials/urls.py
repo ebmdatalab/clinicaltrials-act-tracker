@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework import viewsets
 from django_filters import MultipleChoiceFilter
 from django_filters import FilterSet
+from django_filters import OrderingFilter
 
 from frontend.models import Ranking
 from frontend.models import Trial
@@ -23,22 +24,30 @@ STATUS_CHOICES = (
 
 # Serializers define the API representation.
 class RankingSerializer(serializers.HyperlinkedModelSerializer):
+    sponsor_name = serializers.StringRelatedField(source='sponsor')
+    sponsor_slug = serializers.SlugRelatedField(
+        source='sponsor', read_only=True, slug_field='slug')
     class Meta:
         model = Ranking
-        fields = ('date', 'rank', 'due', 'reported', 'percentage', 'sponsor')
+        fields = ('date', 'rank', 'due', 'reported', 'percentage',
+                  'sponsor_slug', 'sponsor_name')
 
 
 class TrialSerializer(serializers.HyperlinkedModelSerializer):
+    status = serializers.SerializerMethodField()
     class Meta:
         model = Trial
         fields = ('registry_id', 'publication_url', 'title', 'has_exemption',
-                  'start_date', 'due_date', 'completion_date', 'sponsor',)
+                  'start_date', 'due_date', 'completion_date', 'sponsor', 'status')
 
+    def get_status(self, obj):
+        return obj.status
 
 class SponsorSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Sponsor
         fields = ('slug', 'name', 'major', 'updated_date')
+
 
 class TrialStatusFilter(FilterSet):
     status = MultipleChoiceFilter(
@@ -70,16 +79,21 @@ class TrialStatusFilter(FilterSet):
 class RankingViewSet(viewsets.ModelViewSet):
     queryset = Ranking.objects.current_ranks()
     serializer_class = RankingSerializer
+    ordering_fields = '__all__'
+    search_fields = ('sponsor__name',)
+    # See https://docs.djangoproject.com/en/dev/ref/models/lookups/#module-django.db.models.lookups
     filter_fields = {'percentage': ['gte', 'lte'],
                      'due': ['gte', 'lte'],
-                     'sponsor__name': ['icontains']}
+                     'sponsor__name': ['icontains'],
+                     'sponsor__major': ['exact'],
+    }
 
 
 class TrialViewSet(viewsets.ModelViewSet):
     queryset = Trial.objects.all()
     serializer_class = TrialSerializer
     filter_class = TrialStatusFilter
-    search_fields = ('title', 'sponsor',)
+    search_fields = ('title', 'sponsor_name',)
 
 
 class SponsorViewSet(viewsets.ModelViewSet):

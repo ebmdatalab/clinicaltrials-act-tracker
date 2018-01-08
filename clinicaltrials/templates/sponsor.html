@@ -2,12 +2,12 @@
 {% load render_nan %}
 
 {% block social_title %}{% block title %}
-  Is {{ sponsor }} late reporting EU clinical trials?
+  Is {{ sponsor }} late reporting clinical trials?
 {% endblock %}{% endblock %}
 {% block social_description %}
-  {{ sponsor }} hasn't reported {{percent_unreported }} of
-  trials which they must report by law on the EU Clinical Trials Register. Find
-  out which trials they are, and how consistent {{ sponsor_name }}'s reporting is.
+  {{ sponsor }} hasn't reported {{ sponsor.current_rank.percentage }} of
+  trials which they must report by law on the Clinical Trials Register. Find
+  out which trials they are, and how consistent {{ sponsor }}'s reporting is.
 {% endblock %}
 
 {% block content %}
@@ -20,10 +20,10 @@
 
     <ul class="nav nav-pills trials-pills" id="table-pills">
       <li id="due_trials" role="presentation" class="active full-interface-tab">
-        <a href="#"><h2>Due trials<span class="badge">{{ total_due }}</span></h2></a>
+        <a href="#"><h2>Due trials<span class="badge">{{ sponsor.trials.due.count }}</span></h2></a>
       </li>
       <li id="not_yet_due_trials" role="presentation" class="full-interface-tab">
-        <a href="#"><h2>Not due<span class="badge">{{ not_yet_due_trials }}</span></h2></a>
+        <a href="#"><h2>Not due<span class="badge">{{ sponsor.trials.not_due.count }}</span></h2></a>
       </li>
       <li id="search_trials" class="search-pill full-interface-tab" role="presentation">
         <a href="#">
@@ -32,13 +32,13 @@
           <span class="input-group-btn">
             <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
             <div class="spacer">
-              <span class="badge">{{ total_trials }}</span>
+              <span class="badge">{{ sponsor.trials.count }}</span>
             </div>
           </span>
         </div>
       </a></li>
       <li id="all_trials" role="presentation" class="active">
-        <a href="#"><h2>All trials<span class="badge">{{ total_trials }}</span></h2></a>
+        <a href="#"><h2>All trials<span class="badge">{{ sponsor.trials.count }}</span></h2></a>
       </li>
     </ul>
 
@@ -65,10 +65,6 @@
 
 
     <table id="trials_table" class="display" cellspacing="0" width="100%">
-      <script>
-        hide_trials_datatable()
-      </script>
-
       <thead>
         <tr>
           <th>Status</th>
@@ -78,29 +74,12 @@
           <th class="hidden_column">Category</th>
         </tr>
       </thead>
-
-      {% for trial in reported_trials %}
-        <tr>
-          <td>
-            <!-- Due -->
-              <span class="label label-success">
-              Reported results</span></span>
-         </td>
-
-          <td><a href="{{ trial.trial_url}}">{{ trial.nct_id }}</a></td>
-          <td>{{ trial.trial_title }}</td>
-
-          <td>{{ trial.completion_date }}</td>
-
-          <td class="hidden_column">
-            due-trials
-          </td>
-        </tr>
-      {% endfor %}
     </table>
 
     <script>
-      activate_trials_datatable()
+      $(document).ready(function() {
+        trialsTable('{{ sponsor.slug }}');
+      });
     </script>
 
   </div>

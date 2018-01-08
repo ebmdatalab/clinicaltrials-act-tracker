@@ -59,9 +59,14 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100,
-    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+    #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'frontend.pagination.DataTablesPagination',
+    'SEARCH_PARAM': 'search[value]',
+    'DEFAULT_FILTER_BACKENDS': (
+        'frontend.pagination.DataTablesOrderingFilter',
+        'rest_framework.filters.SearchFilter',
+        'django_filters.rest_framework.DjangoFilterBackend',
+        ),
 }
 
 MIDDLEWARE = [
@@ -107,7 +112,7 @@ COMPRESS_CSS_FILTERS = [
 ]
 
 # This is breaking the styling, now sure why
-COMPRESS_ENABLED = True
+COMPRESS_ENABLED = False
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',

@@ -27,12 +27,6 @@
   </ul>
 
   <table id="sponsor_table" class="display" cellspacing="0" width="100%">
-    <script>
-  $(document).ready(function() {
-      hide_sponsor_datatable()
-  });
-    </script>
-
     <thead>
       <tr>
         <th>Rank</th>
@@ -43,23 +37,11 @@
         <th class="hidden_column">Major?</th>
       </tr>
     </thead>
-
-    {% for ranking in table %}
-      <tr>
-        <td>{{ ranking.rank }} </td>
-        <td><a href="/sponsor/{{ ranking.sponsor.slug }}">{{ ranking.sponsor.name }}</a></td>
-        <td> {{ ranking.due }} </td>
-        <td> {{ ranking.reported }} </td>
-        <td> {{ ranking.percentage }} </td>
-        <td class="hidden_column">major</td>
-      </tr>
-    {% endfor %}
-
   </table>
 </div>
 
 <script>
   $(document).ready(function() {
-    activate_sponsor_datatable();
+    rankingTable();
   });
 </script>

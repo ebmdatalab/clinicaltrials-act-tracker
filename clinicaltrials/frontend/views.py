@@ -5,13 +5,14 @@ from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpResponse
 
-from . import models
+from frontend.models import Ranking
+from frontend.models import Sponsor
 
 #############################################################################
 # Index page
 
 def index(request):
-    context = {'scores': models.Ranking.objects.current_ranks()}
+    context = {'scores': Ranking.objects.current_ranks()}
     return render(request, "index.html", context=context)
 
 
@@ -19,7 +20,5 @@ def index(request):
 # Sponsor page
 
 def sponsor(request, slug):
-    sponsor = models.get_sponsor(slug).copy()
-    sponsor['unreported_trials'] = models.get_trials_for_sponsor(slug, 'unreported')
-    sponsor['reported_trials'] = models.get_trials_for_sponsor(slug, 'reported')
-    return render(request, 'sponsor.html', context=sponsor)
+    context = {'sponsor': Sponsor.objects.get(slug=slug)}
+    return render(request, 'sponsor.html', context=context)
