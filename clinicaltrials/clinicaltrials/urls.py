@@ -29,7 +29,7 @@ class RankingSerializer(serializers.HyperlinkedModelSerializer):
         source='sponsor', read_only=True, slug_field='slug')
     class Meta:
         model = Ranking
-        fields = ('date', 'rank', 'due', 'reported', 'percentage',
+        fields = ('date', 'rank', 'due', 'reported', 'total', 'percentage',
                   'sponsor_slug', 'sponsor_name')
 
 

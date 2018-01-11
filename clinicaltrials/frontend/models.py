@@ -147,17 +147,20 @@ class RankingManager(models.Manager):
                     sponsor=sponsor).count()
                 reported = Trial.objects.reported().filter(
                         sponsor=sponsor).count()
+                total = Trial.objects.count()
                 try:
                     ranking = sponsor.rankings.get(
                         date=sponsor.updated_date)
                     ranking.due = due
                     ranking.reported = reported
+                    ranking.total = total
                     ranking.save()
                 except Ranking.DoesNotExist:
                     ranking = sponsor.rankings.create(
                         date=sponsor.updated_date,
                         due=due,
-                        reported=reported
+                        reported=reported,
+                        total=total
                     )
             self._compute_ranks()
 
@@ -176,6 +179,7 @@ class Ranking(models.Model):
     date = models.DateField(db_index=True)
     rank = models.IntegerField(null=True)
     due = models.IntegerField()
+    total = models.IntegerField()
     reported = models.IntegerField()
     percentage = models.IntegerField(null=True)
 

@@ -33,6 +33,7 @@ function rankingTable() {
            full['sponsor_name']+'</a>';
        },
       },
+      {'data': 'total'},
       {'data': 'due'},
       {'data': 'reported'},
       {'data': 'percentage'},
