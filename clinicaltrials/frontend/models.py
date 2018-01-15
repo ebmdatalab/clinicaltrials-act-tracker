@@ -65,7 +65,7 @@ class TrialQuerySet(models.QuerySet):
 class Sponsor(models.Model):
     slug = models.SlugField(max_length=200, primary_key=True)
     name = models.CharField(max_length=200)
-    major = models.BooleanField(default=False)
+    is_industry_sponsor = models.NullBooleanField(default=None)
     updated_date = models.DateField(default=date.today)
     objects = SponsorQuerySet.as_manager()
 

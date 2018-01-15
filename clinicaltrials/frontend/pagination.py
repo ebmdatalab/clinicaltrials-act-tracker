@@ -15,7 +15,7 @@ class DataTablesPagination(LimitOffsetPagination):
     http://www.django-rest-framework.org/api-guide/pagination/#limitoffsetpagination
 
     """
-    default_limit = 100
+    default_limit = 300
     limit_query_param = 'length'
     offset_query_param = 'start'
 

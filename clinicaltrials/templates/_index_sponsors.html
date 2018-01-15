@@ -5,26 +5,39 @@
     <span class="glyphicon glyphicon-refresh spinning"></span>
   </div>
 
-  <ul class="nav nav-pills" id="table-pills">
-    <li id="major_sponsors" role="presentation" class="{% if not showing_all_sponsors %}active{% endif %}" title="Sponsors with more than 50 trials in total listed in EUCTR">
-      <a href="/"><h2>Major sponsors <span class="badge">{{ major_sponsors_count }}</span></h2></a>
-    </li>
-    <li id="all_sponsors" role="presentation" class="{% if showing_all_sponsors %}active{% endif %}" title="Sponsors with at least one completed, due trial">
-      <a href="/?all"><h2>All sponsors <span class="badge">{{ all_sponsors_count }}</span></h2></a>
-    </li>
-    <li id="search_sponsors" class="search-pill" role="presentation">
-      <a href="#">
-      <div class="input-group">
-        <input type="text" class="form-control {% if not showing_all_sponsors %}not-showing-all{% endif %}" placeholder="Search sponsors" {% if activate_search %}autofocus{% endif %}>
-        <span class="input-group-btn">
-          <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
-          <div class="spacer">
-            <span class="badge">{{ all_sponsors_count }}</span>
+
+
+  <table cellspacing="5" cellpadding="5" border="0">
+    <tbody><tr>
+        <td>Minimum ACT trials</td>
+        <td><input id="total__gte" name="total__gte" type="text"></td>
+      </tr>
+      <tr>
+        <td>Sponsor class (Industry or non-industry or both)</td>
+        <td>
+
+          <div class="radio">
+            <label>
+              <input class="sponsor_type" type="radio" name="sponsor__is_industry_sponsor" value="" checked>
+              All
+            </label>
           </div>
-        </span>
-      </div>
-    </a></li>
-  </ul>
+          <div class="radio">
+            <label>
+              <input class="sponsor_type" type="radio" name="sponsor__is_industry_sponsor" value="2">
+              Industry
+            </label>
+          </div>
+          <div class="radio">
+            <label>
+              <input class="sponsor_type" type="radio" name="sponsor__is_industry_sponsor" value="3">
+              Non-industry
+            </label>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
   <table id="sponsor_table" class="display" cellspacing="0" width="100%">
     <thead>

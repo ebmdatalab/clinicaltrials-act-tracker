@@ -4,26 +4,31 @@ function getQueryVariable(variable) {
   for (var i=0; i<vars.length; i++) {
     var pair = vars[i].split('=');
     if (pair[0] == variable) {
-      if (typeof pair[1] === 'undefined') {
-        return true
-      } else {
-        return pair[1];
-      }
+      return pair[1];
     }
   }
-  return (false);
 }
 
 function rankingTable() {
   var url = '/api/rankings/?limit=5000';
-  if (!getQueryVariable('all')) {
-    url += '&sponsor__major=true';
+  var params = getParams();
+  $('#total__gte').val(params['min_total']);
+  if (params['is_industry_sponsor']) {
+    $('.sponsor_type[value="'+params['is_industry_sponsor']+'"]').prop('checked', true);
   }
-  $('#sponsor_table').DataTable( {
+  //val(params['is_industry_sponsor']);
+  var table = $('#sponsor_table').DataTable( {
     'ajax': {
       'url': url,
       'dataSrc': 'results',
+      'data': function(d) {
+        return $.extend({}, d, {
+          'total__gte': $('#total__gte').val(),
+          'sponsor__is_industry_sponsor': $('.sponsor_type:checked').val(),
+        });
+      },
     },
+    'pageLength': 300,
     'serverSide': true,
     'columns': [
       {'data': 'rank'},
@@ -39,17 +44,49 @@ function rankingTable() {
       {'data': 'percentage'},
     ],
   });
+  $('#total__gte').on('input', function() {
+    table.draw();
+    params = getParams();
+    params['min_total'] = $('#total__gte').val();
+    window.history.pushState('min_total', '', '?' + $.param(params));
+  });
+  $('.sponsor_type').on('change', function() {
+    table.draw();
+    params = getParams();
+    params['is_industry_sponsor'] = $('.sponsor_type:checked').val();
+    window.history.pushState('industry_sponsor', '', '?' + $.param(params));
+  });
 }
+
+function getParams() {
+  var is_industry_sponsor = getQueryVariable('is_industry_sponsor');
+  var min_total = getQueryVariable('min_total');
+  var q = getQueryVariable('q');
+  var params = {
+    'is_industry_sponsor': is_industry_sponsor,
+    'min_total': min_total,
+    'q': q,
+  };
+  return params
+}
+
+
+// add to query string
 
 
 function trialsTable(sponsor_slug) {
   var url = '/api/trials/?limit=5000&sponsor=' + sponsor_slug;
+  f = getQueryVariable('status');
+  if (f) {
+    url += '&status=' + f;
+  }
   $('#trials_table').DataTable( {
     'ajax': {
       'url': url,
       'dataSrc': 'results',
     },
     'serverSide': true,
+    'pageLength': 300,
     'columns': [
       {'data': 'status'}, // XXX
       {'data': 'registry_id',
