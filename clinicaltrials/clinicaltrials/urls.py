@@ -51,7 +51,8 @@ class TrialSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Trial
         fields = ('registry_id', 'publication_url', 'title', 'has_exemption',
-                  'start_date', 'due_date', 'completion_date', 'sponsor', 'status')
+                  'start_date', 'completion_date', 'has_results', 'results_due',
+                  'sponsor', 'status')
 
     def get_status(self, obj):
         return obj.status
@@ -87,7 +88,7 @@ class TrialStatusFilter(FilterSet):
 
     class Meta:
         model = Trial
-        fields = ('has_exemption', 'due_date', 'sponsor',)
+        fields = ('has_exemption', 'has_results', 'results_due', 'sponsor',)
 
 
 class SponsorFilter(FilterSet):
@@ -109,9 +110,7 @@ class RankingFilter(FilterSet):
 
     def with_trials_due_filter(self, queryset, name, value):
         if value is True:
-            queryset = queryset.filter(sponsor__trial__due_date__lte=date.today()).distinct()
-        elif value is False:
-            queryset = queryset.filter(sponsor__trial__due_date__gt=date.today()).distinct()
+            queryset = queryset.filter(sponsor__trial__results_due=True).distinct()
         return queryset
 
 

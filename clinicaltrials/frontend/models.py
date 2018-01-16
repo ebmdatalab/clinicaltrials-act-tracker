@@ -14,52 +14,45 @@ class SponsorQuerySet(models.QuerySet):
 
     def with_trials_due(self):
         return self.filter(
-            trial__due_date__lte=date.today()
+            trial__results_due=True
         ).annotated()
 
     def with_trials_unreported(self):
         return self.filter(
-            trial__completion_date__isnull=True,
-            trial__isnull=False
+            trial__has_results=False
         ).annotated()
 
     def with_trials_reported(self):
         return self.filter(
-            trial__completion_date__lte=date.today()
+            trial__has_results=True
         ).annotated()
 
     def with_trials_overdue(self):
-        return self.filter(
-            trial__due_date__lte=date.today(),
-            trial__completion_date__isnull=True,
-            trial__isnull=False
-        ).annotated()
+        return self.with_trials_due().with_trials_unreported()
 
     def with_trials_reported_early(self):
-        return self.filter(
-            trial__completion_date__lte=date.today(),
-            trial__due_date__gt=date.today()
-        ).annotated()
+        return self.with_trials_reported().filter(
+            trial__completion_date__gt=date.today())
 
 
 class TrialQuerySet(models.QuerySet):
     def due(self):
-        return self.filter(due_date__lte=date.today())
+        return self.filter(results_due=True)
 
     def not_due(self):
-        return self.filter(due_date__gt=date.today())
+        return self.filter(results_due=False)
 
     def unreported(self):
-        return self.filter(completion_date__isnull=True)
+        return self.filter(has_results=False)
 
     def reported(self):
-        return self.filter(completion_date__isnull=False)
+        return self.filter(has_results=True)
 
     def overdue(self):
         return self.due().unreported()
 
     def reported_early(self):
-        return self.reported().filter(due_date__gt=date.today())
+        return self.reported().filter(completion_date__gt=date.today())
 
 
 class Sponsor(models.Model):
@@ -83,11 +76,6 @@ class Sponsor(models.Model):
     def trials(self):
         return TrialQuerySet(Trial).filter(sponsor=self)
 
-def compute_due_date(start_date):
-    if isinstance(start_date, str):
-        start_date = parse_date(start_date)
-    return start_date + timedelta(days=365)
-
 
 class Trial(models.Model):
     sponsor = models.ForeignKey(
@@ -98,17 +86,13 @@ class Trial(models.Model):
     title = models.TextField()
     has_exemption = models.BooleanField(default=False)
     start_date = models.DateField()
-    due_date = models.DateField()
+    results_due = models.BooleanField(default=False, db_index=True)
+    has_results = models.BooleanField(default=False, db_index=True)
     completion_date = models.DateField(null=True, blank=True)
     objects = TrialQuerySet.as_manager()
 
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
-
-    def save(self, *args, **kwargs):
-        if self.due_date is None:
-            self.due_date = compute_due_date(self.start_date)
-        super(Trial, self).save(*args, **kwargs)
 
     @property
     def status(self):

@@ -43,6 +43,8 @@ class Command(BaseCommand):
                         'publication_url': row['url'],
                         'title': row['title'],
                         'has_exemption': bool(row['has_certificate']),
+                        'has_results': bool(row['has_results']),
+                        'results_due': bool(row['results_due']),
                         'sponsor': sponsor,
                         'start_date': row['start_date'],
                         'completion_date': row['available_completion_date']
