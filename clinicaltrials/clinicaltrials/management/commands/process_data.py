@@ -1,7 +1,6 @@
 import csv
 import datetime
 
-
 from django.db import transaction
 from django.core.management.base import BaseCommand
 from frontend.models import Trial
@@ -31,6 +30,13 @@ class Command(BaseCommand):
                     sponsor, created = Sponsor.objects.get_or_create(
                         name=row['sponsor'])
                     sponsor.updated_date = today
+                    existing_sponsor = sponsor.is_industry_sponsor
+                    is_industry_sponsor = row['sponsor_type'] == 'Industry'
+                    if existing_sponsor is None:
+                        sponsor.is_industry_sponsor = is_industry_sponsor
+                    else:
+                        assert (is_industry_sponsor == existing_sponsor), \
+                            "Inconsistent sponsor types for {}".format(sponsor)
                     sponsor.save()
                     d = {
                         'registry_id': row['nct_id'],

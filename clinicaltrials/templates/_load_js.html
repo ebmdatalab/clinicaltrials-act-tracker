@@ -1,5 +1,8 @@
 {% load compress %}
 {% compress js %}
+<script>
+ var latest_date = '{{ latest_date|date:"Y-m-d" }}';
+</script>
     <script src="/static/js/jquery-3.1.1.min.js"></script>
     <script src="/static/bootstrap-sass-3.3.7/javascripts/bootstrap.min.js"></script>
     <script src="/static/DataTables-1.10.13/media/js/jquery.dataTables.js"></script>

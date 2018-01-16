@@ -8,11 +8,14 @@ from django.http import HttpResponse
 from frontend.models import Ranking
 from frontend.models import Sponsor
 
+
 #############################################################################
 # Index page
 
 def index(request):
-    context = {'scores': Ranking.objects.current_ranks()}
+    context = {
+        'latest_date': Ranking.objects.latest('date').date
+    }
     return render(request, "index.html", context=context)
 
 

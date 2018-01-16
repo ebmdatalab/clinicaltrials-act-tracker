@@ -20,10 +20,7 @@ class DataTablesPagination(LimitOffsetPagination):
     offset_query_param = 'start'
 
     def paginate_queryset(self, queryset, request, view=None):
-        if queryset.model == Ranking:
-            self.total = queryset.model.objects.current_ranks().count()
-        else:
-            self.total = queryset.model.objects.count()
+        self.total = queryset.model.objects.count()
         return super().paginate_queryset(queryset, request, view=view)
 
     def get_paginated_response(self, data):

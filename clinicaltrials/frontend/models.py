@@ -115,6 +115,7 @@ class Trial(models.Model):
         if Trial.objects.overdue().filter(pk=self.pk).first():
             return "overdue"
         elif Trial.objects.not_due().filter(pk=self.pk).first():
+            # XXX doesn't work
             return "not due"
         elif Trial.objects.reported().filter(pk=self.pk).first():
             return "reported"
@@ -124,7 +125,9 @@ class Trial(models.Model):
 
 class RankingManager(models.Manager):
     def _compute_ranks(self):
-        sql = ("WITH ranked AS (SELECT ranking.id, RANK() OVER ("
+        # XXX should only bother computing ranks for *current* date;
+        # this does it for all of them.
+        sql = ("WITH ranked AS (SELECT date, ranking.id, RANK() OVER ("
                "  PARTITION BY date "
                "ORDER BY percentage DESC"
                ") AS computed_rank "
@@ -136,7 +139,7 @@ class RankingManager(models.Manager):
                 "SET "
                 " rank = ranked.computed_rank "
                 "FROM ranked "
-                "WHERE ranked.id = frontend_ranking.id")
+                "WHERE ranked.id = frontend_ranking.id AND ranked.date = frontend_ranking.date")
         with connection.cursor() as c:
                 c.execute(sql)
 
@@ -147,7 +150,7 @@ class RankingManager(models.Manager):
                     sponsor=sponsor).count()
                 reported = Trial.objects.reported().filter(
                         sponsor=sponsor).count()
-                total = Trial.objects.count()
+                total = sponsor.trial_set.count()
                 try:
                     ranking = sponsor.rankings.get(
                         date=sponsor.updated_date)
@@ -163,13 +166,6 @@ class RankingManager(models.Manager):
                         total=total
                     )
             self._compute_ranks()
-
-    def current_ranks(self):
-        # XXX not optimal performance-wise
-        latest = self.latest('date')
-        return self.filter(
-            date=latest.date,
-            percentage__isnull=False).select_related('sponsor')
 
 
 class Ranking(models.Model):

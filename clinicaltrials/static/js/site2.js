@@ -11,12 +11,12 @@ function getQueryVariable(variable) {
 
 function rankingTable() {
   var url = '/api/rankings/?limit=5000';
+  url += '&date=' + latest_date;
   var params = getParams();
   $('#total__gte').val(params['min_total']);
   if (params['is_industry_sponsor']) {
     $('.sponsor_type[value="'+params['is_industry_sponsor']+'"]').prop('checked', true);
   }
-  //val(params['is_industry_sponsor']);
   var table = $('#sponsor_table').DataTable( {
     'ajax': {
       'url': url,
@@ -24,6 +24,7 @@ function rankingTable() {
       'data': function(d) {
         return $.extend({}, d, {
           'total__gte': $('#total__gte').val(),
+          'with_trials_due': $('.overdue_type:checked').val(),
           'sponsor__is_industry_sponsor': $('.sponsor_type:checked').val(),
         });
       },
@@ -56,18 +57,26 @@ function rankingTable() {
     params['is_industry_sponsor'] = $('.sponsor_type:checked').val();
     window.history.pushState('industry_sponsor', '', '?' + $.param(params));
   });
+  $('.overdue_type').on('change', function() {
+    table.draw();
+    params = getParams();
+    params['with_trials_due'] = $('.with_trials_due:checked').val();
+    window.history.pushState('with_trials_due', '', '?' + $.param(params));
+  });
 }
 
 function getParams() {
   var is_industry_sponsor = getQueryVariable('is_industry_sponsor');
   var min_total = getQueryVariable('min_total');
   var q = getQueryVariable('q');
+  var with_trials_due = getQueryVariable('with_trials_due');
   var params = {
     'is_industry_sponsor': is_industry_sponsor,
     'min_total': min_total,
+    'with_trials_due': with_trials_due,
     'q': q,
   };
-  return params
+  return params;
 }
 
 

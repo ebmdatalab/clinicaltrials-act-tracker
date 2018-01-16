@@ -1,10 +1,13 @@
+from datetime import date
 from django.db.models import Count
 from django.urls import include
 from django.urls import path
 from rest_framework import routers
 from rest_framework import serializers
 from rest_framework import viewsets
+from django_filters import AllValuesFilter
 from django_filters import MultipleChoiceFilter
+from django_filters import BooleanFilter
 from django_filters import RangeFilter
 from django_filters import FilterSet
 from django_filters import OrderingFilter
@@ -12,6 +15,7 @@ from django_filters import OrderingFilter
 from frontend.models import Ranking
 from frontend.models import Trial
 from frontend.models import Sponsor
+from frontend.models import SponsorQuerySet
 from frontend import views
 
 STATUS_CHOICES = (
@@ -95,19 +99,40 @@ class SponsorFilter(FilterSet):
         fields = ('is_industry_sponsor',)
 
 
+
+class RankingFilter(FilterSet):
+    with_trials_due = BooleanFilter(
+        label='Sponsor has trials due',
+        method='with_trials_due_filter'
+    )
+
+
+    def with_trials_due_filter(self, queryset, name, value):
+        if value is True:
+            queryset = queryset.filter(sponsor__trial__due_date__lte=date.today()).distinct()
+        elif value is False:
+            queryset = queryset.filter(sponsor__trial__due_date__gt=date.today()).distinct()
+        return queryset
+
+
+    class Meta:
+        model = Ranking
+        fields = {'percentage': ['gte', 'lte'],
+                  'due': ['gte', 'lte'],
+                  'sponsor__name': ['icontains'],
+                  'sponsor__is_industry_sponsor': ['exact'],
+                  'total': ['gte'],
+        }
+
 # ViewSets define the view behavior.
 class RankingViewSet(viewsets.ModelViewSet):
-    queryset = Ranking.objects.current_ranks()
+    # Let's make this selectable too: date, and if excluding percentage.
+    queryset = Ranking.objects.select_related('sponsor')
     serializer_class = RankingSerializer
     ordering_fields = '__all__'
+    filter_class = RankingFilter
     search_fields = ('sponsor__name',)
     # See https://docs.djangoproject.com/en/dev/ref/models/lookups/#module-django.db.models.lookups
-    filter_fields = {'percentage': ['gte', 'lte'],
-                     'due': ['gte', 'lte'],
-                     'sponsor__name': ['icontains'],
-                     'sponsor__is_industry_sponsor': ['exact'],
-                     'total': ['gte']
-    }
 
 
 class TrialViewSet(viewsets.ModelViewSet):
