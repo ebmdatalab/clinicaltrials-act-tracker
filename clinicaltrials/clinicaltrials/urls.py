@@ -11,6 +11,10 @@ from django_filters import BooleanFilter
 from django_filters import RangeFilter
 from django_filters import FilterSet
 from django_filters import OrderingFilter
+from django.contrib.sitemaps import GenericSitemap
+from django.contrib.sitemaps import Sitemap
+from django.contrib.sitemaps.views import sitemap
+from django.urls import reverse
 
 from frontend.models import Ranking
 from frontend.models import Trial
@@ -153,9 +157,27 @@ router.register(r'trials', TrialViewSet, base_name='trials')
 router.register(r'rankings', RankingViewSet)
 router.register(r'sponsors', SponsorViewSet)
 
+class StaticViewSitemap(Sitemap):
+    priority = 0.5
+    changefreq = 'weekly'
+
+    def items(self):
+        return ['index',]
+
+    def location(self, item):
+        return reverse(item)
+
 urlpatterns = [
-    path('', views.index),
+    path('', views.index, name='index'),
     path('api/', include(router.urls)),
-    path('sponsor/<slug:slug>/', views.sponsor),
+    path('sponsor/<slug:slug>/', views.sponsor, name='views.sponsor'),
     path('api/', include('rest_framework.urls')),
+    path('sitemap.xml', sitemap,
+         {'sitemaps': {
+             'static': StaticViewSitemap,
+             'sponsor': GenericSitemap(
+                 {'queryset': Sponsor.objects.all(),
+                  'date_field': 'updated_date'}, priority=0.5),
+         }},
+         name='django.contrib.sitemaps.views.sitemap')
 ]

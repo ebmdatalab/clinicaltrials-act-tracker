@@ -6,6 +6,7 @@ from django.db import models
 from django.db import transaction
 from django.utils.text import slugify
 from django.utils.dateparse import parse_date
+from django.urls import reverse
 
 
 class SponsorQuerySet(models.QuerySet):
@@ -65,6 +66,8 @@ class Sponsor(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('views.sponsor', args=[self.slug])
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -93,6 +96,7 @@ class Trial(models.Model):
 
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
+
 
     @property
     def status(self):
