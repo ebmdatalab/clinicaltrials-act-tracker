@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'frontend',
-    'clinicaltrials'
+    'clinicaltrials',
+    'django_extensions',
 ]
 
 REST_FRAMEWORK = {

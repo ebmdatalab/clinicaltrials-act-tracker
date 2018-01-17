@@ -15,3 +15,5 @@ dataset==1.0.1
 scrapy-crawlera==1.2.4
 djangorestframework
 django-filter
+django-extensions
+werkzeug
