@@ -22,7 +22,6 @@ class Command(BaseCommand):
         f = open(options['input_csv'])
         with transaction.atomic():
             today = datetime.datetime.today()
-            Trial.objects.all().delete()
             for row in csv.DictReader(f):
                 has_act_flag = int(row['act_flag']) > 0
 
@@ -38,8 +37,13 @@ class Command(BaseCommand):
                         assert (is_industry_sponsor == existing_sponsor), \
                             "Inconsistent sponsor types for {}".format(sponsor)
                     sponsor.save()
+                    trial, created = Trial.objects.get_or_create(
+                        registry_id=row['nct_id'])
+                    trial.updated_date = today
+                    if not created:
+                        if bool(row['has_results']) and not trial.has_results:
+                            trial.reported_date = today
                     d = {
-                        'registry_id': row['nct_id'],
                         'publication_url': row['url'],
                         'title': row['title'],
                         'has_exemption': bool(row['has_certificate']),
@@ -49,6 +53,6 @@ class Command(BaseCommand):
                         'start_date': row['start_date'],
                         'completion_date': row['available_completion_date']
                     }
-                    Trial.objects.create(**d)
+                    trial.update(**d)
             print("Setting current rankings")
             Ranking.objects.set_current()

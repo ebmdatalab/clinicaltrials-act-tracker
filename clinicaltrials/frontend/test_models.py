@@ -9,16 +9,12 @@ from frontend.models import Ranking
 
 
 trial_counter = 0
-def _makeTrial(sponsor, is_due, is_reported):
+def _makeTrial(sponsor, results_due, has_results):
     global trial_counter
     tomorrow = date.today() + timedelta(days=1)
     trial_counter += 1
     start_date = date(2015, 1, 1)
-    if is_due:
-        due_date = date(2016, 1, 1)
-    else:
-        due_date = tomorrow
-    if is_reported:
+    if has_results:
         completion_date = date(2016, 1, 1)
     else:
         completion_date = None
@@ -27,8 +23,9 @@ def _makeTrial(sponsor, is_due, is_reported):
         registry_id='id_{}'.format(trial_counter),
         publication_url='http://bar.com/{}'.format(trial_counter),
         title='Trial {}'.format(trial_counter),
+        has_results=has_results,
+        results_due=results_due,
         start_date=start_date,
-        due_date=due_date,
         completion_date=completion_date)
 
 def _simulateImport(test_trials):
@@ -45,8 +42,8 @@ def _simulateImport(test_trials):
         sponsor.save()
         _makeTrial(
             sponsor,
-            is_due=due,
-            is_reported=reported
+            results_due=due,
+            has_results=reported
         )
         last_date = updated_date
     Ranking.objects.set_current()
@@ -88,19 +85,19 @@ class RankingTestCase(TestCase):
         self.assertEqual(self.sponsor2.rankings.get(date=self.date3).percentage, 100.0)
 
     def test_compute_ranks(self):
-        ranks = Ranking.objects.filter(date=self.date1).all()
+        ranks = Ranking.objects.with_rank().filter(date=self.date1).all()
         self.assertEqual(ranks[0].rank, 1)
         self.assertEqual(ranks[0].sponsor, self.sponsor2)
         self.assertEqual(ranks[1].rank, 2)
         self.assertEqual(ranks[1].sponsor, self.sponsor1)
 
-        ranks = Ranking.objects.filter(date=self.date2).all()
+        ranks = Ranking.objects.with_rank().filter(date=self.date2).all()
         self.assertEqual(ranks[0].rank, 1)
         self.assertEqual(ranks[0].sponsor, self.sponsor1)
         self.assertEqual(ranks[1].rank, 2)
         self.assertEqual(ranks[1].sponsor, self.sponsor2)
 
-        ranks = Ranking.objects.filter(date=self.date3).all()
+        ranks = Ranking.objects.with_rank().filter(date=self.date3).all()
         self.assertEqual(ranks[0].rank, 1)
         self.assertEqual(ranks[0].sponsor, self.sponsor1)
         self.assertEqual(ranks[1].rank, 1)
@@ -143,7 +140,7 @@ class SponsorTrialsTestCase(TestCase):
         self.assertEqual(with_overdue.first().num_trials, 1)
 
     def test_sponsor_reported_early(self):
-        with_reported_early = Sponsor.objects.with_trials_reported_early()
+        with_reported_early = Sponsor.objects.with_trials_reported_late()
         self.assertEqual(len(with_reported_early), 0)
 
     def test_trials_due(self):
@@ -155,6 +152,7 @@ class SponsorTrialsTestCase(TestCase):
         self.assertCountEqual(
             self.sponsor.trials().unreported(),
             [self.due_trial, self.not_due_trial])
+        self.assertEqual(self.not_due_trial.status, 'ongoing')
 
     def test_trials_reported(self):
         self.assertCountEqual(
@@ -165,8 +163,31 @@ class SponsorTrialsTestCase(TestCase):
         self.assertCountEqual(
             self.sponsor.trials().overdue(),
             [self.due_trial])
+        self.assertEqual(self.due_trial.status, 'overdue')
 
     def test_trials_reported_early(self):
         self.assertCountEqual(
             self.sponsor.trials().reported_early(),
             [])
+
+    def test_trials_reported_late_not_late(self):
+        trial = self.sponsor.trials()[0]
+        trial.has_results = True
+        trial.completion_date = '2016-01-01'
+        trial.reported_date = '2016-01-11'
+        trial.save()
+        self.assertEqual(trial.status, 'reported')
+        self.assertCountEqual(
+            self.sponsor.trials().reported_late(),
+            [])
+
+    def test_trials_reported_late_is_late(self):
+        trial = self.sponsor.trials()[0]
+        trial.has_results = True
+        trial.completion_date = '2016-01-01'
+        trial.reported_date = '2017-01-01'
+        trial.save()
+        self.assertEqual(trial.status, 'reported-late')
+        self.assertCountEqual(
+            self.sponsor.trials().reported_late(),
+            [trial])

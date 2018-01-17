@@ -11,6 +11,7 @@ from django_filters import BooleanFilter
 from django_filters import RangeFilter
 from django_filters import FilterSet
 from django_filters import OrderingFilter
+from django_filters.widgets import QueryArrayWidget
 from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps import Sitemap
 from django.contrib.sitemaps.views import sitemap
@@ -21,15 +22,6 @@ from frontend.models import Trial
 from frontend.models import Sponsor
 from frontend.models import SponsorQuerySet
 from frontend import views
-
-STATUS_CHOICES = (
-    ('due', 'Due'),
-    ('overdue', 'Overdue'),
-    ('not_due', 'Not yet due'),
-    ('reported', 'Reported'),
-    ('unreported', 'Not yet reported'),
-    ('reported_early', 'Reported early'),
-)
 
 
 class IsIndustrySponsorField(serializers.RelatedField):
@@ -51,15 +43,11 @@ class RankingSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TrialSerializer(serializers.HyperlinkedModelSerializer):
-    status = serializers.SerializerMethodField()
     class Meta:
         model = Trial
         fields = ('registry_id', 'publication_url', 'title', 'has_exemption',
                   'start_date', 'completion_date', 'has_results', 'results_due',
                   'sponsor', 'status')
-
-    def get_status(self, obj):
-        return obj.status
 
 
 class SponsorSerializer(serializers.HyperlinkedModelSerializer):
@@ -72,27 +60,12 @@ class SponsorSerializer(serializers.HyperlinkedModelSerializer):
 class TrialStatusFilter(FilterSet):
     status = MultipleChoiceFilter(
         label='Trial status',
-        method='status_filter',
-        choices=STATUS_CHOICES)
-
-    def status_filter(self, queryset, name, value):
-        if 'due' in value:
-            queryset = queryset.due()
-        if 'overdue' in value:
-            queryset = queryset.due()
-        if 'not_due' in value:
-            queryset = queryset.not_due()
-        if 'reported' in value:
-            queryset = queryset.reported()
-        if 'unreported' in value:
-            queryset = queryset.unreported()
-        if 'reported_early' in value:
-            queryset = queryset.reported_early()
-        return queryset
+        choices=Trial.STATUS_CHOICES,
+        widget=QueryArrayWidget)
 
     class Meta:
         model = Trial
-        fields = ('has_exemption', 'has_results', 'results_due', 'sponsor',)
+        fields = ('has_exemption', 'has_results', 'results_due', 'sponsor', 'status',)
 
 
 class SponsorFilter(FilterSet):
@@ -114,6 +87,7 @@ class RankingFilter(FilterSet):
 
     def with_trials_due_filter(self, queryset, name, value):
         if value is True:
+            # XXX isn't having a percentage equivalent?
             queryset = queryset.filter(sponsor__trial__results_due=True).distinct()
         return queryset
 
@@ -170,6 +144,7 @@ class StaticViewSitemap(Sitemap):
 urlpatterns = [
     path('', views.index, name='index'),
     path('api/', include(router.urls)),
+    path('trials/', views.trials, name='views.trials'),
     path('sponsor/<slug:slug>/', views.sponsor, name='views.sponsor'),
     path('api/', include('rest_framework.urls')),
     path('sitemap.xml', sitemap,

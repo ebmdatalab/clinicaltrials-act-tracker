@@ -4,6 +4,7 @@ from datetime import timedelta
 from django.db import connection
 from django.db import models
 from django.db import transaction
+from django.db.models import F
 from django.utils.text import slugify
 from django.utils.dateparse import parse_date
 from django.urls import reverse
@@ -29,11 +30,14 @@ class SponsorQuerySet(models.QuerySet):
         ).annotated()
 
     def with_trials_overdue(self):
-        return self.with_trials_due().with_trials_unreported()
+        return self.filter(
+            trial__results_due=True,
+            trial__has_results=False
+        ).annotated()
 
-    def with_trials_reported_early(self):
+    def with_trials_reported_late(self):
         return self.with_trials_reported().filter(
-            trial__completion_date__gt=date.today())
+            trial__reported_date__gt=F('trial__completion_date') + timedelta(days=30))
 
 
 class TrialQuerySet(models.QuerySet):
@@ -48,6 +52,9 @@ class TrialQuerySet(models.QuerySet):
 
     def reported(self):
         return self.filter(has_results=True)
+
+    def reported_late(self):
+        return self.reported().filter(reported_date__gt=F('completion_date') + timedelta(days=30))
 
     def overdue(self):
         return self.due().unreported()
@@ -81,37 +88,57 @@ class Sponsor(models.Model):
 
 
 class Trial(models.Model):
+    STATUS_CHOICES = (
+        ('overdue', 'Overdue'),
+        ('ongoing', 'Ongoing'),
+        ('reported', 'Reported'),
+        ('reported-late', 'Reported (late)'),
+        ('unknown', 'Unknown'),
+    )
     sponsor = models.ForeignKey(
         Sponsor,
         on_delete=models.CASCADE)
-    registry_id = models.CharField(max_length=100, unique=True)
+    registry_id = models.CharField(max_length=100, unique=True, db_index=True)
     publication_url = models.URLField()
     title = models.TextField()
     has_exemption = models.BooleanField(default=False)
     start_date = models.DateField()
     results_due = models.BooleanField(default=False, db_index=True)
     has_results = models.BooleanField(default=False, db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='unknown')
     completion_date = models.DateField(null=True, blank=True)
+    first_seen_date = models.DateField(default=date.today)
+    updated_date = models.DateField(default=date.today)
+    reported_date = models.DateField(null=True, blank=True)
     objects = TrialQuerySet.as_manager()
 
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
 
+    def save(self, *args, **kwargs):
+        self.status = self.get_status()
+        super(Trial, self).save(*args, **kwargs)
 
-    @property
-    def status(self):
-        if Trial.objects.overdue().filter(pk=self.pk).first():
-            return "overdue"
-        elif Trial.objects.not_due().filter(pk=self.pk).first():
-            # XXX doesn't work
-            return "not due"
-        elif Trial.objects.reported().filter(pk=self.pk).first():
-            return "reported"
-        elif Trial.objects.reported_early().filter(pk=self.pk).first():
-            return "reported early"
+    def get_status(self):
+        if self.results_due and not self.has_results:
+            status = 'overdue'
+        elif not self.results_due and not self.has_results:
+            status = 'ongoing'
+        elif self.has_results \
+             and self.reported_date \
+             and parse_date(self.reported_date) > parse_date(self.completion_date) + timedelta(days=30):
+            status = 'reported-late'
+        elif self.has_results:
+            status = 'reported'
+        else:
+            status = 'unknown'
+        return status
 
 
 class RankingManager(models.Manager):
+    def with_rank(self):
+        return self.filter(rank__isnull=False)
+
     def _compute_ranks(self):
         # XXX should only bother computing ranks for *current* date;
         # this does it for all of them.

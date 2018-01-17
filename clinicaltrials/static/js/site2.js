@@ -1,12 +1,19 @@
-function getQueryVariable(variable) {
+function getQueryVariable(variable, coerceArray) {
   var query = window.location.search.substring(1);
   var vars = query.split('&');
+  var vals = [];
   for (var i=0; i<vars.length; i++) {
     var pair = vars[i].split('=');
     if (pair[0] == variable) {
-      return pair[1];
+      vals.push(pair[1]);
     }
   }
+  if (!coerceArray && vals.length == 1) {
+    return vals[0];
+  } else {
+    return vals;
+  }
+
 }
 
 function rankingTable() {
@@ -79,25 +86,61 @@ function getParams() {
   return params;
 }
 
+function getTrialParams() {
+  var status = getQueryVariable('status');
+  var params = {
+    'status': status,
+  };
+  return params;
+}
+
 
 // add to query string
 
 
 function trialsTable(sponsor_slug) {
-  var url = '/api/trials/?limit=5000&sponsor=' + sponsor_slug;
-  f = getQueryVariable('status');
-  if (f) {
-    url += '&status=' + f;
+  if(typeof sponsor_slug !== 'undefined') {
+    var url = '/api/trials/?limit=5000&sponsor=' + sponsor_slug;
+  } else {
+    var url = '/api/trials/?limit=5000';
   }
-  $('#trials_table').DataTable( {
+  statuses = getQueryVariable('status', true);
+  console.log(statuses);
+  if (statuses.length > 0) {
+    $('.status_filter').prop('checked', false);
+    $.each(statuses, function(i, d) {
+      $('.status_filter[value="'+d+'"]').prop('checked', true);
+    });
+  }
+  var table = $('#trials_table').DataTable( {
     'ajax': {
       'url': url,
       'dataSrc': 'results',
+      'data': function(d) {
+        return $.extend({}, d, {
+          'status': $.map($('.status_filter:checked'), function(x) {return $(x).val();}),
+        });
+      },
     },
     'serverSide': true,
     'pageLength': 300,
     'columns': [
-      {'data': 'status'}, // XXX
+      {'data': 'status',
+       'render': function(data, type, full, meta) {
+         var statusClass = '';
+         if (data == 'overdue') {
+           statusClass = 'danger';
+         } else if (data == 'reported') {
+           statusClass = 'success';
+         } else if (data == 'reported') {
+           statusClass = 'success';
+         } else {
+           statusClass = 'info';
+         }
+         return '<span class="label label-' +
+           statusClass + '">' + data + '</span>';
+       },
+      },
       {'data': 'registry_id',
        'render': function(data, type, full, meta) {
          return '<a href="'+full['publication_url']+'">'+
@@ -108,4 +151,13 @@ function trialsTable(sponsor_slug) {
       {'data': 'completion_date'},
     ],
   });
+  $('.status_filter').on('change', function() {
+    table.draw();
+    params = getTrialParams();
+    params['status'] = $.map($('.status_filter:checked'), function(x) {
+      return $(x).val();
+    });
+    window.history.pushState('status', '', '?' + $.param(params, true));
+  });
+
 }

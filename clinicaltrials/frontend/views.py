@@ -7,6 +7,7 @@ from django.http import HttpResponse
 
 from frontend.models import Ranking
 from frontend.models import Sponsor
+from frontend.models import Trial
 
 
 #############################################################################
@@ -23,5 +24,16 @@ def index(request):
 # Sponsor page
 
 def sponsor(request, slug):
-    context = {'sponsor': Sponsor.objects.get(slug=slug)}
+    sponsor = Sponsor.objects.get(slug=slug)
+    #f = TrialStatusFilter(request.GET, queryset=sponsor.trials())
+    context = {'sponsor': sponsor,
+               'status_choices': Trial.STATUS_CHOICES}
     return render(request, 'sponsor.html', context=context)
+
+
+def trials(request):
+    trials = Trial.objects.all()
+    #f = TrialStatusFilter(request.GET, queryset=sponsor.trials())
+    context = {'sponsor': trials,
+               'status_choices': Trial.STATUS_CHOICES}
+    return render(request, 'trials.html', context=context)
