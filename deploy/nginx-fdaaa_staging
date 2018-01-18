@@ -7,7 +7,7 @@ upstream fdaaa {
 server {
     listen 80;
     listen [::]:80;
-    server_name staging.fdaaa.ebmdatalab.net;
+    server_name staging-fdaaa.ebmdatalab.net;
 
     resolver 8.8.8.8 8.8.4.4 valid=300s;
     resolver_timeout 5s;
