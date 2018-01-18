@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-cd /var/www/fdaaa/clinicaltrials-act-tracker/euctr
+cd /var/www/fdaaa/clinicaltrials-act-tracker/clinicaltrials
 
-. /etc/profile.d/fdaaa.sh && exec ../../venv/bin/gunicorn euctr.wsgi -c ../deploy/gunicorn-fdaaa.conf.py  
+. /etc/profile.d/fdaaa.sh && exec ../../venv/bin/gunicorn fdaaa_staging.wsgi -c ../deploy/gunicorn-fdaaa.conf.py

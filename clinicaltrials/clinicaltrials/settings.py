@@ -138,16 +138,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'clinicaltrials',
-        'USER': 'root', # XXX change this!
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'CONN_MAX_AGE': 0  # Must be zero, see api/view_utils#db_timeout
-    },
-    'test_clinicaltrials': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'test_clinicaltrials',
-        'USER': 'root', # XXX change this!
-        'PASSWORD': 'root',
+        'USER': common.utils.get_env_setting('CLINICALTRIALS_DB_NAME')
+        'PASSWORD': common.utils.get_env_setting('CLINICALTRIALS_DB_PASS')
         'HOST': 'localhost',
         'CONN_MAX_AGE': 0  # Must be zero, see api/view_utils#db_timeout
     },
