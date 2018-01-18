@@ -33,14 +33,12 @@ class IsIndustrySponsorField(serializers.RelatedField):
 # Serializers define the API representation.
 class RankingSerializer(serializers.HyperlinkedModelSerializer):
     sponsor_name = serializers.StringRelatedField(source='sponsor')
-    sponsor_slug = serializers.SlugRelatedField(
-        source='sponsor', read_only=True, slug_field='slug')
     is_industry_sponsor = IsIndustrySponsorField(read_only=True, source='sponsor')
 
     class Meta:
         model = Ranking
         fields = ('date', 'rank', 'due', 'reported', 'total', 'percentage',
-                  'sponsor_slug', 'sponsor_name', 'is_industry_sponsor')
+                  'sponsor_name', 'is_industry_sponsor')
 
 
 class TrialSerializer(serializers.HyperlinkedModelSerializer):

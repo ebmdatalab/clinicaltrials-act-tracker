@@ -56,6 +56,7 @@
       </tr>
     </tbody>
   </table>
+    <a id="download" href="#">download</a>
 
   <table id="sponsor_table" class="display" cellspacing="0" width="100%">
     <thead>
@@ -74,6 +75,6 @@
 
 <script>
   $(document).ready(function() {
-    rankingTable();
+    rankingTable('{{ latest_date|date:"Y-m-d" }}');
   });
 </script>

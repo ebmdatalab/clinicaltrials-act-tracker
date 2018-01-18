@@ -16,27 +16,51 @@ function getQueryVariable(variable, coerceArray) {
 
 }
 
-function rankingTable() {
-  var url = '/api/rankings/?limit=5000';
-  url += '&date=' + latest_date;
-  var params = getParams();
+
+function setFormValues(params) {
   $('#total__gte').val(params['min_total']);
   if (params['is_industry_sponsor']) {
     $('.sponsor_type[value="'+params['is_industry_sponsor']+'"]').prop('checked', true);
   }
+  if (params['status']) {
+    $('.status_filter').prop('checked', false);
+    $.each(params['status'], function(i, d) {
+      $('.status_filter[value="'+d+'"]').prop('checked', true);
+    });
+  }
+}
+
+function setCsvLink(viewName) {
+  return function(settings) {
+    var api = this.api();
+    // clone
+    var currentParams = JSON.parse(JSON.stringify(api.ajax.params()));
+    currentParams.format = 'csv';
+    // remove 'length' so we can download everything, unpaginated
+    delete currentParams.length;
+    $('#download').attr('href', '/api/' + viewName + '.csv?' + $.param(currentParams));
+  };
+}
+
+function rankingTable(latestDate) {
+  var url = '/api/rankings/?limit=5000';
+  var params = getRankingParams();
+  params['date'] = latestDate;
+  setFormValues(params);
   var table = $('#sponsor_table').DataTable( {
+    'drawCallback': setCsvLink('rankings'),
     'ajax': {
       'url': url,
       'dataSrc': 'results',
       'data': function(d) {
-        return $.extend({}, d, {
+        return $.extend(d, params, {
           'total__gte': $('#total__gte').val(),
           'with_trials_due': $('.overdue_type:checked').val(),
           'sponsor__is_industry_sponsor': $('.sponsor_type:checked').val(),
         });
       },
     },
-    'pageLength': 300,
+    'pageLength': 100,
     'serverSide': true,
     'columns': [
       {'data': 'rank'},
@@ -54,25 +78,22 @@ function rankingTable() {
   });
   $('#total__gte').on('input', function() {
     table.draw();
-    params = getParams();
     params['min_total'] = $('#total__gte').val();
     window.history.pushState('min_total', '', '?' + $.param(params));
   });
   $('.sponsor_type').on('change', function() {
     table.draw();
-    params = getParams();
     params['is_industry_sponsor'] = $('.sponsor_type:checked').val();
     window.history.pushState('industry_sponsor', '', '?' + $.param(params));
   });
   $('.overdue_type').on('change', function() {
     table.draw();
-    params = getParams();
     params['with_trials_due'] = $('.with_trials_due:checked').val();
     window.history.pushState('with_trials_due', '', '?' + $.param(params));
   });
 }
 
-function getParams() {
+function getRankingParams() {
   var is_industry_sponsor = getQueryVariable('is_industry_sponsor');
   var min_total = getQueryVariable('min_total');
   var q = getQueryVariable('q');
@@ -87,42 +108,27 @@ function getParams() {
 }
 
 function getTrialParams() {
-  var status = getQueryVariable('status');
+  var status = getQueryVariable('status', true);
   var params = {
     'status': status,
   };
   return params;
 }
 
-
-
 function trialsTable(sponsor_slug) {
   var url = '/api/trials/';
-  var params = {};
+  var params = getTrialParams();
   if(typeof sponsor_slug !== 'undefined') {
     params['sponsor'] = sponsor_slug;
   }
-  var statusFromQueryString = getQueryVariable('status', true);
-  if (statusFromQueryString.length > 0) {
-    $('.status_filter').prop('checked', false);
-    $.each(statusFromQueryString, function(i, d) {
-      $('.status_filter[value="'+d+'"]').prop('checked', true);
-    });
-  }
+  setFormValues(params);
   var table = $('#trials_table').DataTable( {
-    'drawCallback': function(settings) {
-      var api = this.api();
-      var current_params = JSON.parse(JSON.stringify(api.ajax.params()));  // clone
-      current_params.format = 'csv';
-      delete current_params.length;
-      $('#download').attr('href', '/api/trials.csv?' + $.param(current_params));
-      // remove 'length' so we can download everything
-    },
+    'drawCallback': setCsvLink('trials'),
     'ajax': {
       'url': url,
       'dataSrc': 'results',
       'data': function(d) {
-        var adjusted = $.extend(params, d, {
+        var adjusted = $.extend(d, params, {
           'status': $.map(
             $('.status_filter:checked'), function(x) {
               return $(x).val();
@@ -162,11 +168,10 @@ function trialsTable(sponsor_slug) {
   });
   $('.status_filter').on('change', function() {
     table.draw();
-    var paramsForUrl = getTrialParams();
-    paramsForUrl['status'] = $.map($('.status_filter:checked'), function(x) {
+    params['status'] = $.map($('.status_filter:checked'), function(x) {
       return $(x).val();
     });
-    window.history.pushState('status', '', '?' + $.param(paramsForUrl, true));
+    window.history.pushState('status', '', '?' + $.param(params));
   });
 
 }
