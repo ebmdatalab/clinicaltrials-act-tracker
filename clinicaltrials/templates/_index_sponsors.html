@@ -5,58 +5,36 @@
     <span class="glyphicon glyphicon-refresh spinning"></span>
   </div>
 
+  <h1>How well do sponsors report their results?</h1>
 
+  <form class="form">
+    <div class="form-group">
+      <label for="total__gte">Only show sponsors with at least </label>
+      <input id="total__gte" name="total__gte" type="number" size="3">
+      applicable trials
+    </div>
+    <div class="form-group">
+      <label for="sponsor__is_industry_sponsor">Type of sponsor</label>
+      <div class="radio">
+        <label>
+          <input class="sponsor_type" type="radio" name="sponsor__is_industry_sponsor" value="" checked>
+          All
+        </label>
+        <label>
+          <input class="sponsor_type" type="radio" name="sponsor__is_industry_sponsor" value="2">
+          Industry
+        </label>
+        <label>
+          <input class="sponsor_type" type="radio" name="sponsor__is_industry_sponsor" value="3">
+          Non-industry
+        </label>
+      </div>
+    </div>
+  </form>
 
-  <table cellspacing="5" cellpadding="5" border="0">
-    <tbody><tr>
-        <td>Minimum ACT trials</td>
-        <td><input id="total__gte" name="total__gte" type="text"></td>
-      </tr>
-      <tr>
-        <td>Sponsor class (Industry or non-industry or both)</td>
-        <td>
-
-          <div class="radio">
-            <label>
-              <input class="sponsor_type" type="radio" name="sponsor__is_industry_sponsor" value="" checked>
-              All
-            </label>
-          </div>
-          <div class="radio">
-            <label>
-              <input class="sponsor_type" type="radio" name="sponsor__is_industry_sponsor" value="2">
-              Industry
-            </label>
-          </div>
-          <div class="radio">
-            <label>
-              <input class="sponsor_type" type="radio" name="sponsor__is_industry_sponsor" value="3">
-              Non-industry
-            </label>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>Sponsors with trials overdue</td>
-        <td>
-
-          <div class="radio">
-            <label>
-              <input class="overdue_type" type="radio" name="with_trials_due" value="2" checked>
-              Show only sponsors with overdue trials
-            </label>
-          </div>
-          <div class="radio">
-            <label>
-              <input class="overdue_type" type="radio" name="with_trials_due" value="">
-              Show all sponsors
-            </label>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-    <a id="download" href="#">download</a>
+  <div class="pull-right">
+    <a id="download" href="#"><span class="glyphicon glyphicon-download" aria-hidden="true"></span> Download this data</a>
+  </div>
 
   <table id="sponsor_table" class="display" cellspacing="0" width="100%">
     <thead>

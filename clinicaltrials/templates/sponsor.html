@@ -9,24 +9,20 @@
     </div>
 
     <h1>All of {{ sponsor }}'s Applicable Clinical Trials</h1>
-    <a id="download" href="#">download</a>
-    <table cellspacing="5" cellpadding="5" border="0">
-    <tbody>
-      <tr>
-        <td>Reporting status</td>
-        <td>
-          {% for k, v in status_choices %}
-          <div class="checkbox">
-            <label>
-              <input class="status_filter" type="checkbox" name="status" value="{{ k }}" checked>
-              {{ v }}
-            </label>
-          </div>
-          {% endfor %}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+
+  <form class="form">
+    <div class="form-group">
+      <label for="sponsor__is_industry_sponsor">Status</label>
+      {% for k, v, i in status_choices %}
+      <div class="checkbox">
+        <label>
+          <input class="status_filter" type="checkbox" name="status" value="{{ k }}" checked>
+          {{ v }} ({{ i }})
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+  </form>
 
     <table id="trials_table" class="display" cellspacing="0" width="100%">
       <thead>

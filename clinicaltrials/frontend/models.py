@@ -62,6 +62,14 @@ class TrialQuerySet(models.QuerySet):
     def reported_early(self):
         return self.reported().filter(completion_date__gt=date.today())
 
+    def status_choices_with_counts(self):
+        return (
+            ('overdue', 'Overdue', self.overdue().count()),
+            ('ongoing', 'Ongoing', self.not_due().count()),
+            ('reported', 'Reported', self.reported().count()),
+            ('reported-late', 'Reported late', self.reported_late().count())
+        )
+
 
 class Sponsor(models.Model):
     slug = models.SlugField(max_length=200, primary_key=True)
@@ -93,7 +101,6 @@ class Trial(models.Model):
         ('ongoing', 'Ongoing'),
         ('reported', 'Reported'),
         ('reported-late', 'Reported (late)'),
-        ('unknown', 'Unknown'),
     )
     sponsor = models.ForeignKey(
         Sponsor,
@@ -107,7 +114,7 @@ class Trial(models.Model):
     start_date = models.DateField()
     results_due = models.BooleanField(default=False, db_index=True)
     has_results = models.BooleanField(default=False, db_index=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='unknown')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ongoing')
     completion_date = models.DateField(null=True, blank=True)
     first_seen_date = models.DateField(default=date.today)
     updated_date = models.DateField(default=date.today)
@@ -132,9 +139,11 @@ class Trial(models.Model):
             status = 'reported-late'
         elif self.has_results:
             status = 'reported'
-        else:
-            status = 'unknown'
         return status
+
+    class Meta:
+        ordering = ('completion_date',)
+
 
 
 class RankingManager(models.Manager):

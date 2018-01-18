@@ -46,9 +46,12 @@ function rankingTable(latestDate) {
   var url = '/api/rankings/?limit=5000';
   var params = getRankingParams();
   params['date'] = latestDate;
+  params['due__gte'] = 1;
   setFormValues(params);
   var table = $('#sponsor_table').DataTable( {
+    "dom": 'f<"top"i>rt<"bottom"lp><"clear">',
     'drawCallback': setCsvLink('rankings'),
+    "order": [[ 1, 'asc' ], [ 0, 'asc' ]],
     'ajax': {
       'url': url,
       'dataSrc': 'results',
@@ -123,6 +126,7 @@ function trialsTable(sponsor_slug) {
   }
   setFormValues(params);
   var table = $('#trials_table').DataTable( {
+    "dom": 'f<"top"i>rt<"bottom"lp><"clear">',
     'drawCallback': setCsvLink('trials'),
     'ajax': {
       'url': url,
@@ -139,6 +143,7 @@ function trialsTable(sponsor_slug) {
     },
     'serverSide': true,
     'pageLength': 100,
+    "order": [[ 3, 'asc' ]],
     'columns': [
       {'data': 'status',
        'render': function(data, type, full, meta) {
