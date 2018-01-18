@@ -162,7 +162,15 @@ function trialsTable(sponsor_slug) {
            full['registry_id']+'</a>';
        },
       },
-      {'data': 'title'},
+      {'data': 'title',
+       'render': function(data, type, full, meta) {
+         var title = full['title'];
+         if (full['is_pact']) {
+           title += ' <span class="pact">[pACT]</span>';
+         }
+         return title;
+       },
+      },
       {'data': 'completion_date'},
     ],
   });

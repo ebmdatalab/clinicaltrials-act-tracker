@@ -102,6 +102,8 @@ class Trial(models.Model):
     publication_url = models.URLField()
     title = models.TextField()
     has_exemption = models.BooleanField(default=False)
+    # "probable" ACT
+    is_pact = models.BooleanField(default=False)
     start_date = models.DateField()
     results_due = models.BooleanField(default=False, db_index=True)
     has_results = models.BooleanField(default=False, db_index=True)

@@ -34,21 +34,24 @@ class IsIndustrySponsorField(serializers.RelatedField):
 # Serializers define the API representation.
 class RankingSerializer(serializers.HyperlinkedModelSerializer):
     sponsor_name = serializers.StringRelatedField(source='sponsor')
+    sponsor_slug = serializers.SlugRelatedField(
+        source='sponsor', read_only=True, slug_field='slug')
     is_industry_sponsor = IsIndustrySponsorField(read_only=True, source='sponsor')
 
     class Meta:
         model = Ranking
         fields = ('date', 'rank', 'due', 'reported', 'total', 'percentage',
-                  'sponsor_name', 'is_industry_sponsor')
+                  'sponsor_name', 'is_industry_sponsor', 'sponsor_slug')
 
 
 class TrialSerializer(serializers.HyperlinkedModelSerializer):
     sponsor_name = serializers.StringRelatedField(source='sponsor')
+
     class Meta:
         model = Trial
         fields = ('registry_id', 'publication_url', 'title', 'has_exemption',
                   'start_date', 'completion_date', 'has_results', 'results_due',
-                  'sponsor_name', 'status')
+                  'sponsor_name', 'status', 'is_pact',)
 
 
 class SponsorSerializer(serializers.HyperlinkedModelSerializer):
@@ -66,7 +69,7 @@ class TrialStatusFilter(FilterSet):
 
     class Meta:
         model = Trial
-        fields = ('has_exemption', 'has_results', 'results_due', 'sponsor', 'status',)
+        fields = ('has_exemption', 'has_results', 'results_due', 'sponsor', 'status', 'is_pact',)
 
 
 class SponsorFilter(FilterSet):

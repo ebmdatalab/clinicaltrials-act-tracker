@@ -21,9 +21,10 @@ class Command(BaseCommand):
         '''
         f = open(options['input_csv'])
         with transaction.atomic():
+
             today = datetime.datetime.today()
             for row in csv.DictReader(f):
-                has_act_flag = int(row['act_flag']) > 0
+                has_act_flag = (int(row['act_flag']) > 0 or int(row['included_pact_flag']) > 0)
 
                 if has_act_flag:
                     sponsor, created = Sponsor.objects.get_or_create(
@@ -37,22 +38,28 @@ class Command(BaseCommand):
                         assert (is_industry_sponsor == existing_sponsor), \
                             "Inconsistent sponsor types for {}".format(sponsor)
                     sponsor.save()
-                    trial, created = Trial.objects.get_or_create(
-                        registry_id=row['nct_id'])
-                    trial.updated_date = today
-                    if not created:
-                        if bool(row['has_results']) and not trial.has_results:
-                            trial.reported_date = today
                     d = {
+                        'registry_id': row['nct_id'],
                         'publication_url': row['url'],
                         'title': row['title'],
                         'has_exemption': bool(row['has_certificate']),
                         'has_results': bool(row['has_results']),
                         'results_due': bool(row['results_due']),
-                        'sponsor': sponsor,
+                        'is_pact': bool(int(row['included_pact_flag'])),
+                        'sponsor_id': sponsor.pk,
                         'start_date': row['start_date'],
-                        'completion_date': row['available_completion_date']
                     }
-                    trial.update(**d)
+                    if row['available_completion_date']:
+                        d['completion_date'] = row['available_completion_date']
+                    trial_set = Trial.objects.filter(registry_id=row['nct_id'])
+                    trial = trial_set.first()
+                    if trial:
+                        d['updated_date'] = today
+                        if bool(row['has_results']) and not trial.has_results:
+                            d['reported_date'] = today
+                        trial_set.update(**d)
+                    else:
+                        Trial.objects.create(**d)
+
             print("Setting current rankings")
             Ranking.objects.set_current()
