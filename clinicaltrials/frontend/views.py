@@ -14,10 +14,7 @@ from frontend.models import Trial
 # Index page
 
 def index(request):
-    context = {
-        'latest_date': Ranking.objects.latest('date').date
-    }
-    return render(request, "index.html", context=context)
+    return render(request, "index.html")
 
 
 #############################################################################

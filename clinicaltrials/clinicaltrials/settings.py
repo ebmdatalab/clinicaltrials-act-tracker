@@ -102,6 +102,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'frontend.context_processors.google_tracking_id',
+                'frontend.context_processors.latest_date',
             ],
         },
     },
