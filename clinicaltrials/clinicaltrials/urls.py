@@ -5,6 +5,7 @@ from django.urls import path
 from rest_framework import routers
 from rest_framework import serializers
 from rest_framework import viewsets
+from rest_framework.urlpatterns import format_suffix_patterns
 from django_filters import AllValuesFilter
 from django_filters import MultipleChoiceFilter
 from django_filters import BooleanFilter
@@ -43,11 +44,12 @@ class RankingSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TrialSerializer(serializers.HyperlinkedModelSerializer):
+    sponsor_name = serializers.StringRelatedField(source='sponsor')
     class Meta:
         model = Trial
         fields = ('registry_id', 'publication_url', 'title', 'has_exemption',
                   'start_date', 'completion_date', 'has_results', 'results_due',
-                  'sponsor', 'status')
+                  'sponsor_name', 'status')
 
 
 class SponsorSerializer(serializers.HyperlinkedModelSerializer):
@@ -94,6 +96,7 @@ class RankingFilter(FilterSet):
 
     class Meta:
         model = Ranking
+        # See https://docs.djangoproject.com/en/dev/ref/models/lookups/#module-django.db.models.lookups
         fields = {'percentage': ['gte', 'lte'],
                   'due': ['gte', 'lte'],
                   'sponsor__name': ['icontains'],
@@ -102,28 +105,52 @@ class RankingFilter(FilterSet):
         }
 
 # ViewSets define the view behavior.
-class RankingViewSet(viewsets.ModelViewSet):
-    # Let's make this selectable too: date, and if excluding percentage.
+
+class CSVNonPagingViewSet(viewsets.ModelViewSet):
+    @property
+    def paginator(self):
+        """Overrides paginator lookup in base class
+        """
+        if getattr(self, '_skip_paginator', False):
+            p = None
+        else:
+            p = super(CSVNonPagingViewSet, self).paginator
+        return p
+
+
+    def list(self, request, format=None):
+        """Overrides method in base class
+        """
+        if request.accepted_renderer.media_type == 'text/csv':
+            self._skip_paginator = True
+            result = super(CSVNonPagingViewSet, self).list(request, format=format)
+            self._skip_paginator = False
+        else:
+            result = super(CSVNonPagingViewSet, self).list(request, format=format)
+        return result
+
+
+class RankingViewSet(CSVNonPagingViewSet):
     queryset = Ranking.objects.select_related('sponsor')
     serializer_class = RankingSerializer
     ordering_fields = '__all__'
     filter_class = RankingFilter
     search_fields = ('sponsor__name',)
-    # See https://docs.djangoproject.com/en/dev/ref/models/lookups/#module-django.db.models.lookups
 
 
-class TrialViewSet(viewsets.ModelViewSet):
-    queryset = Trial.objects.all()
+class TrialViewSet(CSVNonPagingViewSet):
+    queryset = Trial.objects.select_related('sponsor').all()
     serializer_class = TrialSerializer
     filter_class = TrialStatusFilter
     search_fields = ('title', 'sponsor__name',)
 
 
-class SponsorViewSet(viewsets.ModelViewSet):
+class SponsorViewSet(CSVNonPagingViewSet):
     queryset = Sponsor.objects.annotate(num_trials=Count('trial'))
     serializer_class = SponsorSerializer
     filter_class = SponsorFilter
     search_fields = ('name',)
+
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
@@ -156,3 +183,4 @@ urlpatterns = [
          }},
          name='django.contrib.sitemaps.views.sitemap')
 ]
+#urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'csv'])

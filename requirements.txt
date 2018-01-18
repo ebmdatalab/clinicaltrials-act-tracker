@@ -14,6 +14,7 @@ sqlalchemy==1.1.14
 dataset==1.0.1
 scrapy-crawlera==1.2.4
 djangorestframework
+djangorestframework-csv
 django-filter
 django-extensions
 werkzeug

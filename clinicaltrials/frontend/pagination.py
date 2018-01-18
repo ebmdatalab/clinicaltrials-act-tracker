@@ -10,9 +10,12 @@ from frontend.models import Ranking
 
 class DataTablesPagination(LimitOffsetPagination):
     """Configure REST api pagination to match variable names expected by
-    DataTables
-    https://datatables.net/manual/server-side
+    DataTables.
+
+    Read https://datatables.net/manual/server-side for details of
+    variables sent by the DataTables widget; and
     http://www.django-rest-framework.org/api-guide/pagination/#limitoffsetpagination
+    for details of how the Django REST framework handles pagination.
 
     """
     default_limit = 300

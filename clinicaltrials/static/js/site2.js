@@ -95,35 +95,44 @@ function getTrialParams() {
 }
 
 
-// add to query string
-
 
 function trialsTable(sponsor_slug) {
+  var url = '/api/trials/';
+  var params = {};
   if(typeof sponsor_slug !== 'undefined') {
-    var url = '/api/trials/?limit=5000&sponsor=' + sponsor_slug;
-  } else {
-    var url = '/api/trials/?limit=5000';
+    params['sponsor'] = sponsor_slug;
   }
-  statuses = getQueryVariable('status', true);
-  console.log(statuses);
-  if (statuses.length > 0) {
+  var statusFromQueryString = getQueryVariable('status', true);
+  if (statusFromQueryString.length > 0) {
     $('.status_filter').prop('checked', false);
-    $.each(statuses, function(i, d) {
+    $.each(statusFromQueryString, function(i, d) {
       $('.status_filter[value="'+d+'"]').prop('checked', true);
     });
   }
   var table = $('#trials_table').DataTable( {
+    'drawCallback': function(settings) {
+      var api = this.api();
+      var current_params = JSON.parse(JSON.stringify(api.ajax.params()));  // clone
+      current_params.format = 'csv';
+      delete current_params.length;
+      $('#download').attr('href', '/api/trials.csv?' + $.param(current_params));
+      // remove 'length' so we can download everything
+    },
     'ajax': {
       'url': url,
       'dataSrc': 'results',
       'data': function(d) {
-        return $.extend({}, d, {
-          'status': $.map($('.status_filter:checked'), function(x) {return $(x).val();}),
+        var adjusted = $.extend(params, d, {
+          'status': $.map(
+            $('.status_filter:checked'), function(x) {
+              return $(x).val();
+            }),
         });
+        return adjusted;
       },
     },
     'serverSide': true,
-    'pageLength': 300,
+    'pageLength': 100,
     'columns': [
       {'data': 'status',
        'render': function(data, type, full, meta) {
@@ -153,11 +162,11 @@ function trialsTable(sponsor_slug) {
   });
   $('.status_filter').on('change', function() {
     table.draw();
-    params = getTrialParams();
-    params['status'] = $.map($('.status_filter:checked'), function(x) {
+    var paramsForUrl = getTrialParams();
+    paramsForUrl['status'] = $.map($('.status_filter:checked'), function(x) {
       return $(x).val();
     });
-    window.history.pushState('status', '', '?' + $.param(params, true));
+    window.history.pushState('status', '', '?' + $.param(paramsForUrl, true));
   });
 
 }
