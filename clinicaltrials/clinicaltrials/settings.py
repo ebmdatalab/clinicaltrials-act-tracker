@@ -136,7 +136,7 @@ WSGI_APPLICATION = 'clinicaltrials.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'clinicaltrials',
         'USER': common.utils.get_env_setting('CLINICALTRIALS_DB_NAME'),
         'PASSWORD': common.utils.get_env_setting('CLINICALTRIALS_DB_PASS'),
