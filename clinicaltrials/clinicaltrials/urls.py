@@ -17,6 +17,7 @@ from django.contrib.sitemaps import GenericSitemap
 from django.contrib.sitemaps import Sitemap
 from django.contrib.sitemaps.views import sitemap
 from django.urls import reverse
+from django.views.generic import TemplateView
 
 from frontend.models import Ranking
 from frontend.models import Trial
@@ -172,6 +173,7 @@ urlpatterns = [
     path('trials/', views.trials, name='views.trials'),
     path('sponsor/<slug:slug>/', views.sponsor, name='views.sponsor'),
     path('api/', include('rest_framework.urls')),
+    path('about/', TemplateView.as_view(template_name="about.html")),
     path('sitemap.xml', sitemap,
          {'sitemaps': {
              'static': StaticViewSitemap,
