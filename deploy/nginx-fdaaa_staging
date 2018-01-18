@@ -24,7 +24,7 @@ server {
     }
 
     location /static {
-        alias   /var/www/fdaaa_staging/clinicaltrials-act-tracker/euctr/static;
+        alias   /var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/static;
         expires max;
         access_log off;
     }
