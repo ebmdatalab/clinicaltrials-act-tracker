@@ -44,6 +44,9 @@ def setup_nginx():
     run('ln -sf %s/clinicaltrials-act-tracker/deploy/nginx-%s /etc/nginx/sites-enabled/%s' % (env.path, env.app, env.app))
     run('chown -R www-data:www-data /var/www/%s/{clinicaltrials-act-tracker,venv}' % (env.app,))
 
+def setup_django():
+    with prefix('source .venv/bin/activate'):
+        run('cd clinicaltrials/ && python manage.py collectstatic')
 
 #def run_migrations():
 #    if env.environment == 'live':
