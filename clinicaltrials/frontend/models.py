@@ -114,8 +114,10 @@ class Trial(models.Model):
     start_date = models.DateField()
     results_due = models.BooleanField(default=False, db_index=True)
     has_results = models.BooleanField(default=False, db_index=True)
+    days_late = models.IntegerField(default=None, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ongoing')
     completion_date = models.DateField(null=True, blank=True)
+
     first_seen_date = models.DateField(default=date.today)
     updated_date = models.DateField(default=date.today)
     reported_date = models.DateField(null=True, blank=True)
@@ -126,7 +128,33 @@ class Trial(models.Model):
 
     def save(self, *args, **kwargs):
         self.status = self.get_status()
+        self.days_late = self.get_days_late()
         super(Trial, self).save(*args, **kwargs)
+
+    def get_days_late(self):
+        days_late = None
+        if self.results_due:
+            if self.has_results:
+                if self.reported_date and self.completion_date:
+                    # Normalise from strings, as this method may be called
+                    # before the object has been saved to the databasse
+                    if isinstance(self.reported_date, str):
+                        self.reported_date = parse_date(self.reported_date)
+                    if isinstance(self.completion_date, str):
+                        self.completion_date = parse_date(self.completion_date)
+                    days_late = max([
+                        (self.reported_date
+                         - self.completion_date
+                         - timedelta(days=30)).days,
+                        0])
+            elif self.completion_date:
+                days_late = max([
+                    (date.today()
+                     - self.completion_date
+                     - timedelta(days=30)).days,
+                    0])
+        return days_late
+
 
     def get_status(self):
         if self.results_due and not self.has_results:
@@ -135,7 +163,7 @@ class Trial(models.Model):
             status = 'ongoing'
         elif self.has_results \
              and self.reported_date \
-             and parse_date(self.reported_date) > parse_date(self.completion_date) + timedelta(days=30):
+             and self.days_late > 0:
             status = 'reported-late'
         elif self.has_results:
             status = 'reported'

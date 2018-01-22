@@ -43,6 +43,7 @@ GOOGLE_TRACKING_ID = common.utils.get_env_setting('CLINICALTRIALS_GOOGLE_TRACKIN
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.sitemaps',

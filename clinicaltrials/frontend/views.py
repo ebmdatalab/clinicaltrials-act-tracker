@@ -3,6 +3,7 @@ import time
 
 from django.shortcuts import render
 from django.conf import settings
+from django.db.models import Sum
 from django.http import HttpResponse
 
 from frontend.models import Ranking
@@ -22,9 +23,13 @@ def index(request):
 
 def sponsor(request, slug):
     sponsor = Sponsor.objects.get(slug=slug)
+    fine = sponsor.trial_set.aggregate(Sum('days_late'))['days_late__sum'] * 10000
     #f = TrialStatusFilter(request.GET, queryset=sponsor.trials())
     context = {'sponsor': sponsor,
-               'status_choices': Trial.objects.filter(sponsor=sponsor).status_choices_with_counts()}
+               'status_choices': Trial.objects.filter(
+                   sponsor=sponsor).status_choices_with_counts(),
+               'fine': fine
+    }
     return render(request, 'sponsor.html', context=context)
 
 
