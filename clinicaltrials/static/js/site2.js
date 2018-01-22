@@ -54,7 +54,10 @@ function rankingTable(latestDate) {
   var table = $('#sponsor_table').DataTable( {
     "dom": 'f<"top"i>rt<"bottom"lp><"clear">',
     'drawCallback': setCsvLink('rankings'),
-    "order": [[ 1, 'asc' ], [ 0, 'asc' ]],
+    "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
+    "language": {
+      "infoFiltered": '',
+    },
     'ajax': {
       'url': url,
       'dataSrc': 'results',
@@ -79,7 +82,11 @@ function rankingTable(latestDate) {
       {'data': 'total'},
       {'data': 'due'},
       {'data': 'reported'},
-      {'data': 'percentage'},
+      {'data': 'percentage',
+       'render': function(data, type, full, meta) {
+         return data + '%';
+       },
+      },
     ],
   });
   $('#total__gte').on('input', function() {

@@ -101,6 +101,7 @@ class RankingFilter(FilterSet):
         # See https://docs.djangoproject.com/en/dev/ref/models/lookups/#module-django.db.models.lookups
         fields = {'percentage': ['gte', 'lte'],
                   'due': ['gte', 'lte'],
+                  'date': ['exact'],
                   'sponsor__name': ['icontains'],
                   'sponsor__is_industry_sponsor': ['exact'],
                   'total': ['gte'],
