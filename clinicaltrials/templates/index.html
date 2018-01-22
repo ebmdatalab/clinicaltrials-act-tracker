@@ -1,22 +1,11 @@
 {% extends "_base.html" %}
 
 {% block social_title %}{% block title %}
-  EU Trials Tracker &mdash; Who's not sharing clinical trial results?
+  FDAAA &mdash; Who's not sharing clinical trial results?
 {% endblock %}{% endblock %}
 
-{% block social_description %}
-  By law, all clinical trials on the European Union Clinical Trials Register
-  (EUCTR) must report their results in the registry within a year of completion.
-  This site tracks which universities and pharmaceutical companies are doing this
-  and which aren't.
-{% endblock %}
 
 {% block content %}
-  <script>
-    showing_all_sponsors = {% if showing_all_sponsors %}true{% else %}false{% endif %}
-    activate_search = {% if activate_search %}true{% else %}false{% endif %}
-  </script>
-
   {% include "_index_jumbotron.html" %}
   {% include "_index_sponsors.html" with table=scores %}
 {% endblock%}
