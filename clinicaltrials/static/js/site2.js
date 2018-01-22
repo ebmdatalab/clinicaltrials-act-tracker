@@ -4,7 +4,10 @@ function getQueryVariable(variable, coerceArray) {
   var vals = [];
   for (var i=0; i<vars.length; i++) {
     var pair = vars[i].split('=');
-    if (pair[0] == variable) {
+    var decoded = decodeURIComponent(pair[0]);
+    if (decoded == variable) {
+      vals.push(pair[1]);
+    } else if (decoded == variable + '[]') {
       vals.push(pair[1]);
     }
   }
@@ -82,17 +85,22 @@ function rankingTable(latestDate) {
   $('#total__gte').on('input', function() {
     table.draw();
     params['min_total'] = $('#total__gte').val();
-    window.history.pushState('min_total', '', '?' + $.param(params));
+    window.history.pushState('min_total', params, '?' + $.param(params));
   });
   $('.sponsor_type').on('change', function() {
     table.draw();
     params['is_industry_sponsor'] = $('.sponsor_type:checked').val();
-    window.history.pushState('industry_sponsor', '', '?' + $.param(params));
+    window.history.pushState('industry_sponsor', params, '?' + $.param(params));
   });
   $('.overdue_type').on('change', function() {
     table.draw();
     params['with_trials_due'] = $('.with_trials_due:checked').val();
-    window.history.pushState('with_trials_due', '', '?' + $.param(params));
+    window.history.pushState('with_trials_due', params, '?' + $.param(params));
+  });
+  $(window).bind('popstate', function () {
+    var params = getRankingParams();
+    setFormValues(params);
+    table.draw();
   });
 }
 
@@ -184,7 +192,13 @@ function trialsTable(sponsor_slug) {
     params['status'] = $.map($('.status_filter:checked'), function(x) {
       return $(x).val();
     });
-    window.history.pushState('status', '', '?' + $.param(params));
+    window.history.pushState('status', params, '?' + $.param(params));
+  });
+  $(window).bind('popstate', function () {
+    var params = getTrialParams();
+    setFormValues(params);
+    debugger
+    table.draw();
   });
 
 }
