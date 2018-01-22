@@ -23,7 +23,11 @@ def index(request):
 
 def sponsor(request, slug):
     sponsor = Sponsor.objects.get(slug=slug)
-    fine = sponsor.trial_set.aggregate(Sum('days_late'))['days_late__sum'] * 10000
+    days_late = sponsor.trial_set.aggregate(Sum('days_late'))['days_late__sum']
+    if days_late:
+        fine = days_late * 10000
+    else:
+        fine = None
     #f = TrialStatusFilter(request.GET, queryset=sponsor.trials())
     context = {'sponsor': sponsor,
                'status_choices': Trial.objects.filter(
