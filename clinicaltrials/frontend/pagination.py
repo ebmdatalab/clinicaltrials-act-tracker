@@ -39,9 +39,16 @@ class DataTablesPagination(LimitOffsetPagination):
 def get_columns(params):
     cols = {}
     for k, v in params.items():
-        match = re.match(r"^columns\[(\d+)\]\[data\]", k)
-        if match:
+        # Datatables optionally supplies a `name` field...
+        match = re.match(r"^columns\[(\d+)\]\[name\]", k)
+        if match and match.groups()[0]:
             cols[match.groups()[0]] = v
+        else:
+            # ...and if that's not present, we should use the `data`
+            # field instead
+            match = re.match(r"^columns\[(\d+)\]\[data\]", k)
+            if match:
+                cols[match.groups()[0]] = v
     return cols
 
 
@@ -57,7 +64,7 @@ def get_datatables_ordering(params):
         dir_match = re.match(r"^order\[(\d+)\]\[dir\]", k)
         if dir_match:
             ordering_directions[dir_match.groups()[0]] = v
-    for k, v in ordering_names.items():
+    for k, v in sorted(ordering_names.items(), key=lambda x: x[0]):
         if ordering_directions[k] == 'desc':
             direction = "-"
         else:

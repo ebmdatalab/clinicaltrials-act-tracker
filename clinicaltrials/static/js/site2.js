@@ -73,7 +73,7 @@ function rankingTable(latestDate) {
     'serverSide': true,
     'columns': [
       {'data': 'rank'},
-      {'data': 'sponsor',
+      {'name': 'sponsor__name', 'data': 'sponsor_name',
        'render': function(data, type, full, meta) {
          return '<a href="/sponsor/'+full['sponsor_slug']+'">'+
            full['sponsor_name']+'</a>';
