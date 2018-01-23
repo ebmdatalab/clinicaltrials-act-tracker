@@ -167,8 +167,8 @@ function trialsTable(sponsor_slug) {
            statusClass = 'danger';
          } else if (data == 'reported') {
            statusClass = 'success';
-         } else if (data == 'reported') {
-           statusClass = 'success';
+         } else if (data == 'reported-late') {
+           statusClass = 'warning';
          } else {
            statusClass = 'info';
          }
@@ -204,8 +204,7 @@ function trialsTable(sponsor_slug) {
   $(window).bind('popstate', function () {
     var params = getTrialParams();
     setFormValues(params);
-    debugger
     table.draw();
   });
-
+  //setupControls(); // from boostrap-checkbox-radio.js
 }

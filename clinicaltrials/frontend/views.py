@@ -15,7 +15,10 @@ from frontend.models import Trial
 # Index page
 
 def index(request):
-    return render(request, "index.html")
+    context = {
+        'title': "Who's sharing their clinical trial results?"
+    }
+    return render(request, "index.html", context=context)
 
 
 #############################################################################
@@ -30,6 +33,7 @@ def sponsor(request, slug):
         fine = None
     #f = TrialStatusFilter(request.GET, queryset=sponsor.trials())
     context = {'sponsor': sponsor,
+               'title': "All of {}'s Applicable Clinical Trials".format(sponsor),
                'status_choices': Trial.objects.filter(
                    sponsor=sponsor).status_choices_with_counts(),
                'fine': fine
@@ -41,5 +45,6 @@ def trials(request):
     trials = Trial.objects.all()
     #f = TrialStatusFilter(request.GET, queryset=sponsor.trials())
     context = {'sponsor': trials,
+               'title': "All Applicable Clinical Trials",
                'status_choices': Trial.objects.status_choices_with_counts()}
     return render(request, 'trials.html', context=context)

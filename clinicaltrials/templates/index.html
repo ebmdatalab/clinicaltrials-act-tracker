@@ -6,6 +6,61 @@
 
 
 {% block content %}
-  {% include "_index_jumbotron.html" %}
-  {% include "_index_sponsors.html" with table=scores %}
+<div class="container">
+  <form class="form form-inline">
+    <div class="form-group">
+      <label for="total__gte">Only show sponsors with at least </label>
+      <input id="total__gte" name="total__gte" type="number" size="3" style="width: 3em" placeholder="1">
+      applicable trials
+    </div>
+  </form>
+  <form class="form form-inline">
+    <div class="form-group">
+      <label>Type of sponsor</label>
+      <div class="radio">
+        <label for="all-sponsors">
+          <input class="sponsor_type" id="all-sponsors" type="radio" name="sponsor__is_industry_sponsor" value="" checked>
+          All
+        </label>
+      </div>
+      <div class="radio">
+        <label for="industry-sponsors">
+          <input class="sponsor_type" id="industry-sponsors" type="radio" name="sponsor__is_industry_sponsor" value="2">
+          Industry
+        </label>
+      </div>
+      <div class="radio">
+        <label for="nonindustry-sponsors">
+          <input class="sponsor_type" id="nonindustry-sponsors" type="radio" name="sponsor__is_industry_sponsor" value="3">
+          Non-industry
+        </label>
+      </div>
+    </div>
+  </form>
+
+  <div class="pull-right">
+    <a id="download" href="#"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
+  </div>
+
+  <table id="sponsor_table" class="table table-striped" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Sponsor name</th>
+        <th>Ongoing</th>
+        <th>Overdue</th>
+        <th>Reported</th>
+        <th>Reported</th>
+      </tr>
+    </thead>
+  </table>
+</div>
 {% endblock%}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function() {
+    rankingTable('{{ LATEST_DATE|date:"Y-m-d" }}');
+  });
+</script>
+{% endblock %}

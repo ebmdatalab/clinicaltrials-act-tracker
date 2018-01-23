@@ -1,83 +1,131 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+        <meta charset="utf-8" />
+        <link rel="apple-touch-icon" sizes="76x76" href="/static/img/apple-icon.png">
+        <link rel="icon" type="image/png" sizes="96x96" href="/static/img/favicon.png">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-    <title>
-      {% block title %}{% endblock %}
-    </title>
+        <title>{{ title }}</title>
 
-    <meta property="og:title" content="{% block social_title %}{% endblock %}">
-    <meta property="og:description" content="{% block social_description %}{% endblock %}">
-    <meta property="og:image" content="{{ social_image }}">
-    <meta property="og:url" content="{{ request.build_absolute_uri }}">
-    <meta name="twitter:card" content="summary_large_image">
+        <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+
+    {% include "_load_js.html" %}
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.16/fh-3.1.3/datatables.min.js"></script>
+    {% block extra_js %}{% endblock %}
 
     {% load compress %}
     {% compress css %}
-        <link rel="stylesheet" href="/static/scss/site.scss"
-          type="text/x-scss" charset="utf-8">
-        <link rel="stylesheet" href="/static/DataTables-1.10.13/media/css/jquery.dataTables.css"
-          type="text/x-scss" charset="utf-8">
-        <link rel="stylesheet" href="/static/FixedHeader-3.1.2/css/fixedHeader.dataTables.min.css"
-          type="text/x-scss" charset="utf-8">
+
+
+    <!-- Bootstrap core CSS     -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Animation library for notifications   -->
+    <link href="/static/css/animate.min.css" rel="stylesheet"/>
+
+    <!--  Paper Dashboard core CSS    -->
+    <link href="/static/css/paper-dashboard.css" rel="stylesheet"/>
+
+    <!--  CSS for Demo Purpose, don't include it in your project     -->
+    <link href="/static/css/demo.css" rel="stylesheet" />
     {% endcompress %}
-    {% include "_load_js.html" %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/fh-3.1.3/datatables.min.css"/>
 
-    {% if GOOGLE_TRACKING_ID %}
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-      ga('create', '{{ GOOGLE_TRACKING_ID }}', 'auto');
-      ga('send', 'pageview');
+    <!--  Fonts and icons     -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
+    <link href="/static/css/themify-icons.css" rel="stylesheet">
 
-    </script>
-    {% endif %}
-  </head>
+</head>
+<body>
 
-    <body>
-      <div class="container">
-        <nav class="navbar navbar-inverse navbar-fixed-top fh-fixedHeader">
-          <div class="container fluid">
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="/">FDAAA Compliance Tracker</a>
-              <ul class="nav navbar-nav navbar-left">
-                <li> <a href="/">Home</a> </li>
-                <li> <a href="/trials/">All trials</a> </li>
-              </ul>
-            </div>
-            <div id="navbar" class="navbar-collapse collapse">
-              <ul class="nav navbar-nav navbar-right">
-                <li> <a href="/about">About</a> </li>
-              </ul>
+<div class="wrapper">
+  <div class="sidebar" data-background-color="white" data-active-color="danger">
 
-            </div>
+        <!--
+                Tip 1: you can change the color of the sidebar's background using: data-background-color="white | black"
+                Tip 2: you can change the color of the active button using the data-active-color="primary | info | success | warning | danger"
+          -->
+
+        <div class="sidebar-wrapper">
+          <div class="logo">
+            <a href="/" class="simple-text">
+              FDAAA Tracker
+            </a>
           </div>
-        </nav>
-        <div class="container">
 
-    {% block content %}{% endblock %}
-
-      <hr>
-      <footer>
-        <div class="container">
-        Built by the <a href="http://ebmdatalab.net">Evidence-Based Medicine
-          Data Lab</a>, University of Oxford.  Data last updated {{ LATEST_DATE|date:"d F Y" }}.
-          <a href="mailto:hello@ebmdatalab.net">Get in touch</a>.
+          <ul class="nav">
+            <li>
+              <a href="/">
+                <i class="ti-stats-up"></i>
+                <p>Ranked sponsors</p>
+              </a>
+            </li>
+            <li>
+              <a href="/trials/">
+                <i class="ti-view-list"></i>
+                <p>All trials</p>
+              </a>
+            </li>
+            <li>
+              <a href="/about/">
+                <i class="ti-help"></i>
+                <p>About</p>
+              </a>
+            </li>
+          </ul>
         </div>
-      </footer>
-      </div>
-  </body>
+  </div>
 
+    <div class="main-panel">
+
+
+
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="header">
+                                <h4 class="title">{{ title }}</h4>
+                            </div>
+                            <div class="content">
+                              {% block content %}{% endblock %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid">
+                <nav class="pull-left">
+                    <ul>
+
+                      <li>
+                        Built by the <a href="http://ebmdatalab.net">Evidence-Based Medicine
+                          Data Lab</a>, University of Oxford.
+                        </li>
+                      <li>
+                          Data last updated {{ LATEST_DATE|date:"d F Y" }}.
+                      </li>
+                        <li>
+                          <a href="mailto:hello@ebmdatalab.net">Get in touch</a>.
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </footer>
+
+
+    </div>
+</div>
+
+
+</body>
 </html>

@@ -3,20 +3,26 @@
 
   <div class="container">
 
-    <h1>All Applicable Clinical Trials</h1>
-
   <form class="form">
-    <div class="form-group">
-      <label for="sponsor__is_industry_sponsor">Status</label>
       {% for k, v, i in status_choices %}
       <div class="checkbox">
-        <label>
-          <input class="status_filter" type="checkbox" name="status" value="{{ k }}" checked>
-          {{ v }} ({{ i }})
+        <label for="filter-{{k}}">
+          <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}" checked="checked">
+          {% if k == 'overdue' %}
+            <span class="label label-danger">
+          {% elif k == 'reported' %}
+            <span class="label label-success">
+          {% elif k == 'reported-late' %}
+            <span class="label label-warning">
+          {% else %}
+            <span class="label label-info">
+          {% endif %}
+            {{ v }}
+            ({{ i }})
+          </span>
         </label>
       </div>
       {% endfor %}
-    </div>
   </form>
 
   <div class="pull-right">
@@ -24,14 +30,13 @@
   </div>
 
 
-    <table id="trials_table" class="display" cellspacing="0" width="100%">
+    <table id="trials_table" class="table table-striped" cellspacing="0" width="100%">
       <thead>
         <tr>
           <th>Status</th>
           <th>Trial ID</th>
           <th>Title</th>
           <th>Completion date</th>
-          <th class="hidden_column">Category</th>
         </tr>
       </thead>
     </table>

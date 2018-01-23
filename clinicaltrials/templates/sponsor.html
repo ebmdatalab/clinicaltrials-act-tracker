@@ -8,8 +8,6 @@
     <div id="trials_table_loading">
       <span class="glyphicon glyphicon-refresh spinning"></span>
     </div>
-
-    <h1>All of {{ sponsor }}'s Applicable Clinical Trials</h1>
     {% if fine %}
     The FDA has the power to fine sponsors up to $10,000 for each day a trial is reported late.
     On this basis, as of today, {{ sponsor }} could have been fined a total of ${{ fine | intcomma}}.
@@ -28,25 +26,25 @@
     </div>
   </form>
 
-    <table id="trials_table" class="display" cellspacing="0" width="100%">
+    <table id="trials_table" class="table table-striped" cellspacing="0" width="100%">
       <thead>
         <tr>
           <th>Status</th>
           <th>Trial ID</th>
           <th>Title</th>
           <th>Completion date</th>
-          <th class="hidden_column">Category</th>
         </tr>
       </thead>
     </table>
 
-    <script>
-      $(document).ready(function() {
-        trialsTable('{{ sponsor.slug }}');
-      });
-    </script>
 
   </div>
+{% endblock %}
 
-
-{% endblock%}
+{% block extra_js %}
+  <script>
+    $(document).ready(function() {
+    trialsTable('{{ sponsor.slug }}');
+    });
+  </script>
+{% endblock %}
