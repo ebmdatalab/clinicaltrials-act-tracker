@@ -5,16 +5,17 @@
 
   <div class="container">
 
-    <div id="trials_table_loading">
-      <span class="glyphicon glyphicon-refresh spinning"></span>
-    </div>
     {% if fine %}
-    The FDA has the power to fine sponsors up to $10,000 for each day a trial is reported late.
-    On this basis, as of today, {{ sponsor }} could have been fined a total of ${{ fine | intcomma}}.
+    <div class="alert alert-danger alert-with-icon">
+      <span data-notify="icon" class="ti-alert"></span>
+      <span data-notify="message">
+        The FDA has the power to fine sponsors up to $10,000 for each day a trial is reported late.
+        On this basis, as of today, {{ sponsor }} could have been fined a total of ${{ fine | intcomma}}.
+      </span>
+    </div>
     {% endif %}
   <form class="form">
     <div class="form-group">
-      <label for="sponsor__is_industry_sponsor">Status</label>
       {% for k, v, i in status_choices %}
       <div class="checkbox">
         <label>
