@@ -1,8 +1,6 @@
 {% extends "_base.html" %}
 {% block content %}
 
-  <div class="container">
-
   <form class="form">
       {% for k, v, i in status_choices %}
       <div class="checkbox">
@@ -25,32 +23,27 @@
       {% endfor %}
   </form>
 
-  <div class="pull-right">
-    <a id="download" href="#"><span class="glyphicon glyphicon-download" aria-hidden="true"></span> Download this data</a>
-  </div>
 
+  <table id="trials_table" class="table table-striped" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Sponsor</th>
+        <th>Trial ID</th>
+        <th>Title</th>
+        <th class="text-nowrap">Completion date</th>
+        <th class="text-nowrap">Days overdue</th>
 
-    <table id="trials_table" class="table table-striped" cellspacing="0" width="100%">
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th>Sponsor</th>
-          <th>Trial ID</th>
-          <th>Title</th>
-          <th class="text-nowrap">Completion date</th>
-          <th class="text-nowrap">Days overdue</th>
+      </tr>
+    </thead>
+  </table>
+  <a id="download" href="#" class="btn btn-default"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
+  <script>
+    $(document).ready(function() {
+    trialsTable('{{ sponsor.slug }}');
+    });
+  </script>
 
-        </tr>
-      </thead>
-    </table>
-
-    <script>
-      $(document).ready(function() {
-        trialsTable('{{ sponsor.slug }}');
-      });
-    </script>
-
-  </div>
 
 
 {% endblock%}

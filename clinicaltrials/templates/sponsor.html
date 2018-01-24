@@ -3,7 +3,6 @@
 
 {% block content %}
 
-  <div class="container">
 
     {% if fine %}
     <div class="alert alert-danger alert-with-icon">
@@ -43,9 +42,9 @@
     </thead>
   </table>
 
+  <a id="download" href="#" class="btn btn-default"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
 
-  </div>
-{% endblock %}
+  {% endblock %}
 
 {% block extra_js %}
   <script>

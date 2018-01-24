@@ -6,8 +6,6 @@
 
 
 {% block content %}
-<div class="container">
-
   {% if request.user.is_authenticated %}
   <form class="form form-inline">
     <div class="form-group">
@@ -40,9 +38,6 @@
     </div>
   </form>
   {% endif %}
-  <div class="pull-right">
-    <a id="download" href="#"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
-  </div>
 
   <table id="sponsor_table" class="table table-striped" cellspacing="0" width="100%">
     <thead>
@@ -54,7 +49,7 @@
       </tr>
     </thead>
   </table>
-</div>
+  <a id="download" href="#" class="btn btn-default"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
 {% endblock%}
 
 {% block extra_js %}

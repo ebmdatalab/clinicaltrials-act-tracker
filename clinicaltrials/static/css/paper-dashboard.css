@@ -793,7 +793,6 @@ hr {
 
 .form-control {
   background-color: #fffcf5;
-  border: medium none;
   border-radius: 4px;
   color: #66615b;
   font-size: 14px;
@@ -2765,4 +2764,8 @@ textarea.form-control {
 /* my stuff */
 .sponsor-col {
   display: none;
+}
+
+#sponsor_table_filter, #trials_table_filter {
+  text-align: left;
 }
