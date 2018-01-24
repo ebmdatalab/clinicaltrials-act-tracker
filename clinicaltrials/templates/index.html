@@ -7,6 +7,8 @@
 
 {% block content %}
 <div class="container">
+
+  {% if request.user.is_authenticated %}
   <form class="form form-inline">
     <div class="form-group">
       <label for="total__gte">Only show sponsors with at least </label>
@@ -37,7 +39,7 @@
       </div>
     </div>
   </form>
-
+  {% endif %}
   <div class="pull-right">
     <a id="download" href="#"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
   </div>

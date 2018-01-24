@@ -51,7 +51,7 @@ class TrialSerializer(serializers.HyperlinkedModelSerializer):
         model = Trial
         fields = ('registry_id', 'publication_url', 'title', 'has_exemption',
                   'start_date', 'completion_date', 'has_results', 'results_due',
-                  'sponsor_name', 'status', 'is_pact',)
+                  'sponsor_name', 'status', 'is_pact', 'days_late',)
 
 
 class SponsorSerializer(serializers.HyperlinkedModelSerializer):
@@ -185,6 +185,8 @@ urlpatterns = [
                  {'queryset': Sponsor.objects.all(),
                   'date_field': 'updated_date'}, priority=0.5),
          }},
-         name='django.contrib.sitemaps.views.sitemap')
+         name='django.contrib.sitemaps.views.sitemap'),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
+
 #urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'csv'])
