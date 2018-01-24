@@ -48,6 +48,7 @@ class Command(BaseCommand):
                         'is_pact': bool(int(row['included_pact_flag'])),
                         'sponsor_id': sponsor.pk,
                         'start_date': row['start_date'],
+                        'reported_date': row['results_submitted_date'],
                     }
                     if row['available_completion_date']:
                         d['completion_date'] = row['available_completion_date']
@@ -55,11 +56,10 @@ class Command(BaseCommand):
                     trial = trial_set.first()
                     if trial:
                         d['updated_date'] = today
-                        if bool(row['has_results']) and not trial.has_results:
-                            d['reported_date'] = today
                         trial_set.update(**d)
                     else:
                         Trial.objects.create(**d)
 
             print("Setting current rankings")
             Ranking.objects.set_current()
+# clinical_study.clinical_results non-null and
