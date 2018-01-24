@@ -33,7 +33,7 @@ function setFormValues(params) {
   }
 }
 
-function setCsvLink(viewName) {
+function setCsvLinkAndTableDecoration(viewName) {
   return function(settings) {
     var api = this.api();
     // clone
@@ -42,6 +42,16 @@ function setCsvLink(viewName) {
     // remove 'length' so we can download everything, unpaginated
     delete currentParams.length;
     $('#download').attr('href', '/api/' + viewName + '.csv?' + $.param(currentParams));
+    var hasPages = this.api().page.info().pages > 1;
+    var wrapper = $(this).closest('.dataTables_wrapper');
+    var filter = wrapper.find('.dataTables_filter');
+    filter.toggle(Boolean(filter.find('input').val() || (this.api().page.info().pages > 1)));
+    var pagination = wrapper.find('.dataTables_paginate');
+    pagination.toggle(hasPages);
+    var length = wrapper.find('.dataTables_length');
+    length.toggle(hasPages);
+    var info = wrapper.find('.dataTables_info');
+    info.toggle(hasPages);
   };
 }
 
@@ -52,8 +62,8 @@ function rankingTable(latestDate) {
   params['due__gte'] = 1;
   setFormValues(params);
   var table = $('#sponsor_table').DataTable( {
-    "dom": 'f<"top"i>rt<"bottom"lp><"clear">',
-    'drawCallback': setCsvLink('rankings'),
+    "dom": '<"datatable-top"i>rt<"bottom"lp><"clear">',
+    'drawCallback': setCsvLinkAndTableDecoration('rankings'),
     "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
     "language": {
       "infoFiltered": '',
@@ -141,9 +151,12 @@ function trialsTable(sponsor_slug) {
   }
   setFormValues(params);
   var table = $('#trials_table').DataTable( {
-    "dom": 'f<"top"i>rt<"bottom"lp><"clear">',
-    'drawCallback': setCsvLink('trials'),
+    "dom": '<"datatable-top"fi>rt<"bottom"lp><"clear">',
+    'drawCallback': setCsvLinkAndTableDecoration('trials'),
     'columnDefs': columnDefs,
+    "language": {
+      "infoFiltered": '',
+    },
     'ajax': {
       'url': url,
       'dataSrc': 'results',
