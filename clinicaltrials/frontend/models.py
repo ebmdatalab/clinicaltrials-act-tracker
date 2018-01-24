@@ -64,7 +64,7 @@ class TrialQuerySet(models.QuerySet):
 
     def status_choices_with_counts(self):
         return (
-            ('overdue', 'Overdue', self.overdue().count()),
+            ('due', 'Due', self.overdue().count()),
             ('ongoing', 'Ongoing', self.not_due().count()),
             ('reported', 'Reported', self.reported().count()),
             ('reported-late', 'Reported late', self.reported_late().count())

@@ -177,7 +177,7 @@ function trialsTable(sponsor_slug) {
       {'data': 'status',
        'render': function(data, type, full, meta) {
          var statusClass = '';
-         if (data == 'overdue') {
+         if (data == 'due') {
            statusClass = 'danger';
          } else if (data == 'reported') {
            statusClass = 'success';

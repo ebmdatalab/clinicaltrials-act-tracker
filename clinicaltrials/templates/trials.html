@@ -6,7 +6,7 @@
       <div class="checkbox">
         <label for="filter-{{k}}">
           <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}" checked="checked">
-          {% if k == 'overdue' %}
+          {% if k == 'due' %}
             <span class="label label-danger">
           {% elif k == 'reported' %}
             <span class="label label-success">
