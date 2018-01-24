@@ -393,8 +393,6 @@ hr {
   background-color: #f4f3ef;
   position: relative;
   z-index: 2;
-  float: right;
-  width: calc(100% - 260px);
   min-height: 100%; }
   .main-panel > .content {
     padding: 30px 15px;
