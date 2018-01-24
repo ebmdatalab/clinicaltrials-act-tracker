@@ -36,16 +36,15 @@ function setFormValues(params) {
 function setCsvLinkAndTableDecoration(viewName) {
   return function(settings) {
     var api = this.api();
-    // clone
     var currentParams = JSON.parse(JSON.stringify(api.ajax.params()));
     currentParams.format = 'csv';
     // remove 'length' so we can download everything, unpaginated
     delete currentParams.length;
     $('#download').attr('href', '/api/' + viewName + '.csv?' + $.param(currentParams));
-    var hasPages = this.api().page.info().pages > 1;
+    var hasPages = api.page.info().pages > 1;
     var wrapper = $(this).closest('.dataTables_wrapper');
     var filter = wrapper.find('.dataTables_filter');
-    filter.toggle(Boolean(filter.find('input').val() || (this.api().page.info().pages > 1)));
+    filter.toggle(Boolean(filter.find('input').val() || hasPages));
     var pagination = wrapper.find('.dataTables_paginate');
     pagination.toggle(hasPages);
     var length = wrapper.find('.dataTables_length');
