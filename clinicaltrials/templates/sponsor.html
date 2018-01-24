@@ -28,17 +28,20 @@
       {% endfor %}
     </div>
   </form>
+  {% endif %}
 
-    <table id="trials_table" class="table table-striped" cellspacing="0" width="100%">
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th>Trial ID</th>
-          <th>Title</th>
-          <th>Completion date</th>
-        </tr>
-      </thead>
-    </table>
+  <table id="trials_table" class="table table-striped" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th class="sponsor-col">Sponsor</th>
+        <th>Trial ID</th>
+        <th>Title</th>
+        <th class="text-nowrap">Completion date</th>
+        <th class="text-nowrap">Days overdue</th>
+      </tr>
+    </thead>
+  </table>
 
 
   </div>

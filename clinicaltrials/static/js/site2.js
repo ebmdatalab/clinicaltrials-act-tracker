@@ -72,14 +72,12 @@ function rankingTable(latestDate) {
     'pageLength': 100,
     'serverSide': true,
     'columns': [
-      {'data': 'rank'},
       {'name': 'sponsor__name', 'data': 'sponsor_name',
        'render': function(data, type, full, meta) {
          return '<a href="/sponsor/'+full['sponsor_slug']+'">'+
            full['sponsor_name']+'</a>';
        },
       },
-      {'data': 'total'},
       {'data': 'due'},
       {'data': 'reported'},
       {'data': 'percentage',
@@ -136,13 +134,16 @@ function getTrialParams() {
 function trialsTable(sponsor_slug) {
   var url = '/api/trials/';
   var params = getTrialParams();
-  if(typeof sponsor_slug !== 'undefined') {
+  var columnDefs = [];
+  if(typeof sponsor_slug !== 'undefined' && sponsor_slug !== '') {
     params['sponsor'] = sponsor_slug;
+    columnDefs = [{className: 'sponsor-col', targets: [1]}];
   }
   setFormValues(params);
   var table = $('#trials_table').DataTable( {
     "dom": 'f<"top"i>rt<"bottom"lp><"clear">',
     'drawCallback': setCsvLink('trials'),
+    'columnDefs': columnDefs,
     'ajax': {
       'url': url,
       'dataSrc': 'results',
@@ -176,6 +177,7 @@ function trialsTable(sponsor_slug) {
            statusClass + '">' + data + '</span>';
        },
       },
+      {'data': 'sponsor_name'},
       {'data': 'registry_id',
        'render': function(data, type, full, meta) {
          return '<a target="_blank" href="'+full['publication_url']+'">'+
@@ -192,6 +194,7 @@ function trialsTable(sponsor_slug) {
        },
       },
       {'data': 'completion_date'},
+      {'data': 'days_late'},
     ],
   });
   $('.status_filter').on('change', function() {
