@@ -2798,3 +2798,7 @@ textarea.form-control {
 #summary-card {
   opacity: 0;
 }
+
+table thead tr {
+  background-color: white;
+}
