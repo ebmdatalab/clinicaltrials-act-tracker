@@ -2773,7 +2773,6 @@ textarea.form-control {
 /* summary card */
 
 #numerator {
-  border-bottom: solid #555 2px;
   padding-bottom: 10px;
 }
 
@@ -2791,8 +2790,6 @@ textarea.form-control {
 }
 
 #fraction-container {
-  padding-right: 20%;
-  padding-left: 20%;
 }
 
 #summary-card .card {
@@ -2815,7 +2812,7 @@ table thead tr {
 #outof {
   color: #555;
   position: relative;
-  top: -12px;
+  top: -6px;
   display: block;
   width: 50%;
   margin: 0 auto;
