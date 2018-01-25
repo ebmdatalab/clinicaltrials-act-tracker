@@ -2772,33 +2772,49 @@ textarea.form-control {
 
 /* summary card */
 
-.valign {
-  display: table-cell;
-  text-align: center;
-  vertical-align: middle;
-  padding-right: 20px;
-}
-#numerator, #denominator {
-  padding: 5px 10px 5px 10px;
-}
 #numerator {
-  border-bottom: solid black 0.1em;
+  border-bottom: solid #555 2px;
+  padding-bottom: 10px;
 }
 
-.big-text {
-  font-size: 3em;
-  line-height: 0.95em;
+#denominator {
+  margin-top: -20px;
+
 }
 
-.x-big-text {
-  font-size: 5em;
-  line-height: 0.85em;
+.bigtext {
+  text-align: center;
 }
 
 #summary-card {
   opacity: 0;
 }
 
+#summary-card .card {
+  min-height: 11em;
+  overflow: hidden;
+  width: 100%;
+}
+
+.big-text {
+  line-height: 0.8em;
+}
 table thead tr {
   background-color: white;
+}
+
+.card .content {
+  width: 100%;
+}
+
+#outof {
+  color: #555;
+  position: relative;
+  top: -12px;
+  display: block;
+  width: 50%;
+  margin: 0 auto;
+  background-color: white;
+  text-align: center;
+  padding: 0;
 }

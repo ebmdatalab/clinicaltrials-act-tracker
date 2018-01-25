@@ -1,50 +1,59 @@
 {% extends "_base.html" %}
 {% block content %}
-  {% include '_summary_card.html' %}
-  <form class="form">
-      {% for k, v, i in status_choices %}
-      <div class="btn-group" data-toggle="buttons">
-        <label for="filter-{{k}}" class="btn
-          {% if k == 'due' %}
-            btn-danger
-          {% elif k == 'reported' %}
-            btn-success
-          {% elif k == 'reported-late' %}
-            btn-warning
-          {% else %}
-            btn-info
-          {% endif %}
+{% include '_summary_card.html' %}
 
-">
-          <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}">
+<div class="row">
+  <div class="col-sm-12">
+  <div class="card">
+    <div class="content">
+      <form class="form">
+        {% for k, v, i in status_choices %}
+        <div class="btn-group" data-toggle="buttons">
+          <label for="filter-{{k}}" class="btn
+                                           {% if k == 'due' %}
+                                           btn-danger
+                                           {% elif k == 'reported' %}
+                                           btn-success
+                                           {% elif k == 'reported-late' %}
+                                           btn-warning
+                                           {% else %}
+                                           btn-info
+                                           {% endif %}
+
+                                           ">
+            <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}">
             {{ v }}
             ({{ i }})
-        </label>
-      </div>
-      {% endfor %}
-  </form>
+          </label>
+        </div>
+        {% endfor %}
+      </form>
+      <hr>
+      <table id="trials_table" class="table table-striped" cellspacing="0" width="100%">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Sponsor</th>
+            <th>Trial ID</th>
+            <th>Title</th>
+            <th class="text-nowrap">Completion date</th>
+            <th class="text-nowrap">Days overdue</th>
 
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+  </div>
+</div>
 
-  <table id="trials_table" class="table table-striped" cellspacing="0" width="100%">
-    <thead>
-      <tr>
-        <th>Status</th>
-        <th>Sponsor</th>
-        <th>Trial ID</th>
-        <th>Title</th>
-        <th class="text-nowrap">Completion date</th>
-        <th class="text-nowrap">Days overdue</th>
-
-      </tr>
-    </thead>
-  </table>
-  <a id="download" href="#" class="btn btn-default"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
-  <script>
-    $(document).ready(function() {
-      trialsTable('{{ sponsor.slug }}');
-      showPerformance();
-    });
-  </script>
+<a id="download" href="#" class="btn btn-default"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
+<script>
+  $(document).ready(function() {
+  trialsTable('{{ sponsor.slug }}');
+  showPerformance();
+  });
+</script>
 
 
 

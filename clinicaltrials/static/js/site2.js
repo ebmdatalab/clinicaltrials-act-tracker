@@ -60,14 +60,19 @@ function showPerformance(sponsorSlug) {
     params['sponsor'] = sponsorSlug;
   }
   $.get('/api/performance', params, function(d) {
-    $('#numerator span').text(d['reported']);
-    $('#denominator span').text(d['due']);
+    $('#numerator #num').text(d['reported']);
+    $('#denominator #denom').text(d['due']);
     if (d['due']) {
       var percentage = (d['reported']/d['due'] * 100).toFixed(1);
-      $('#percentage div').first().text(percentage + '%');
+      $('#percent-amount').text(percentage + '%');
     }
     $('#fine-amount').text(d['fines_str']);
     $('#summary-card').fadeTo(1000, 1);
+    var opts = {maxfontsize: 60}
+    $('#percent-container').bigtext(opts);
+    $('#fine-container').bigtext(opts);
+    $('#claimed-fine-container').bigtext(opts);
+    $('#fraction-container').bigtext(opts);
   });
 }
 
@@ -78,7 +83,7 @@ function rankingTable(latestDate) {
   params['due__gte'] = 1;
   setFormValues(params);
   var table = $('#sponsor_table').DataTable( {
-    "dom": '<"datatable-top"i>rt<"bottom"lp><"clear">',
+    "dom": '<"datatable-top"fi>rt<"bottom"lp><"clear">',
     'drawCallback': setCsvLinkAndTableDecoration('rankings'),
     "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
     "language": {

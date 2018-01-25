@@ -1,21 +1,54 @@
-<div id="summary-card">
-  <div id="fraction" class="valign">
-    <div id="numerator"><span class="big-text">0</span> out of</div>
-    <div id="denominator"><span class="big-text">0</span> due trials</div>
-  </div>
-  <div id="equals" class="valign big-text">=</div>
-  <div id="percentage" class="valign">
-    <div class="x-big-text">0%</div>
-    <div class="small-text">reported trials</div>
-  </div>
-  <div id="fines" class="valign">
-    <div class="small-text">Which adds up to </div>
-    <div class="big-text" id="fine-amount">$0</div>
-    <div class="small-text">in fines</div>
-  </div>
-  <div id="claimed-fines" class="valign">
-    <div class="small-text">of which</div>
-    <div class="big-text">$0</div>
-    <div class="small-text">have been claimed by the FDA</div>
+<div class="row hidden-xs">
+  <div id="summary-card">
+    <div id="fraction" class="valign col-sm-2">
+      <div class="card">
+        <div class="header">
+          <p class="category">
+            Trials reported
+          </p>
+        </div>
+        <div class="content" id="fraction-container">
+          <div id="numerator"  class="big-text"><span id="num">0</span></div>
+           <span id="outof" class="bigtext-exempt">out of</span>
+          <div id="denominator"><span class="big-text" id="denom">0</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="percentage" class="valign col-sm-3">
+      <div class="card">
+        <div class="header">
+          <p class="category">
+            Percent reported
+          </p>
+        </div>
+        <div class="content" id="percent-container">
+          <div class=" big-text" id="percent-amount">0%</div>
+        </div>
+      </div>
+    </div>
+    <div id="fines" class="valign col-sm-4">
+      <div class="card">
+        <div class="header">
+          <p class="category">
+            Total fines due to the FDA
+          </p>
+        </div>
+        <div class="content" id="fine-container">
+          <div class="big-text" id="fine-amount">$0</div>
+        </div>
+      </div>
+    </div>
+    <div id="claimed-fines" class="valign col-sm-3">
+      <div class="card">
+        <div class="header">
+          <p class="category">
+            Total fines claimed by the FDA
+          </p>
+        </div>
+        <div class="content" id="claimed-fine-container">
+          <div class="big-text">$0</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
