@@ -1,44 +1,24 @@
 {% extends "_base.html" %}
 {% block content %}
-
-<div id="summary-card">
-  <div id="fraction" class="valign">
-    <div id="numerator"><span class="big-text">34</span> out of</div>
-    <div id="denominator"><span class="big-text">11</span> due trials</div>
-  </div>
-  <div id="equals" class="valign big-text">=</div>
-  <div id="percentage" class="valign">
-    <div class="x-big-text">58%</div>
-    <div class="small-text">reported trials</div>
-  </div>
-  <div id="fines" class="valign">
-    <div class="small-text">Which adds up to </div>
-    <div class="big-text" id="fine-amount">$13,100,000</div>
-    <div class="small-text">in fines</div>
-  </div>
-  <div id="claimed-fines" class="valign">
-    <div class="small-text">of which</div>
-    <div class="big-text">$0</div>
-    <div class="small-text">have been claimed by the FDA</div>
-  </div>
-</div>
+  {% include '_summary_card.html' %}
   <form class="form">
       {% for k, v, i in status_choices %}
-      <div class="checkbox">
-        <label for="filter-{{k}}">
-          <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}" checked="checked">
+      <div class="btn-group" data-toggle="buttons">
+        <label for="filter-{{k}}" class="btn
           {% if k == 'due' %}
-            <span class="label label-danger">
+            btn-danger
           {% elif k == 'reported' %}
-            <span class="label label-success">
+            btn-success
           {% elif k == 'reported-late' %}
-            <span class="label label-warning">
+            btn-warning
           {% else %}
-            <span class="label label-info">
+            btn-info
           {% endif %}
+
+">
+          <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}">
             {{ v }}
             ({{ i }})
-          </span>
         </label>
       </div>
       {% endfor %}

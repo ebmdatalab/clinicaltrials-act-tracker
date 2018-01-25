@@ -21,15 +21,18 @@ from frontend.models import Trial
 def performance(request):
     queryset = Trial.objects.all()
     if 'sponsor' in request.GET:
-        queryset = queryset.filter(sponsor__slug=sponsor)
+        queryset = queryset.filter(sponsor__slug=request.GET['sponsor'])
     due = queryset.overdue().count()
     reported = queryset.reported().count()
     days_late = queryset.aggregate(Sum('days_late'))['days_late__sum']
+    fines_str = '$0'
+    if days_late:
+        fines_str = "${:,}".format(days_late * 10000)
     return Response({
         'due': due,
         'reported': reported,
         'days_late': days_late,
-        'fines_str': "${:,}".format(days_late * 10000)
+        'fines_str': fines_str
     })
 
 

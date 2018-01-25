@@ -2794,3 +2794,7 @@ textarea.form-control {
   font-size: 5em;
   line-height: 0.85em;
 }
+
+#summary-card {
+  opacity: 0;
+}

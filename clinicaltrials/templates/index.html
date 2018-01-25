@@ -6,6 +6,7 @@
 
 
 {% block content %}
+  {% include '_summary_card.html' %}
   {% if request.user.is_authenticated %}
   <form class="form form-inline">
     <div class="form-group">
@@ -56,6 +57,7 @@
 <script>
   $(document).ready(function() {
     rankingTable('{{ LATEST_DATE|date:"Y-m-d" }}');
+    showPerformance();
   });
 </script>
 {% endblock %}

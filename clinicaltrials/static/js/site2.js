@@ -54,13 +54,20 @@ function setCsvLinkAndTableDecoration(viewName) {
   };
 }
 
-function showPerformance() {
+function showPerformance(sponsorSlug) {
   var params = getTrialParams();
-  $.get('/api/performance', function(d) {
+  if(typeof sponsorSlug !== 'undefined' && sponsorSlug !== '') {
+    params['sponsor'] = sponsorSlug;
+  }
+  $.get('/api/performance', params, function(d) {
     $('#numerator span').text(d['reported']);
     $('#denominator span').text(d['due']);
-    $('#percentage div').first().text(((d['reported']/d['due']) * 100).toFixed(1) + '%');
+    if (d['due']) {
+      var percentage = (d['reported']/d['due'] * 100).toFixed(1);
+      $('#percentage div').first().text(percentage + '%');
+    }
     $('#fine-amount').text(d['fines_str']);
+    $('#summary-card').fadeTo(1000, 1);
   });
 }
 
@@ -76,6 +83,8 @@ function rankingTable(latestDate) {
     "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
     "language": {
       "infoFiltered": '',
+      "search": "",
+      "searchPlaceholder": "Search sponsors"
     },
     'ajax': {
       'url': url,
@@ -165,6 +174,8 @@ function trialsTable(sponsor_slug) {
     'columnDefs': columnDefs,
     "language": {
       "infoFiltered": '',
+      "search": "",
+      "searchPlaceholder": "Search"
     },
     'ajax': {
       'url': url,
