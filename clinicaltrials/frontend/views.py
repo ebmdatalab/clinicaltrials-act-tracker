@@ -6,9 +6,31 @@ from django.conf import settings
 from django.db.models import Sum
 from django.http import HttpResponse
 
+from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
+from rest_framework import permissions
+from rest_framework.response import Response
+
 from frontend.models import Ranking
 from frontend.models import Sponsor
 from frontend.models import Trial
+
+
+@api_view()
+@permission_classes((permissions.AllowAny,))
+def performance(request):
+    queryset = Trial.objects.all()
+    if 'sponsor' in request.GET:
+        queryset = queryset.filter(sponsor__slug=sponsor)
+    due = queryset.overdue().count()
+    reported = queryset.reported().count()
+    days_late = queryset.aggregate(Sum('days_late'))['days_late__sum']
+    return Response({
+        'due': due,
+        'reported': reported,
+        'days_late': days_late,
+        'fines_str': "${:,}".format(days_late * 10000)
+    })
 
 
 #############################################################################

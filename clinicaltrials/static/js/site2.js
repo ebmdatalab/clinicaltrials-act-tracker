@@ -54,6 +54,16 @@ function setCsvLinkAndTableDecoration(viewName) {
   };
 }
 
+function showPerformance() {
+  var params = getTrialParams();
+  $.get('/api/performance', function(d) {
+    $('#numerator span').text(d['reported']);
+    $('#denominator span').text(d['due']);
+    $('#percentage div').first().text(((d['reported']/d['due']) * 100).toFixed(1) + '%');
+    $('#fine-amount').text(d['fines_str']);
+  });
+}
+
 function rankingTable(latestDate) {
   var url = '/api/rankings/?limit=5000';
   var params = getRankingParams();

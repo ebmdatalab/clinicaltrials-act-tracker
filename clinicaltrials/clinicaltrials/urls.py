@@ -173,6 +173,7 @@ class StaticViewSitemap(Sitemap):
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('api/performance/', views.performance, name='performance'),
     path('api/', include(router.urls)),
     path('trials/', views.trials, name='views.trials'),
     path('sponsor/<slug:slug>/', views.sponsor, name='views.sponsor'),
