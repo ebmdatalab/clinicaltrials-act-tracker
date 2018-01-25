@@ -54,23 +54,6 @@ function setCsvLinkAndTableDecoration(viewName) {
   };
 }
 
-function showSVGPerformance() {
-  var s = Snap("#summary-card");
-  Snap.load("/static/images/drawing.svg", function(f) {
-    var params = getTrialParams();
-    $.get('/api/performance', function(d) {
-      var num = f.select('#tspan10');
-      num.attr({"#text": d['reported']});
-      var denom = f.select('#tspan14');
-      denom.attr({"#text": d['due']});
-      //$('#numerator').text(d['reported']);
-      //$('#denominator').text(d['due']);
-      //$('#fine-str').text(d['fines_str']);
-      s.append(f);
-    });
-  });
-}
-
 function showPerformance() {
   var params = getTrialParams();
   $.get('/api/performance', function(d) {
