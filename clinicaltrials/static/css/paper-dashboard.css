@@ -2790,6 +2790,11 @@ textarea.form-control {
   opacity: 0;
 }
 
+#fraction-container {
+  padding-right: 20%;
+  padding-left: 20%;
+}
+
 #summary-card .card {
   min-height: 11em;
   overflow: hidden;
@@ -2817,4 +2822,5 @@ table thead tr {
   background-color: white;
   text-align: center;
   padding: 0;
+  white-space: nowrap;
 }
