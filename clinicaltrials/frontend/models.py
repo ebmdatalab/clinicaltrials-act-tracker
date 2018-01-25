@@ -51,16 +51,16 @@ class TrialQuerySet(models.QuerySet):
         return self.filter(has_results=False)
 
     def reported(self):
-        return self.filter(has_results=True)
+        return self.filter(status='reported')
 
     def reported_late(self):
-        return self.reported().filter(reported_date__gt=F('completion_date') + timedelta(days=30))
+        return self.filter(status='reported-late')
 
     def overdue(self):
-        return self.due().unreported()
+        return self.filter(status='overdue')
 
     def reported_early(self):
-        return self.reported().filter(completion_date__gt=date.today())
+        return self.reported().filter(reported_date__lt=F('completion_date'))
 
     def status_choices_with_counts(self):
         return (
