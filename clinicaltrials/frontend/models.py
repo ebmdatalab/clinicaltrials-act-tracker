@@ -127,8 +127,8 @@ class Trial(models.Model):
         return "{}: {}".format(self.registry_id, self.title)
 
     def save(self, *args, **kwargs):
-        self.status = self.get_status()
         self.days_late = self.get_days_late()
+        self.status = self.get_status()
         super(Trial, self).save(*args, **kwargs)
 
     def get_days_late(self):
@@ -163,6 +163,7 @@ class Trial(models.Model):
             status = 'ongoing'
         elif self.has_results \
              and self.reported_date \
+             and self.days_late \
              and self.days_late > 0:
             status = 'reported-late'
         elif self.has_results:

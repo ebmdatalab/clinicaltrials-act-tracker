@@ -48,7 +48,7 @@ class Command(BaseCommand):
                         'is_pact': bool(int(row['included_pact_flag'])),
                         'sponsor_id': sponsor.pk,
                         'start_date': row['start_date'],
-                        'reported_date': row['results_submitted_date'],
+                        'reported_date': row['results_submitted_date'] or None,
                     }
                     if row['available_completion_date']:
                         d['completion_date'] = row['available_completion_date']
