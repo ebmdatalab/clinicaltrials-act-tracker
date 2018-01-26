@@ -166,8 +166,10 @@ class Trial(models.Model):
              and self.days_late \
              and self.days_late > 0:
             status = 'reported-late'
-        elif self.has_results:
+        elif self.has_results and self.results_due:
             status = 'reported'
+        elif self.has_results and not self.results_due:
+            status = 'reported-early'
         return status
 
     class Meta:
