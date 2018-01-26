@@ -150,7 +150,7 @@ class Trial(models.Model):
             elif self.completion_date:
                 days_late = max([
                     (date.today()
-                     - self.completion_date
+                     - parse_date(self.completion_date)
                      - timedelta(days=30)).days,
                     0])
         return days_late
