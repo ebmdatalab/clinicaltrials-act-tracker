@@ -10,7 +10,7 @@
         {% for k, v, i in status_choices %}
         <div class="btn-group" data-toggle="buttons">
           <label for="filter-{{k}}" class="btn
-                                           {% if k == 'due' %}
+                                           {% if k == 'overdue' %}
                                            btn-danger
                                            {% elif k == 'reported' %}
                                            btn-success
