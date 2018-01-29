@@ -1,5 +1,6 @@
 from datetime import date
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 from django.db import connection
 from django.db import models
@@ -36,8 +37,11 @@ class SponsorQuerySet(models.QuerySet):
         ).annotated()
 
     def with_trials_reported_late(self):
+        # XXX this possibly won't work with leap years, depending on
+        # the precise definition of "late" by FDA.
+        overdue_delta = timedelta(days=395)
         return self.with_trials_reported().filter(
-            trial__reported_date__gt=F('trial__completion_date') + timedelta(days=30))
+            trial__reported_date__gt=F('trial__completion_date') + overdue_delta)
 
 
 class TrialQuerySet(models.QuerySet):
@@ -132,8 +136,9 @@ class Trial(models.Model):
         super(Trial, self).save(*args, **kwargs)
 
     def get_days_late(self):
-        overdue_delta = timedelta(days=30) + timedelta(years=1)
+        overdue_delta = relativedelta(days=30) + relativedelta(years=1)
         days_late = None
+
         if self.results_due:
             if self.has_results:
                 if self.reported_date and self.completion_date:
