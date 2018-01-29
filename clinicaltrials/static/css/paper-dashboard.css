@@ -2679,3 +2679,33 @@ table thead tr {
   margin-top: 5px;
   font-weight: 400;
 }
+
+
+/* Align datatable sorting arrows to left of column heading text */
+table.dataTable thead th.sorting:before,
+table.dataTable thead th.sorting_asc:before,
+table.dataTable thead th.sorting_asc_disabled:before,
+table.dataTable thead th.sorting_desc:before,
+table.dataTable thead th.sorting_desc_disabled:before
+ {
+   left: -1em;
+ }
+
+table.dataTable thead th.sorting:after,
+table.dataTable thead th.sorting_asc:after,
+table.dataTable thead th.sorting_asc_disabled:after,
+table.dataTable thead th.sorting_desc:after,
+table.dataTable thead th.sorting_desc_disabled:after
+ {
+   left: -0.5em;
+
+ }
+
+
+table.dataTable thead>tr>th.sorting_asc, table.dataTable thead>tr>th.sorting_desc, table.dataTable thead>tr>th.sorting, table.dataTable thead>tr>td.sorting_asc, table.dataTable thead>tr>td.sorting_desc, table.dataTable thead>tr>td.sorting {
+  left: 1.5em;
+}
+
+.table-striped > thead > tr > th, .table-striped > tbody > tr > th, .table-striped > tfoot > tr > th, .table-striped > thead > tr > td, .table-striped > tbody > tr > td, .table-striped > tfoot > tr > td {
+  padding-right: 40px;
+}
