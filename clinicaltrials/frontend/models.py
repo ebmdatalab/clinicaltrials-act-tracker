@@ -132,6 +132,7 @@ class Trial(models.Model):
         super(Trial, self).save(*args, **kwargs)
 
     def get_days_late(self):
+        overdue_delta = timedelta(days=30) + timedelta(years=1)
         days_late = None
         if self.results_due:
             if self.has_results:
@@ -145,13 +146,13 @@ class Trial(models.Model):
                     days_late = max([
                         (self.reported_date
                          - self.completion_date
-                         - timedelta(days=30)).days,
+                         - overdue_delta).days,
                         0])
             elif self.completion_date:
                 days_late = max([
                     (date.today()
                      - parse_date(self.completion_date)
-                     - timedelta(days=30)).days,
+                     - overdue_delta).days,
                     0])
         return days_late
 
