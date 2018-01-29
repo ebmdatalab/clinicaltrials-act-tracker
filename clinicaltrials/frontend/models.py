@@ -99,6 +99,14 @@ class Sponsor(models.Model):
         return TrialQuerySet(Trial).filter(sponsor=self)
 
 
+def parse_date_if_needed(date):
+    # Normalise from strings, as this method may be called
+    # before the object has been saved to the databasse
+    if isinstance(date, str):
+        date = parse_date(date)
+    return date
+
+
 class Trial(models.Model):
     STATUS_CHOICES = (
         ('overdue', 'Overdue'),
@@ -142,12 +150,12 @@ class Trial(models.Model):
         if self.results_due:
             if self.has_results:
                 if self.reported_date and self.completion_date:
-                    # Normalise from strings, as this method may be called
-                    # before the object has been saved to the databasse
                     if isinstance(self.reported_date, str):
-                        self.reported_date = parse_date(self.reported_date)
+                        self.reported_date = parse_date_if_needed(
+                            self.reported_date)
                     if isinstance(self.completion_date, str):
-                        self.completion_date = parse_date(self.completion_date)
+                        self.completion_date = parse_date_if_needed(
+                            self.completion_date)
                     days_late = max([
                         (self.reported_date
                          - self.completion_date
@@ -156,7 +164,8 @@ class Trial(models.Model):
             elif self.completion_date:
                 days_late = max([
                     (date.today()
-                     - parse_date(self.completion_date)
+                     - parse_date_if_needed(
+                         self.completion_date)
                      - overdue_delta).days,
                     0])
         return days_late
