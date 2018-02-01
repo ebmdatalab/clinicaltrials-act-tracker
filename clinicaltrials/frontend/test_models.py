@@ -191,3 +191,11 @@ class SponsorTrialsTestCase(TestCase):
         self.assertCountEqual(
             self.sponsor.trials().reported_late(),
             [trial])
+
+    def test_trials_reported_late_days_late(self):
+        trial = self.sponsor.trials()[0]
+        trial.has_results = True
+        trial.completion_date = '2016-01-01'
+        trial.reported_date = '2017-01-01'
+        trial.save()
+        self.assertEqual(trial.days_late, 0)

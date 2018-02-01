@@ -1,6 +1,5 @@
 from datetime import date
 from datetime import timedelta
-from dateutil.relativedelta import relativedelta
 
 from django.db import connection
 from django.db import models
@@ -143,19 +142,30 @@ class Trial(models.Model):
         self.status = self.get_status()
         super(Trial, self).save(*args, **kwargs)
 
+    def _datify(self):
+        """We sometimes maninpulate data before the model has been saved, and
+        therefore before any date strings have been converted to date
+        objects.
+
+        """
+        for field in ['most_recent_fda_activity_date',
+                      'most_recent_sponsor_activity_date',
+                      'reported_date',
+                      'completion_date']:
+            _field = getattr(self, field)
+            if isinstance(_field, str):
+                val = parse_date_if_needed(_field)
+                setattr(self, field, val)
+
+
     def get_days_late(self):
         overdue_delta = relativedelta(days=30) + relativedelta(years=1)
         days_late = None
 
         if self.results_due:
+            self._datify()
             if self.has_results:
                 if self.reported_date and self.completion_date:
-                    if isinstance(self.reported_date, str):
-                        self.reported_date = parse_date_if_needed(
-                            self.reported_date)
-                    if isinstance(self.completion_date, str):
-                        self.completion_date = parse_date_if_needed(
-                            self.completion_date)
                     days_late = max([
                         (self.reported_date
                          - self.completion_date
