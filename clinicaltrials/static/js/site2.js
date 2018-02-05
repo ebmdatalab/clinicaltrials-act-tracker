@@ -289,5 +289,4 @@ function trialsTable(sponsor_slug) {
     setFormValues(params);
     table.draw();
   });
-  //setupControls(); // from boostrap-checkbox-radio.js
 }
