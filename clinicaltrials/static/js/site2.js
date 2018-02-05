@@ -104,12 +104,12 @@ function showPerformance(sponsorSlug) {
       $('#percent-amount').text(percentage + '%');
     }
     $('#fine-amount').text(d['fines_str']);
-    $('#summary-card').fadeTo(1000, 1);
-    // XXX wierd place to execute this
     resizeCards();
     $(window).resize(function() {
       resizeCards();
     });
+
+    $('#summary-cards').fadeTo(1000, 1);
   });
 }
 
@@ -252,7 +252,12 @@ function trialsTable(sponsor_slug) {
            statusClass + '">' + data + '</span>';
        },
       },
-      {'data': 'sponsor_name'},
+      {'name': 'sponsor__name', 'data': 'sponsor_name',
+       'render': function(data, type, full, meta) {
+         return '<a href="/sponsor/'+full['sponsor_slug']+'">'+
+           full['sponsor_name']+'</a>';
+       },
+      },
       {'data': 'registry_id',
        'render': function(data, type, full, meta) {
          return '<a target="_blank" href="'+full['publication_url']+'">'+

@@ -46,12 +46,14 @@ class RankingSerializer(serializers.HyperlinkedModelSerializer):
 
 class TrialSerializer(serializers.HyperlinkedModelSerializer):
     sponsor_name = serializers.StringRelatedField(source='sponsor')
+    sponsor_slug = serializers.SlugRelatedField(
+        source='sponsor', read_only=True, slug_field='slug')
 
     class Meta:
         model = Trial
         fields = ('registry_id', 'publication_url', 'title', 'has_exemption',
                   'start_date', 'completion_date', 'has_results', 'results_due',
-                  'sponsor_name', 'status', 'is_pact', 'days_late',)
+                  'sponsor_name', 'sponsor_slug', 'status', 'is_pact', 'days_late',)
 
 
 class SponsorSerializer(serializers.HyperlinkedModelSerializer):
