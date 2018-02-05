@@ -2132,8 +2132,15 @@ table.dataTable thead>tr>th.sorting_asc, table.dataTable thead>tr>th.sorting_des
   left: 1.5em;
 }
 
-.table-striped > thead > tr > th, .table-striped > tbody > tr > th, .table-striped > tfoot > tr > th, .table-striped > thead > tr > td, .table-striped > tbody > tr > td, .table-striped > tfoot > tr > td {
+.table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
   padding-right: 40px;
+}
+
+table.dataTable td {
+  /* align contents with column heading (allowing for sort arrows
+   pushing col header to right ) */
+  padding-left: 2em !important;
+  padding-right: 0 !important;
 }
 
 
