@@ -1597,11 +1597,6 @@ textarea.form-control {
     transition: all 0.33s cubic-bezier(0.685, 0.0473, 0.346, 1);
     position: relative; }
 
-  .navbar .navbar-collapse.collapse,
-  .navbar .navbar-collapse.collapse.in,
-  .navbar .navbar-collapse.collapsing {
-    display: none !important; }
-
   .navbar-nav > li {
     float: none;
     position: relative;
@@ -1711,12 +1706,6 @@ textarea.form-control {
       height: 1px;
       margin: 10px 0; }
 
-  .nav-open .navbar-collapse {
-    -webkit-transform: translate3d(0px, 0, 0);
-    -moz-transform: translate3d(0px, 0, 0);
-    -o-transform: translate3d(0px, 0, 0);
-    -ms-transform: translate3d(0px, 0, 0);
-    transform: translate3d(0px, 0, 0); }
 
   .nav-open .navbar .container {
     left: -230px; }
@@ -1981,12 +1970,6 @@ textarea.form-control {
   .media-post .media-body {
     width: 100%; }
 
-  .navbar-collapse.collapse {
-    height: 100% !important; }
-
-  .navbar-collapse.collapse.in {
-    display: block; }
-
   .navbar-header .collapse, .navbar-toggle {
     display: block !important; }
 
@@ -2249,4 +2232,9 @@ h1, h2 {
 
 .label-indeterminate {
   background-color: $teal-dark;
+}
+
+
+.navbar-default .navbar-collapse, .navbar-default .navbar-form {
+    border-color: white;
 }
