@@ -4,8 +4,10 @@
   FDAAA &mdash; Who’s not sharing clinical trial results?
 {% endblock %}{% endblock %}
 
-
 {% block content %}
+<p class="introtext">
+  FDAAA 2007 is a law that requires - finally - certain clinical trials to report results. It came into force in Feb 2018. The FDA aren’t publicly tracking compliance. So we are, here.
+</p>
   {% include '_summary_card.html' %}
   {% if request.user.is_authenticated %}
   <form class="form form-inline">
@@ -40,7 +42,7 @@
   </form>
   {% endif %}
 
-  <table id="sponsor_table" class="table table-striped" cellspacing="0" width="100%">
+  <table id="sponsor_table" class="table" cellspacing="0" width="100%">
     <thead>
       <tr>
         <th>Sponsor name</th>

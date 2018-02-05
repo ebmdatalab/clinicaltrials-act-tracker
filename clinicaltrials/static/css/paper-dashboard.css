@@ -238,12 +238,11 @@ hr {
 
 
 .main-panel {
-  background-color: #f4f3ef;
+  background-color: white;
   position: relative;
   z-index: 2;
   min-height: 100%; }
   .main-panel > .content {
-    padding: 30px 15px;
     min-height: calc(100% - 123px); }
   .main-panel > .footer {
     border-top: 1px solid rgba(0, 0, 0, 0.1); }
@@ -1035,9 +1034,8 @@ textarea.form-control {
   margin-top: -5px; }
 
 .navbar-default {
-  /* background-color: #f4f3ef; */
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #DDDDDD; }
+  background-color: white;
+}
   .navbar-default .brand {
     color: #66615b !important; }
   .navbar-default .navbar-nav > li > a:not(.btn) {
@@ -1312,8 +1310,8 @@ textarea.form-control {
   overflow: visible; }
 
 .card {
-  border-radius: 6px;
-  box-shadow: 0 2px 2px rgba(204, 197, 185, 0.5);
+  border-radius: 12px;
+  /*box-shadow: 0 2px 2px rgba(204, 197, 185, 0.5); */
   background-color: #FFFFFF;
   color: #252422;
   margin-bottom: 20px;
@@ -1331,7 +1329,7 @@ textarea.form-control {
     .card .image img {
       width: 100%; }
   .card .content {
-    padding: 15px 15px 10px 15px; }
+    padding: 15px 15px 10px 25px; }
   .card .header {
     padding: 20px 20px 0; }
   .card .description {
@@ -2073,7 +2071,7 @@ textarea.form-control {
 
 @media (min-width: 992px) {
   .navbar {
-    min-height: 75px; }
+    min-height: 150px; }
 
   .navbar-form {
     margin-top: 21px;
@@ -2642,6 +2640,22 @@ textarea.form-control {
 #fraction-container {
 }
 
+.fraction {
+  background-color: #006666;
+}
+
+.percentage {
+  background-color: #00CCCC;
+}
+
+.fines {
+  background-color: #FF9900;
+}
+
+.claimed-fines {
+  background-color: #FF3232;
+}
+
 #summary-card .card {
   min-height: 11em;
   overflow: hidden;
@@ -2650,9 +2664,6 @@ textarea.form-control {
 
 .big-text {
   line-height: 0.8em;
-}
-table thead tr {
-  background-color: white;
 }
 
 .card .content {
@@ -2681,6 +2692,12 @@ table thead tr {
 }
 
 
+table.dataTable {
+  border: solid #00CCCC 2px;
+  border-radius: 12px;
+  -moz-border-radius:6px;
+}
+
 /* Align datatable sorting arrows to left of column heading text */
 table.dataTable thead th.sorting:before,
 table.dataTable thead th.sorting_asc:before,
@@ -2708,4 +2725,79 @@ table.dataTable thead>tr>th.sorting_asc, table.dataTable thead>tr>th.sorting_des
 
 .table-striped > thead > tr > th, .table-striped > tbody > tr > th, .table-striped > tfoot > tr > th, .table-striped > thead > tr > td, .table-striped > tbody > tr > td, .table-striped > tfoot > tr > td {
   padding-right: 40px;
+}
+
+
+
+/* IE SVG fix */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.navbar-brand img {
+  height: 50px;
+}
+
+@media (min-width: 992px) {
+  .navbar-brand img {
+    height: 100px;
+  }
+}
+/* typography */
+
+h1, h2, h3, h4, h5 {
+  font-family: "museo-sans-rounded",tahoma,"sans-serif";
+  font-weight: 500;
+  color: #006666;
+}
+
+h1, h2 {
+  font-weight: 700;
+}
+
+.navbutton {
+  font-family: "museo-sans-rounded",tahoma,"sans-serif";
+  font-weight: 500;
+  font-style: normal;
+  padding: 10px;
+}
+
+.category, .introtext {
+  font-family: "museo-sans-rounded",tahoma,"sans-serif";
+  font-weight: 300;
+  font-style: normal;
+  color: #006666;
+}
+#summary-cards .category {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+@media (min-width: 768px) {
+  #summary-cards .category {
+    text-overflow: inherit;
+    overflow: auto;
+    white-space: normal;
+  }
+}
+
+.big-text {
+  font-family: "museo-sans-rounded",tahoma,"sans-serif";
+  font-weight: 700;
+  font-style: normal;
+}
+
+.card, .card label, .card .category {
+  color: white;
+}
+
+.card .icon {
+  height: 3em;
+  text-align: right;
+  padding-top: 5px;
+}
+
+.card .icon img {
+  height: 100%;
 }

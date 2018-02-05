@@ -36,7 +36,7 @@
 
     <!--  Fonts and icons     -->
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://use.typekit.net/yao2dcr.css">
     <link href="/static/css/themify-icons.css" rel="stylesheet">
 
 </head>
@@ -56,28 +56,24 @@
                         <span class="icon-bar bar3"></span>
                     </button>
                     <div class="navbar-brand">
-                      <a href="/"><span class="icon-warning">W.</span><span class="icon-success">A.</span><span class="icon-danger">T.</span><span class="icon-info">C.</span><span class="icon-warning">H.</span><span class="icon-success">E.</span><span class="icon-danger">R.</span><span class="icon-warning"></a>
-                      <span class="brand-sub hidden-md hidden-sm hidden-xs">Waiting for Accountability in Trials of Clinical Health Evidence and Research</span>
-                </div>
+                      <a href="/"><img src="/static/images/logo.svg"></a>
+                    </div>
                 </div>
                 <div class="collapse navbar-collapse" id="main-nav">
                     <ul class="nav navbar-nav navbar-right">
                         <li>
                             <a href="/">
-                                <i class="ti-stats-up"></i>
-                                <p>Ranked sponsors</p>
+                              <p class="navbutton percentage card">Ranked sponsors</p>
                             </a>
                         </li>
                         <li>
                             <a href="/trials/">
-                                <i class="ti-view-list"></i>
-                                <p>All trials</p>
+                                <p class="navbutton percentage card">All trials</p>
                             </a>
                         </li>
                         <li>
                             <a href="/about/">
-                                <i class="ti-help"></i>
-                                <p>About</p>
+                              <p class="navbutton percentage card">About</p>
                             </a>
                         </li>
                     </ul>
@@ -90,7 +86,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">
-                              <h2>{{ title }}</h2>
+                              <h2 class="introtext">{{ title }}</h2>
                               {% block content %}{% endblock %}
                     </div>
                 </div>

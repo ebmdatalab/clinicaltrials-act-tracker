@@ -54,6 +54,43 @@ function setCsvLinkAndTableDecoration(viewName) {
   };
 }
 
+function resizeCards() {
+  // find the widest text; OR. the smallest font size!
+  // find the largest font size that won't overflow the container
+  // apply that to all the boxes
+  var fontSize = 14;
+  var largestHeight = 19;
+  if ($(window).width() >= 768) {
+    $('#summary-cards .header').css('height', 'auto');
+
+    var maxFontSize = 60;
+    var minFontSize = 10;
+    var smallestFont = maxFontSize;
+    var sizes = $.each($('#summary-cards .content'), function(i, container) {
+      container = $(container);
+      var data = BigText.calculateSizes(
+        container, container.find('.big-text'), container.width(), maxFontSize, minFontSize);
+      if(data.fontSizes[0] < smallestFont) {
+        smallestFont = data.fontSizes[0];
+      }
+    });
+    fontSize = smallestFont;
+    $('#summary-cards .big-text').css('font-size', fontSize + 'px');
+    var sizes = $.each($('#summary-cards .header'), function(i, container) {
+      container = $(container);
+      var h = container.height();
+      if (h > largestHeight) {
+        largestHeight = h;
+      }
+    });
+    console.log(largestHeight);
+    $('#summary-cards .header').height(largestHeight + 'px');
+  } else {
+    $('#summary-cards .big-text').css('font-size', fontSize + 'px');
+    $('#summary-cards .header').height(largestHeight + 'px');
+  }
+}
+
 function showPerformance(sponsorSlug) {
   var params = getTrialParams();
   if(typeof sponsorSlug !== 'undefined' && sponsorSlug !== '') {
@@ -68,11 +105,11 @@ function showPerformance(sponsorSlug) {
     }
     $('#fine-amount').text(d['fines_str']);
     $('#summary-card').fadeTo(1000, 1);
-    var opts = {maxfontsize: 60}
-    $('#percent-container').bigtext(opts);
-    $('#fine-container').bigtext(opts);
-    $('#claimed-fine-container').bigtext(opts);
-    $('#fraction-container').bigtext(opts);
+    // XXX wierd place to execute this
+    resizeCards();
+    $(window).resize(function() {
+      resizeCards();
+    });
   });
 }
 

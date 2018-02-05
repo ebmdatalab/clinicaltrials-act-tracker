@@ -1,61 +1,68 @@
-<div class="row hidden-xs">
-  <div id="summary-card">
-    <div id="fraction" class="valign col-sm-2">
-      <div class="card">
-        <div class="header">
-          <p class="category">
-            Trials reported
-          </p>
+<div class="row" id="summary-cards">
+  <div id="fraction" class="valign col-sm-3">
+    <div class="fraction card">
+      <div class="header">
+        <p class="category">
+          Trials reported
+        </p>
+      </div>
+      <div class="content" id="fraction-container">
+        <div class="big-text">
+          <span id="num">0</span>  out of <span id="denom">0</span>
         </div>
-        <div class="content" id="fraction-container">
-          <div id="numerator"  class="big-text"><span id="num">0</span></div>
-           <span id="outof" class="bigtext-exempt">— out of —</span>
-          <div id="denominator"><span class="big-text" id="denom">0</span></div>
+        <div class="icon bigtext-exempt hidden-xs">
+          <img src="/static/images/reports.png">
         </div>
       </div>
     </div>
-    <div id="percentage" class="valign col-sm-3">
-      <div class="card">
-        <div class="header">
-          <p class="category">
-            Percent reported
-          </p>
+  </div>
+  <div id="percentage" class="valign col-sm-3">
+    <div class="percentage card">
+      <div class="header">
+        <p class="category">
+          Percent reported
+        </p>
+      </div>
+      <div class="content" id="percent-container">
+        <div class="big-text">
+          <span id="percent-amount">0%</span>
         </div>
-        <div class="content" id="percent-container">
-          <div class="big-text">
-            <i class="icon-warning ti-pulse"></i>
-            <span id="percent-amount">0%</span>
-          </div>
+        <div class="icon bigtext-exempt hidden-xs">
+          <img src="/static/images/reports.png">
         </div>
       </div>
     </div>
-    <div id="fines" class="valign col-sm-4">
-      <div class="card">
-        <div class="header">
-          <p class="category">
-            Total fines due to the FDA
-          </p>
-        </div>
-        <div class="content" id="fine-container">
+  </div>
+  <div id="fines" class="valign col-sm-3">
+    <div class="fines card">
+      <div class="header">
+        <p class="category">
+          Fines due to the US Govt are at least
+        </p>
+      </div>
+      <div class="content" id="fine-container">
 
-          <div class="big-text">
-            <i class="icon-success ti-wallet"></i>
-            <span id="fine-amount">$0</span></div>
+        <div class="big-text">
+          <span id="fine-amount">$0</span></div>
+        <div class="icon bigtext-exempt hidden-xs">
+          <img src="/static/images/fines.png">
         </div>
       </div>
     </div>
-    <div id="claimed-fines" class="valign col-sm-3">
-      <div class="card">
-        <div class="header">
-          <p class="category">
-            Total fines claimed by the FDA
-          </p>
+  </div>
+  <div id="claimed-fines" class="valign col-sm-3">
+    <div class="claimed-fines card">
+      <div class="header">
+        <p class="category">
+          Fines claimed by US Govt
+        </p>
+      </div>
+      <div class="content" id="claimed-fine-container">
+        <div class="big-text">
+          <span class="big-text">$0</span>
         </div>
-        <div class="content" id="claimed-fine-container">
-          <div class="big-text">
-            <i class="icon-danger ti-wallet"></i>
-            <span class="big-text">$0</span>
-          </div>
+        <div class="icon bigtext-exempt hidden-xs">
+          <img src="/static/images/fines.png">
         </div>
       </div>
     </div>
