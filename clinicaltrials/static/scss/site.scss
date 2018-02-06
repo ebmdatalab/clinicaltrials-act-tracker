@@ -1924,7 +1924,7 @@ textarea.form-control {
   text-align: center;
 }
 
-#summary-card {
+#summary-cards {
   opacity: 0;
 }
 
@@ -1947,7 +1947,7 @@ textarea.form-control {
   background-color: $red;
 }
 
-#summary-card .card {
+#summary-cards .card {
   min-height: 11em;
   overflow: hidden;
   width: 100%;
@@ -2005,6 +2005,13 @@ table.dataTable thead>tr>th.sorting_asc, table.dataTable thead>tr>th.sorting_des
   padding-right: 40px;
 }
 
+table.dataTable td {
+  /* align contents with column heading (allowing for sort arrows
+   pushing col header to right ) */
+  padding-left: 3em !important;
+  padding-right: 0 !important;
+}
+
 
 
 /* IE SVG fix */
@@ -2057,11 +2064,22 @@ h1, h2 {
   font-style: normal;
   color: $teal-dark;
 }
+
+#summary-cards .big-text{
+  white-space: nowrap;
+}
+
 #summary-cards .category {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
+
+
+.navbar-default .navbar-collapse, .navbar-default .navbar-form {
+    border-color: white;
+}
+
 @media (min-width: 768px) {
   #summary-cards .category {
     text-overflow: inherit;
