@@ -138,7 +138,7 @@ class CSVNonPagingViewSet(viewsets.ModelViewSet):
 class RankingViewSet(CSVNonPagingViewSet):
     queryset = Ranking.objects.select_related('sponsor')
     serializer_class = RankingSerializer
-    ordering_fields = ['rank','sponsor__name', 'total', 'due', 'reported', 'percentage']
+    ordering_fields = ['sponsor__name', 'due', 'reported', 'percentage']
     filter_class = RankingFilter
     search_fields = ('sponsor__name',)
 
@@ -146,6 +146,8 @@ class RankingViewSet(CSVNonPagingViewSet):
 class TrialViewSet(CSVNonPagingViewSet):
     queryset = Trial.objects.select_related('sponsor').all()
     serializer_class = TrialSerializer
+    ordering_fields = ['status', 'sponsor__name', 'registry_id',
+                       'title', 'completion_date', 'days_late']
     filter_class = TrialStatusFilter
     search_fields = ('title', 'sponsor__name',)
 
