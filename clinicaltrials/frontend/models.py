@@ -165,12 +165,13 @@ class Trial(models.Model):
         if self.results_due:
             self._datify()
             if self.has_results:
-                if self.reported_date and self.completion_date:
-                    days_late = max([
-                        (self.reported_date
-                         - self.completion_date
-                         - overdue_delta).days,
-                        0])
+                assert self.reported_date, \
+                    "{} has_results but no reported date".format(self)
+                days_late = max([
+                    (self.reported_date
+                     - self.completion_date
+                     - overdue_delta).days,
+                    0])
             else:
                 # still not reported.
                 qa_start_date = self.qa_start_date()
