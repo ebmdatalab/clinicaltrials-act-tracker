@@ -19,3 +19,4 @@ django-filter
 django-extensions
 werkzeug
 dateparser
+requests
