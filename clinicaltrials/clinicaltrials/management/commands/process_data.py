@@ -7,6 +7,7 @@ from frontend.models import Trial
 from frontend.models import TrialQA
 from frontend.models import Sponsor
 from frontend.models import Ranking
+from frontend.models import date
 import requests
 from lxml import html
 import dateparser
@@ -47,8 +48,7 @@ class Command(BaseCommand):
         '''
         f = open(options['input_csv'])
         with transaction.atomic():
-
-            today = datetime.datetime.today()
+            today = date.today()
             for row in csv.DictReader(f):
                 has_act_flag = (int(row['act_flag']) > 0 or int(row['included_pact_flag']) > 0)
 
@@ -63,6 +63,7 @@ class Command(BaseCommand):
                     else:
                         assert (is_industry_sponsor == existing_sponsor), \
                             "Inconsistent sponsor types for {}".format(sponsor)
+
                     sponsor.save()
                     d = {
                         'registry_id': row['nct_id'],
@@ -84,7 +85,13 @@ class Command(BaseCommand):
                         d['updated_date'] = today
                         trial_set.update(**d)
                     else:
+                        d['first_seen_date'] = today
                         Trial.objects.create(**d)
+
+            # Mark zombie trials
+            #import pdb; pdb.set_trace()
+
+            Trial.objects.filter(updated_date__lt=today).update(no_longer_on_website=True)
 
             # Now scrape trials that might be in QA (these would be
             # flagged as having no results, but if in QA we consider

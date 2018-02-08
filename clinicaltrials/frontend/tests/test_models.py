@@ -127,32 +127,12 @@ class SponsorTrialsTestCase(TestCase):
     def test_slug(self):
         self.assertEqual(self.sponsor.slug, 'sponsor-1')
 
-    def test_sponsor_annotation(self):
-        self.assertEqual(Sponsor.objects.annotated().first().num_trials, 3)
-
-    def test_sponsor_due(self):
-        with_due = Sponsor.objects.with_trials_due()
-        self.assertEqual(len(with_due), 1)
-        self.assertEqual(with_due.first().num_trials, 2)
-
-    def test_sponsor_unreported(self):
-        with_unreported = Sponsor.objects.with_trials_unreported()
-        self.assertEqual(len(with_unreported), 1)
-        self.assertEqual(with_unreported.first().num_trials, 2)
-
-    def test_sponsor_reported(self):
-        with_reported = Sponsor.objects.with_trials_reported()
-        self.assertEqual(len(with_reported), 1)
-        self.assertEqual(with_reported.first().num_trials, 1)
-
-    def test_sponsor_overdue(self):
-        with_overdue = Sponsor.objects.with_trials_overdue()
-        self.assertEqual(len(with_overdue), 1)
-        self.assertEqual(with_overdue.first().num_trials, 1)
-
-    def test_sponsor_reported_early(self):
-        with_reported_early = Sponsor.objects.with_trials_reported_late()
-        self.assertEqual(len(with_reported_early), 0)
+    def test_zombie_sponsor(self):
+        self.assertEqual(len(self.sponsor.trials().all()), 3)
+        due = self.due_trial
+        due.no_longer_on_website = True
+        due.save()
+        self.assertEqual(len(self.sponsor.trials().all()), 2)
 
     def test_trials_due(self):
         self.assertEqual(

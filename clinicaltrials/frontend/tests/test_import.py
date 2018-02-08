@@ -24,9 +24,10 @@ def dummy_ccgov_results(url):
 
 
 class CommandsTestCase(TestCase):
+
     @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
     @mock.patch('frontend.models.date')
-    def test_mycommand(self, datetime_mock):
+    def test_import(self, datetime_mock):
         " Test my custom command."
         datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
 
@@ -56,6 +57,56 @@ class CommandsTestCase(TestCase):
         self.assertEqual(overdueingrace.status, 'ongoing')
         self.assertEqual(overdueingrace.days_late, 0)
 
-
         self.assertEqual(Ranking.objects.first().sponsor, reported.sponsor)
         self.assertEqual(Ranking.objects.count(), 3)
+
+
+    @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
+    @mock.patch('frontend.models.date')
+    def test_second_import(self, models_datetime_mock):
+        " Test my custom command."
+        models_datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
+
+        args = []
+        sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq.csv')
+        opts = {'input_csv': sample_csv}
+        call_command('process_data', *args, **opts)
+
+        # Pretend the previous import took place ages ago
+        Trial.objects.all().update(updated_date=date(2017,1,1))
+
+        # Import again
+        process_datetime_mock = models_datetime_mock.today = mock.Mock(return_value=date(2018,1,2))
+        call_command('process_data', *args, **opts)
+
+        overdue = Trial.objects.get(registry_id='overdue')
+        self.assertEqual(overdue.status, 'overdue')
+        self.assertEqual(overdue.days_late, 62)
+
+        self.assertEqual(overdue.updated_date, date(2018,1,2))
+        self.assertEqual(overdue.first_seen_date, date(2018,1,1))
+
+
+    @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
+    @mock.patch('frontend.models.date')
+    def test_second_import_with_disappeared_trials(self, datetime_mock):
+        " Test my custom command."
+        datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
+
+        args = []
+        sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq.csv')
+        opts = {'input_csv': sample_csv}
+        call_command('process_data', *args, **opts)
+
+        # Pretend the previous import took place ages ago
+
+        Trial.objects.all().update(updated_date=date(2017,1,1))
+
+        # Import empty file
+        sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq_empty.csv')
+        opts = {'input_csv': sample_csv}
+
+        call_command('process_data', *args, **opts)
+
+        # There should be no Trials visible
+        self.assertEqual(Trial.objects.count(), 0)

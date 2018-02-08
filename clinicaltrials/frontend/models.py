@@ -6,6 +6,7 @@ from django.db import connection
 from django.db import models
 from django.db import transaction
 from django.db.models import F
+from django.db.models import Q
 from django.utils.text import slugify
 from django.utils.dateparse import parse_date
 from django.urls import reverse
@@ -13,41 +14,10 @@ from django.urls import reverse
 
 GRACE_PERIOD = 30
 
+class TrialManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(no_longer_on_website=False)
 
-class SponsorQuerySet(models.QuerySet):
-    def annotated(self):
-        return self.annotate(num_trials=models.Count('trial'))
-
-    def with_trials_due(self):
-        return self.filter(
-            trial__results_due=True
-        ).annotated()
-
-    def with_trials_unreported(self):
-        return self.filter(
-            trial__has_results=False
-        ).annotated()
-
-    def with_trials_reported(self):
-        return self.filter(
-            trial__has_results=True
-        ).annotated()
-
-    def with_trials_overdue(self):
-        return self.filter(
-            trial__results_due=True,
-            trial__has_results=False
-        ).annotated()
-
-    def with_trials_reported_late(self):
-        # XXX this possibly won't work with leap years, depending on
-        # the precise definition of "late" by FDA.
-        overdue_delta = timedelta(days=395)
-        return self.with_trials_reported().filter(
-            trial__reported_date__gt=F('trial__completion_date') + overdue_delta)
-
-
-class TrialQuerySet(models.QuerySet):
     def due(self):
         return self.filter(results_due=True)
 
@@ -83,7 +53,6 @@ class Sponsor(models.Model):
     name = models.CharField(max_length=200)
     is_industry_sponsor = models.NullBooleanField(default=None)
     updated_date = models.DateField(default=date.today)
-    objects = SponsorQuerySet.as_manager()
 
     def __str__(self):
         return self.name
@@ -99,7 +68,8 @@ class Sponsor(models.Model):
         return self.rankings.get(date=self.updated_date)
 
     def trials(self):
-        return TrialQuerySet(Trial).filter(sponsor=self)
+        # XXX redundant
+        return self.trial_set
 
 
 
@@ -118,19 +88,21 @@ class Trial(models.Model):
     publication_url = models.URLField()
     title = models.TextField()
     has_exemption = models.BooleanField(default=False)
-    # "probable" ACT
+    # `pact` means "probable ACT"
     is_pact = models.BooleanField(default=False)
     start_date = models.DateField()
     results_due = models.BooleanField(default=False, db_index=True)
     has_results = models.BooleanField(default=False, db_index=True)
     days_late = models.IntegerField(default=None, null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ongoing')
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='ongoing')
     completion_date = models.DateField(null=True, blank=True)
+    no_longer_on_website = models.BooleanField(default=False)
 
     first_seen_date = models.DateField(default=date.today)
     updated_date = models.DateField(default=date.today)
     reported_date = models.DateField(null=True, blank=True)
-    objects = TrialQuerySet.as_manager()
+    objects = TrialManager()
 
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)

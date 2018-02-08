@@ -22,7 +22,6 @@ from django.views.generic import TemplateView
 from frontend.models import Ranking
 from frontend.models import Trial
 from frontend.models import Sponsor
-from frontend.models import SponsorQuerySet
 from frontend import views
 
 
