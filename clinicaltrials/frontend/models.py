@@ -11,6 +11,9 @@ from django.utils.dateparse import parse_date
 from django.urls import reverse
 
 
+GRACE_PERIOD = 30
+
+
 class SponsorQuerySet(models.QuerySet):
     def annotated(self):
         return self.annotate(num_trials=models.Count('trial'))
@@ -160,7 +163,6 @@ class Trial(models.Model):
 
     def get_days_late(self):
         overdue_delta = relativedelta(days=365)
-        grace_period = 30  # days
         days_late = None
         if self.results_due:
             self._datify()
@@ -183,18 +185,21 @@ class Trial(models.Model):
                          - self.completion_date
                          - overdue_delta).days,
                         0])
-                    if (days_late - grace_period) <= 0:
+                    if (days_late - GRACE_PERIOD) <= 0:
                         days_late = 0
 
         return days_late
 
     def get_status(self):
+        # assumes days_late() has been called first
         overdue = self.results_due and not self.has_results
         if overdue:
             if self.qa_start_date():
                 status = 'qa'
-            else:
+            elif self.days_late:
                 status = 'overdue'
+            else:
+                status = 'ongoing'
         elif not self.results_due and not self.has_results:
             status = 'ongoing'
         elif self.has_results \

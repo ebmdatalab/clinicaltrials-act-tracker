@@ -12,9 +12,10 @@ from lxml import html
 import dateparser
 
 
-def set_qa_metadata(registry_id):
+def set_qa_metadata(trial):
+    registry_id = trial.registry_id
     url = "https://clinicaltrials.gov/ct2/show/results/{}".format(registry_id)
-    content = html.fromstring(requests.get(url).content)
+    content = html.fromstring(requests.get(url).text)
     table = content.xpath("//table[.//th//text()[contains(., 'Submission Cycle')]]")
     if table:
         for row in table[0].xpath(".//tr"):
@@ -28,15 +29,14 @@ def set_qa_metadata(registry_id):
                 TrialQA.objects.get_or_create(
                     submitted_to_regulator=submitted,
                     returned_to_sponsor=returned,
-                    trial_id=registry_id)
-                print("{} submitted: {}, returned: {}".format(
-                    registry_id, submitted, returned))
-
+                    trial=trial)
 
 
 class Command(BaseCommand):
-    help = 'Converts CSV to useful JSON formats'
-
+    help = 'XXX'
+    # XXX the order matters here and could be better enforced in
+    # code. First we get the data, then we scrape data, then we
+    # compute status, then we compute ranking.
     def add_arguments(self, parser):
         parser.add_argument(
             '--input-csv',
@@ -91,7 +91,7 @@ class Command(BaseCommand):
             # them submitted until QA finishes)
             print("Fetching trial QA metadata")
             for trial in Trial.objects.filter(results_due=True, has_results=False):
-                set_qa_metadata(trial.registry_id)
+                set_qa_metadata(trial)
 
             # Next, compute days_late and status for each trial
             print("Computing trial metadata")
