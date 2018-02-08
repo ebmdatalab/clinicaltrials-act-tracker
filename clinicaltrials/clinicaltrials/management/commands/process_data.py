@@ -89,8 +89,6 @@ class Command(BaseCommand):
                         Trial.objects.create(**d)
 
             # Mark zombie trials
-            #import pdb; pdb.set_trace()
-
             Trial.objects.filter(updated_date__lt=today).update(no_longer_on_website=True)
 
             # Now scrape trials that might be in QA (these would be
