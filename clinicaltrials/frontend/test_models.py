@@ -5,7 +5,10 @@ from datetime import timedelta
 
 from frontend.models import Sponsor
 from frontend.models import Trial
+from frontend.models import TrialQA
 from frontend.models import Ranking
+
+from unittest.mock import patch, Mock
 
 
 trial_counter = 0
@@ -178,9 +181,28 @@ class SponsorTrialsTestCase(TestCase):
             list(self.sponsor.trials().reported_early()),
             [])
 
-class SponsorTrialsLatenessTestCase(TestCase):
+class SponsorTrialsStatusTestCase(TestCase):
     def setUp(self):
         self.sponsor = Sponsor.objects.create(name="Sponsor 1")
+
+    def test_trial_overdue(self):
+        trial = _makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2016-01-01')
+        self.assertEqual(trial.status, 'overdue')
+        self.assertEqual(
+            list(self.sponsor.trials().overdue()),
+            [trial])
+
+    def test_trial_ongoing(self):
+        trial = _makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=False,
+            completion_date='2016-01-01')
+        self.assertEqual(trial.status, 'ongoing')
 
     def test_trial_not_reported_late(self):
         trial = _makeTrial(
@@ -194,6 +216,20 @@ class SponsorTrialsLatenessTestCase(TestCase):
             list(self.sponsor.trials().reported_late()),
             [])
 
+    def test_trial_under_qa(self):
+        trial = _makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2016-01-01')
+        TrialQA.objects.create(
+            submitted_to_regulator='2016-02-01',
+            returned_to_sponsor=None,
+            trial=trial
+        )
+        trial.compute_metadata()
+        self.assertEqual(trial.status, 'qa')
+
     def test_trials_reported_late_is_late(self):
         trial = _makeTrial(
             self.sponsor,
@@ -206,7 +242,12 @@ class SponsorTrialsLatenessTestCase(TestCase):
             list(self.sponsor.trials().reported_late()),
             [trial])
 
-    def test_trials_reported_late_days_late(self):
+
+class SponsorTrialsLatenessTestCase(TestCase):
+    def setUp(self):
+        self.sponsor = Sponsor.objects.create(name="Sponsor 1")
+
+    def test_reported_trial_late(self):
         trial = _makeTrial(
             self.sponsor,
             has_results=True,
@@ -215,11 +256,59 @@ class SponsorTrialsLatenessTestCase(TestCase):
             reported_date= '2017-01-01')
         self.assertEqual(trial.days_late, 1)
 
-    def test_trials_reported_late_days_late(self):
+    def test_reported_trial_not_late(self):
         trial = _makeTrial(
             self.sponsor,
             has_results=True,
             results_due=True,
             completion_date='2016-01-01',
-            reported_date= '2017-01-01')
+            reported_date= '2016-12-01')
+        self.assertEqual(trial.days_late, 0)
+
+    def test_trial_under_qa_not_late(self):
+        trial = _makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2016-01-01')
+        TrialQA.objects.create(
+            submitted_to_regulator='2016-02-01',
+            returned_to_sponsor=None,
+            trial=trial
+        )
+        trial.compute_metadata()
+        self.assertEqual(trial.days_late, 0)
+
+    def test_trial_under_qa_late(self):
+        trial = _makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2016-01-01')
+        TrialQA.objects.create(
+            submitted_to_regulator='2017-01-01',
+            returned_to_sponsor=None,
+            trial=trial
+        )
+        trial.compute_metadata()
         self.assertEqual(trial.days_late, 1)
+
+    @patch('frontend.models.date')
+    def test_unreported_trial_late_within_grace(self, datetime_mock):
+        datetime_mock.today = Mock(return_value=date(2017,1,30))
+        trial = _makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2016-01-01')
+        self.assertEqual(trial.days_late, 0)
+
+    @patch('frontend.models.date')
+    def test_unreported_trial_late_outside_grace(self, datetime_mock):
+        datetime_mock.today = Mock(return_value=date(2017,1,31))
+        trial = _makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2016-01-01')
+        self.assertEqual(trial.days_late, 31)

@@ -160,7 +160,7 @@ class Trial(models.Model):
 
     def get_days_late(self):
         overdue_delta = relativedelta(days=365)
-        grace_period = relativedelta(days=30)
+        grace_period = 30  # days
         days_late = None
         if self.results_due:
             self._datify()
@@ -176,13 +176,16 @@ class Trial(models.Model):
                 # still not reported.
                 qa_start_date = self.qa_start_date()
                 if qa_start_date:
-                    days_late = min([qa_start_date - self.completion_date, 0])
+                    days_late = max([(qa_start_date - self.completion_date - overdue_delta).days, 0])
                 else:
                     days_late = max([
                         (date.today()
                          - self.completion_date
-                         - (overdue_delta + grace_period)).days,
+                         - overdue_delta).days,
                         0])
+                    if (days_late - grace_period) <= 0:
+                        days_late = 0
+
         return days_late
 
     def get_status(self):
