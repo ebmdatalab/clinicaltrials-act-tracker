@@ -4,6 +4,7 @@ import time
 from django.shortcuts import render
 from django.conf import settings
 from django.db.models import Sum
+from django.db.models import F
 from django.http import HttpResponse
 
 from rest_framework.decorators import api_view
@@ -24,7 +25,7 @@ def performance(request):
         queryset = queryset.filter(sponsor__slug=request.GET['sponsor'])
     due = queryset.overdue().count()
     reported = queryset.reported().count()
-    days_late = queryset.aggregate(Sum('days_late'))['days_late__sum']
+    days_late = queryset.aggregate(Sum(F('days_late')-30))['days_late__sum']
     fines_str = '$0'
     if days_late:
         fines_str = "${:,}".format(days_late * 10000)
@@ -51,7 +52,7 @@ def index(request):
 
 def sponsor(request, slug):
     sponsor = Sponsor.objects.get(slug=slug)
-    days_late = sponsor.trial_set.aggregate(Sum('days_late'))['days_late__sum']
+    days_late = sponsor.trial_set.aggregate(Sum(F('days_late')-30))['days_late__sum']
     if days_late:
         fine = days_late * 10000
     else:

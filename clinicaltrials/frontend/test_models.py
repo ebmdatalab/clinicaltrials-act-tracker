@@ -9,16 +9,13 @@ from frontend.models import Ranking
 
 
 trial_counter = 0
-def _makeTrial(sponsor, results_due, has_results):
+def _makeTrial(sponsor, results_due=None, has_results=None):
     global trial_counter
     tomorrow = date.today() + timedelta(days=1)
     trial_counter += 1
     start_date = date(2015, 1, 1)
-    if has_results:
-        completion_date = date(2016, 1, 1)
-    else:
-        completion_date = None
-    return Trial.objects.create(
+    completion_date = date(2016, 1, 1)
+    trial = Trial.objects.create(
         sponsor=sponsor,
         registry_id='id_{}'.format(trial_counter),
         publication_url='http://bar.com/{}'.format(trial_counter),
@@ -27,6 +24,8 @@ def _makeTrial(sponsor, results_due, has_results):
         results_due=results_due,
         start_date=start_date,
         completion_date=completion_date)
+    trial.compute_metadata()
+    return trial
 
 def _simulateImport(test_trials):
     """Do the same as the import script, but for an array of tuples
@@ -109,9 +108,18 @@ class SponsorTrialsTestCase(TestCase):
     def setUp(self):
         self.sponsor = Sponsor.objects.create(name="Sponsor 1")
         self.sponsor2 = Sponsor.objects.create(name="Sponsor 2")
-        self.due_trial = _makeTrial(self.sponsor, True, False)
-        self.reported_trial = _makeTrial(self.sponsor, True, True)
-        self.not_due_trial = _makeTrial(self.sponsor, False, False)
+        self.due_trial = _makeTrial(
+            self.sponsor,
+            results_due=True,
+            has_results=False)
+        self.reported_trial = _makeTrial(
+            self.sponsor,
+            results_due=True,
+            has_results=True)
+        self.not_due_trial = _makeTrial(
+            self.sponsor,
+            results_due=False,
+            has_results=False)
 
     def test_slug(self):
         self.assertEqual(self.sponsor.slug, 'sponsor-1')
@@ -160,10 +168,10 @@ class SponsorTrialsTestCase(TestCase):
             [self.reported_trial])
 
     def test_trials_overdue(self):
+        self.assertEqual(self.due_trial.status, 'overdue')
         self.assertCountEqual(
             self.sponsor.trials().overdue(),
             [self.due_trial])
-        self.assertEqual(self.due_trial.status, 'overdue')
 
     def test_trials_reported_early(self):
         self.assertCountEqual(
@@ -171,31 +179,34 @@ class SponsorTrialsTestCase(TestCase):
             [])
 
     def test_trials_reported_late_not_late(self):
-        trial = self.sponsor.trials()[0]
+        trial = self.due_trial
         trial.has_results = True
         trial.completion_date = '2016-01-01'
         trial.reported_date = '2016-01-11'
         trial.save()
+        trial.compute_metadata()
         self.assertEqual(trial.status, 'reported')
         self.assertCountEqual(
             self.sponsor.trials().reported_late(),
             [])
 
     def test_trials_reported_late_is_late(self):
-        trial = self.sponsor.trials()[0]
+        trial = self.due_trial
         trial.has_results = True
         trial.completion_date = '2016-01-01'
         trial.reported_date = '2017-01-01'
         trial.save()
+        trial.compute_metadata()
         self.assertEqual(trial.status, 'reported-late')
         self.assertCountEqual(
             self.sponsor.trials().reported_late(),
             [trial])
 
     def test_trials_reported_late_days_late(self):
-        trial = self.sponsor.trials()[0]
+        trial = self.due_trial
         trial.has_results = True
         trial.completion_date = '2016-01-01'
         trial.reported_date = '2017-01-01'
         trial.save()
-        self.assertEqual(trial.days_late, 0)
+        trial.compute_metadata()
+        self.assertEqual(trial.days_late, 1)

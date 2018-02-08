@@ -4,8 +4,34 @@ import datetime
 from django.db import transaction
 from django.core.management.base import BaseCommand
 from frontend.models import Trial
+from frontend.models import TrialQA
 from frontend.models import Sponsor
 from frontend.models import Ranking
+import requests
+from lxml import html
+import dateparser
+
+
+def set_qa_metadata(registry_id):
+    url = "https://clinicaltrials.gov/ct2/show/results/{}".format(registry_id)
+    content = html.fromstring(requests.get(url).content)
+    table = content.xpath("//table[.//th//text()[contains(., 'Submission Cycle')]]")
+    if table:
+        for row in table[0].xpath(".//tr"):
+            if len(row.xpath(".//td")) == 0:
+                continue
+            else:
+                submitted = row.xpath(".//td[1]")[0].text.strip()
+                submitted = submitted and dateparser.parse(submitted) or None
+                returned = row.xpath(".//td[2]")[0].text.strip()
+                returned = returned and dateparser.parse(returned) or None
+                TrialQA.objects.get_or_create(
+                    submitted_to_regulator=submitted,
+                    returned_to_sponsor=returned,
+                    trial_id=registry_id)
+                print("{} submitted: {}, returned: {}".format(
+                    registry_id, submitted, returned))
+
 
 
 class Command(BaseCommand):
@@ -60,6 +86,18 @@ class Command(BaseCommand):
                     else:
                         Trial.objects.create(**d)
 
+            # Now scrape trials that might be in QA (these would be
+            # flagged as having no results, but if in QA we consider
+            # them submitted until QA finishes)
+            print("Fetching trial QA metadata")
+            for trial in Trial.objects.filter(results_due=True, has_results=False):
+                set_qa_metadata(trial.registry_id)
+
+            # Next, compute days_late and status for each trial
+            print("Computing trial metadata")
+            for trial in Trial.objects.all():
+                trial.compute_metadata()
+
+            # This should only happen after Trial statuses have been set
             print("Setting current rankings")
             Ranking.objects.set_current()
-# clinical_study.clinical_results non-null and

@@ -1,5 +1,6 @@
 from datetime import date
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 from django.db import connection
 from django.db import models
@@ -98,19 +99,13 @@ class Sponsor(models.Model):
         return TrialQuerySet(Trial).filter(sponsor=self)
 
 
-def parse_date_if_needed(date):
-    # Normalise from strings, as this method may be called
-    # before the object has been saved to the databasse
-    if isinstance(date, str):
-        date = parse_date(date)
-    return date
-
 
 class Trial(models.Model):
     STATUS_CHOICES = (
         ('overdue', 'Overdue'),
         ('ongoing', 'Ongoing'),
         ('reported', 'Reported'),
+        ('qa', 'Under QA'),
         ('reported-late', 'Reported (late)'),
     )
     sponsor = models.ForeignKey(
@@ -137,10 +132,10 @@ class Trial(models.Model):
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
 
-    def save(self, *args, **kwargs):
+    def compute_metadata(self):
         self.days_late = self.get_days_late()
         self.status = self.get_status()
-        super(Trial, self).save(*args, **kwargs)
+        self.save()
 
     def _datify(self):
         """We sometimes maninpulate data before the model has been saved, and
@@ -148,20 +143,25 @@ class Trial(models.Model):
         objects.
 
         """
-        for field in ['most_recent_fda_activity_date',
-                      'most_recent_sponsor_activity_date',
-                      'reported_date',
+        for field in ['reported_date',
                       'completion_date']:
             _field = getattr(self, field)
             if isinstance(_field, str):
-                val = parse_date_if_needed(_field)
+                val = parse_date(_field)
                 setattr(self, field, val)
 
 
-    def get_days_late(self):
-        overdue_delta = relativedelta(days=30) + relativedelta(years=1)
-        days_late = None
+    def qa_start_date(self):
+        first_event = self.trialqa_set.first()
+        if first_event:
+            return first_event.submitted_to_regulator
+        else:
+            return None
 
+    def get_days_late(self):
+        overdue_delta = relativedelta(days=365)
+        grace_period = relativedelta(days=30)
+        days_late = None
         if self.results_due:
             self._datify()
             if self.has_results:
@@ -171,19 +171,26 @@ class Trial(models.Model):
                          - self.completion_date
                          - overdue_delta).days,
                         0])
-            elif self.completion_date:
-                days_late = max([
-                    (date.today()
-                     - parse_date_if_needed(
-                         self.completion_date)
-                     - overdue_delta).days,
-                    0])
+            else:
+                # still not reported.
+                qa_start_date = self.qa_start_date()
+                if qa_start_date:
+                    days_late = min([qa_start_date - self.completion_date, 0])
+                else:
+                    days_late = max([
+                        (date.today()
+                         - self.completion_date
+                         - (overdue_delta + grace_period)).days,
+                        0])
         return days_late
 
-
     def get_status(self):
-        if self.results_due and not self.has_results:
-            status = 'overdue'
+        overdue = self.results_due and not self.has_results
+        if overdue:
+            if self.qa_start_date():
+                status = 'qa'
+            else:
+                status = 'overdue'
         elif not self.results_due and not self.has_results:
             status = 'ongoing'
         elif self.has_results \
@@ -200,6 +207,11 @@ class Trial(models.Model):
     class Meta:
         ordering = ('completion_date',)
 
+
+class TrialQA(models.Model):
+    trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
+    submitted_to_regulator = models.DateField()
+    returned_to_sponsor = models.DateField(null=True, blank=True)
 
 
 class RankingManager(models.Manager):
