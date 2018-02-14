@@ -45,7 +45,8 @@ def performance(request):
 
 def index(request):
     context = {
-        'title': "Who’s sharing their clinical trial results?"
+        'title': "Who’s sharing their clinical trial results?",
+        'prelaunch_mode': settings.PRELAUNCH_MODE
     }
     return render(request, "index.html", context=context)
 

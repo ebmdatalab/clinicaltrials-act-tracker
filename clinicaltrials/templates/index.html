@@ -42,7 +42,19 @@
   </form>
   {% endif %}
 
-  <table id="sponsor_table" class="table" cellspacing="0" width="100%">
+  <table id="sponsor_table" class="table{% if prelaunch_mode %} prelaunch{% endif %}" cellspacing="0" width="100%">
+    {% if prelaunch_mode %}
+    <tbody>
+      <tr>
+        <td>
+          <div class="col-md-6 col-md-offset-3">
+            <h4>February 18th 2018 is one year plus one month grace period since the FDAAA final rule came into effect.</h4>
+            <h3>From Monday 19th February 2018, trials that are overdue to report will appear here, along with an estimate of how much the FDA could have levied in fines.</h3>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+    {% else %}
     <thead>
       <tr>
         <th>Sponsor name</th>
@@ -51,15 +63,20 @@
         <th>Percent</th>
       </tr>
     </thead>
+    {% endif %}
   </table>
-  <a id="download" href="#" class="btn btn-default"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
+  {% if not prelaunch_mode %}
+    <a id="download" href="#" class="btn btn-default"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
+  {% endif %}
 {% endblock%}
 
 {% block extra_js %}
-<script>
+  <script>
   $(document).ready(function() {
-    rankingTable('{{ LATEST_DATE|date:"Y-m-d" }}');
+    if ({% if prelaunch_mode %}false{% else %}true{% endif %}) {
+      rankingTable('{{ LATEST_DATE|date:"Y-m-d" }}');
+    }
     showPerformance();
-  });
+    });
 </script>
 {% endblock %}
