@@ -26,9 +26,9 @@ function setFormValues(params) {
     $('.sponsor_type[value="'+params['is_industry_sponsor']+'"]').prop('checked', true);
   }
   if (params['status']) {
-    $('.status_filter').prop('checked', false);
+    $('.status_filter').prop('checked', false).bootstrapToggle('off');
     $.each(params['status'], function(i, d) {
-      $('.status_filter[value="'+d+'"]').prop('checked', true);
+      $('.status_filter[value="'+d+'"]').prop('checked', true).bootstrapToggle('on');
     });
   }
 }

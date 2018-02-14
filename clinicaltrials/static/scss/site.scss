@@ -1629,23 +1629,23 @@ h1, h2 {
   height: 100%;
 }
 
-.checkbox-info .btn-primary {
+.checkbox-info .btn-primary, .label-info {
   background-color: $green-mid;
   color: white;
 }
 
-.checkbox-success .btn-primary {
+.checkbox-success .btn-primary, .label-success {
   background-color: $teal-light;
   color: white;
 }
 
-.checkbox-danger .btn-primary {
+.checkbox-danger .btn-primary, .label-danger {
   background-color: $red;
   color: white;
 }
 
 
-.checkbox-warning  .btn-primary {
+.checkbox-warning  .btn-primary, .label-warning {
   background-color: $orange;
   color: white;
 }
@@ -1676,4 +1676,8 @@ label#filter-trials {
 footer {
     background-color: #f8f8f8;
     margin-top: 20px;
+}
+
+body {
+  font-size: 16px;
 }
