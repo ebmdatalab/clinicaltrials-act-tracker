@@ -665,82 +665,6 @@ textarea.form-control {
     font-size: 14px; }
   .navbar .btn-simple {
     font-size: 16px; }
-
-.navbar-nav > li > .dropdown-menu {
-  border-radius: 6px;
-  margin-top: -5px; }
-
-.navbar-default {
-  background-color: white;
-}
-  .navbar-default .brand {
-    color: #66615b !important; }
-  .navbar-default .navbar-nav > li > a:not(.btn) {
-    color: #9A9A9A; }
-  .navbar-default .navbar-nav > .active > a,
-  .navbar-default .navbar-nav > .active > a:not(.btn):hover,
-  .navbar-default .navbar-nav > .active > a:not(.btn):focus,
-  .navbar-default .navbar-nav > li > a:not(.btn):hover,
-  .navbar-default .navbar-nav > li > a:not(.btn):focus {
-    background-color: transparent;
-    border-radius: 3px;
-    color: $green-mid;
-    opacity: 1;
-    filter: alpha(opacity=100); }
-  .navbar-default .navbar-nav > .dropdown > a:hover .caret,
-  .navbar-default .navbar-nav > .dropdown > a:focus .caret {
-    border-bottom-color: $green-mid;
-    border-top-color: $green-mid; }
-  .navbar-default .navbar-nav > .open > a,
-  .navbar-default .navbar-nav > .open > a:hover,
-  .navbar-default .navbar-nav > .open > a:focus {
-    background-color: transparent;
-    color: $green-mid; }
-  .navbar-default .navbar-nav .navbar-toggle:hover, .navbar-default .navbar-nav .navbar-toggle:focus {
-    background-color: transparent; }
-  .navbar-default:not(.navbar-transparent) .btn-default:hover {
-    color: $green-mid;
-    border-color: $green-mid; }
-  .navbar-default:not(.navbar-transparent) .btn-neutral, .navbar-default:not(.navbar-transparent) .btn-neutral:hover, .navbar-default:not(.navbar-transparent) .btn-neutral:active {
-    color: #9A9A9A; }
-
-.navbar-form {
-  -webkit-box-shadow: none;
-  box-shadow: none; }
-  .navbar-form .form-control {
-    border-radius: 0;
-    border: 0;
-    padding: 0;
-    background-color: transparent;
-    height: 22px;
-    font-size: 16px;
-    line-height: 1.4em;
-    color: #E3E3E3; }
-  .navbar-transparent .navbar-form .form-control, [class*="navbar-ct"] .navbar-form .form-control {
-    color: #FFFFFF;
-    border: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.6); }
-
-.navbar-ct-primary {
-  background-color: #8ECFD5; }
-
-.navbar-ct-info {
-  background-color: #7CE4FE; }
-
-.navbar-ct-success {
-  background-color: #8EF3C5; }
-
-.navbar-ct-warning {
-  background-color: #FFE28C; }
-
-.navbar-ct-danger {
-  background-color: #FF8F5E; }
-
-.navbar-transparent {
-  padding-top: 15px;
-  background-color: transparent;
-  border-bottom: 1px solid transparent; }
-
 .navbar-toggle {
   margin-top: 19px;
   margin-bottom: 19px;
@@ -835,22 +759,6 @@ textarea.form-control {
       margin: 15px 3px;
       line-height: 20px;
       text-align: center; }
-    .footer nav ul a:not(.btn) {
-      color: #66615b;
-      display: block;
-      margin-bottom: 3px; }
-      .footer nav ul a:not(.btn):focus, .footer nav ul a:not(.btn):hover {
-        color: #403D39; }
-  .footer .copyright {
-    color: #66615b;
-    padding: 10px 15px;
-    font-size: 14px;
-    white-space: nowrap;
-    margin: 15px 3px;
-    line-height: 20px;
-    text-align: center; }
-  .footer .heart {
-    color: $red; }
 
 .dropdown-menu {
   background-color: #FFFCF5;
@@ -1753,4 +1661,19 @@ label#filter-trials {
 
 .checkbox-inline {
   padding-right: 6px;
+}
+
+.navbar-default {
+    background-color: #f8f8f8;
+    border-color: #e7e7e7;
+}
+
+.navbar-default {
+    background-color: white;
+    border-color: white;
+}
+
+footer {
+    background-color: #f8f8f8;
+    margin-top: 20px;
 }
