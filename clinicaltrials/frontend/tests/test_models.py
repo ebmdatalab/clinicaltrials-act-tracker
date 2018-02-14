@@ -196,7 +196,7 @@ class SponsorTrialsStatusTestCase(TestCase):
             list(self.sponsor.trials().reported_late()),
             [])
 
-    def test_trial_under_qa(self):
+    def test_reported_trial_under_qa(self):
         trial = _makeTrial(
             self.sponsor,
             has_results=False,
@@ -208,7 +208,21 @@ class SponsorTrialsStatusTestCase(TestCase):
             trial=trial
         )
         trial.compute_metadata()
-        self.assertEqual(trial.status, 'qa')
+        self.assertEqual(trial.status, 'reported')
+
+    def test_overdue_trial_under_qa(self):
+        trial = _makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2016-01-01')
+        TrialQA.objects.create(
+            submitted_to_regulator='2017-02-01',
+            returned_to_sponsor=None,
+            trial=trial
+        )
+        trial.compute_metadata()
+        self.assertEqual(trial.status, 'reported-late')
 
     def test_trials_reported_late_is_late(self):
         trial = _makeTrial(

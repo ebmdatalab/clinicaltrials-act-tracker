@@ -95,8 +95,8 @@ function showPerformance(sponsorSlug) {
     params['sponsor'] = sponsorSlug;
   }
   $.get('/api/performance', params, function(d) {
-    $('#numerator #num').text(d['reported']);
-    $('#denominator #denom').text(d['due']);
+    $('#num').text(d['reported']);
+    $('#denom').text(d['due']);
     if (d['due']) {
       var percentage = (d['reported']/d['due'] * 100).toFixed(1);
       $('#percent-amount').text(percentage + '%');

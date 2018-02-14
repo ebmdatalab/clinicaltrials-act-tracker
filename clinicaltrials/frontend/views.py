@@ -23,9 +23,9 @@ def performance(request):
     queryset = Trial.objects.all()
     if 'sponsor' in request.GET:
         queryset = queryset.filter(sponsor__slug=request.GET['sponsor'])
-    due = queryset.overdue().count()
-    reported = queryset.reported().count()
-    days_late = queryset.aggregate(Sum(F('days_late')-30))['days_late__sum']
+    due = queryset.filter(results_due=True).count()
+    reported = queryset.filter(status__in=['reported', 'reported-late']).count()
+    days_late = queryset.aggregate(days_late=Sum(F('days_late')-30))['days_late']
     fines_str = '$0'
     if days_late:
         fines_str = "${:,}".format(days_late * 10000)

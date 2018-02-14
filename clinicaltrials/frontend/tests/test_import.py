@@ -49,7 +49,7 @@ class CommandsTestCase(TestCase):
         self.assertEqual(overdue.days_late, 61)
 
         overdueinqa = Trial.objects.get(registry_id='overdueinqa')
-        self.assertEqual(overdueinqa.status, 'qa')
+        self.assertEqual(overdueinqa.status, 'reported-late')
         self.assertEqual(overdueinqa.days_late, 12)
         self.assertEqual(overdueinqa.qa_start_date(), date(2017,11,13))
 
@@ -76,7 +76,7 @@ class CommandsTestCase(TestCase):
         Trial.objects.all().update(updated_date=date(2017,1,1))
 
         # Import again
-        process_datetime_mock = models_datetime_mock.today = mock.Mock(return_value=date(2018,1,2))
+        models_datetime_mock.today = mock.Mock(return_value=date(2018,1,2))
         call_command('process_data', *args, **opts)
 
         overdue = Trial.objects.get(registry_id='overdue')

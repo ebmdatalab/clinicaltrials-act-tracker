@@ -16,7 +16,8 @@ GRACE_PERIOD = 30
 
 class TrialManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(no_longer_on_website=False)
+        return super().get_queryset().filter(
+            no_longer_on_website=False).prefetch_related('trialqa_set')
 
     def due(self):
         return self.filter(results_due=True)
@@ -28,7 +29,7 @@ class TrialManager(models.Manager):
         return self.filter(has_results=False)
 
     def reported(self):
-        return self.filter(status='reported')
+        return self.filter(status__in=['reported', 'reported-late'])
 
     def reported_late(self):
         return self.filter(status='reported-late')
@@ -78,7 +79,6 @@ class Trial(models.Model):
         ('overdue', 'Overdue'),
         ('ongoing', 'Ongoing'),
         ('reported', 'Reported'),
-        ('qa', 'Under QA'),
         ('reported-late', 'Reported (late)'),
     )
     sponsor = models.ForeignKey(
@@ -134,6 +134,7 @@ class Trial(models.Model):
             return None
 
     def get_days_late(self):
+        # See https://github.com/ebmdatalab/clinicaltrials-act-tracker/issues/38
         overdue_delta = relativedelta(days=365)
         days_late = None
         if self.results_due:
@@ -163,26 +164,33 @@ class Trial(models.Model):
         return days_late
 
     def get_status(self):
-        # assumes days_late() has been called first
-        overdue = self.results_due and not self.has_results
-        if overdue:
-            if self.qa_start_date():
-                status = 'qa'
-            elif self.days_late:
-                status = 'overdue'
+        # days_late() must have been called first
+        overdue = self.days_late and self.days_late > 0
+        if self.results_due:
+            if self.has_results:
+                if overdue:
+                    status = 'reported-late'
+                else:
+                    status = 'reported'
+            else:
+                if self.qa_start_date():
+                    if self.days_late:
+                        status = 'reported-late'
+                    else:
+                        status = 'reported'
+                else:
+                    if self.days_late:
+                        status = 'overdue'
+                    else:
+                        # We're in the grace period
+                        status = 'ongoing'
+        else:
+            if self.has_results:
+                # Reported early! Might want to track separately in
+                # the future
+                status = 'reported'
             else:
                 status = 'ongoing'
-        elif not self.results_due and not self.has_results:
-            status = 'ongoing'
-        elif self.has_results \
-             and self.reported_date \
-             and self.days_late \
-             and self.days_late > 0:
-            status = 'reported-late'
-        elif self.has_results and self.results_due:
-            status = 'reported'
-        elif self.has_results and not self.results_due:
-            status = 'reported-early'
         return status
 
     class Meta:
