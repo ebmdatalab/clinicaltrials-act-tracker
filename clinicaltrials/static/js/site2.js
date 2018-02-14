@@ -94,7 +94,7 @@ function showPerformance(sponsorSlug) {
   if(typeof sponsorSlug !== 'undefined' && sponsorSlug !== '') {
     params['sponsor'] = sponsorSlug;
   }
-  $.get('/api/performance', params, function(d) {
+  $.get('/api/performance/', params, function(d) {
     $('#num').text(d['reported']);
     $('#denom').text(d['due']);
     if (d['due']) {
