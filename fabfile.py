@@ -46,8 +46,8 @@ def setup_nginx():
 
 def setup_django():
     with prefix('source venv/bin/activate'):
-        run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py collectstatic')
-        run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py migrate')
+        run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py collectstatic --settings=clinicaltrials.settings')
+        run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py migrate --settings=clinicaltrials.settings')
 
 #def run_migrations():
 #    if env.environment == 'live':
