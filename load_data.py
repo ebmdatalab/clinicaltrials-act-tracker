@@ -74,3 +74,10 @@ if __name__ == '__main__':
     to update the source following the above steps more easily.  You
     have to redo this every time you load data, or you get wierd
     effects from BigQuery.""")
+    print("""
+    Then run `website_data_view` in BigQuery, save the results to a table, download as a CSV, and run
+
+        . /etc/profile.d/fdaaa_staging.sh && ../../venv/bin/python python manage.py process_data --csv=/path/to/csv`
+
+    Finally, update NEXT_PLANNED_UPDATE in settings.py and restart the server
+    """)
