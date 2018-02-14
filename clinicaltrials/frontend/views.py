@@ -25,7 +25,9 @@ def performance(request):
         queryset = queryset.filter(sponsor__slug=request.GET['sponsor'])
     due = queryset.filter(results_due=True).count()
     reported = queryset.filter(status__in=['reported', 'reported-late']).count()
-    days_late = queryset.aggregate(days_late=Sum(F('days_late')-30))['days_late']
+    # XXX we only subtract 30
+    days_late = queryset.aggregate(
+        days_late=Sum('finable_days_late'))['days_late']
     fines_str = '$0'
     if days_late:
         fines_str = "${:,}".format(days_late * 10000)
@@ -52,7 +54,8 @@ def index(request):
 
 def sponsor(request, slug):
     sponsor = Sponsor.objects.get(slug=slug)
-    days_late = sponsor.trial_set.aggregate(days_late=Sum(F('days_late')-30))['days_late']
+    days_late = sponsor.trial_set.aggregate(
+        days_late=Sum('finable_days_late'))['days_late']
     if days_late:
         fine = days_late * 10000
     else:

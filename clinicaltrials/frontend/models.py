@@ -75,6 +75,7 @@ class Sponsor(models.Model):
 
 
 class Trial(models.Model):
+    FINES_GRACE_PERIOD = 30
     STATUS_CHOICES = (
         ('overdue', 'Overdue'),
         ('ongoing', 'Ongoing'),
@@ -94,6 +95,7 @@ class Trial(models.Model):
     results_due = models.BooleanField(default=False, db_index=True)
     has_results = models.BooleanField(default=False, db_index=True)
     days_late = models.IntegerField(default=None, null=True, blank=True)
+    finable_days_late = models.IntegerField(default=None, null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default='ongoing')
     completion_date = models.DateField(null=True, blank=True)
@@ -109,6 +111,10 @@ class Trial(models.Model):
 
     def compute_metadata(self):
         self.days_late = self.get_days_late()
+        if self.days_late:
+            self.finable_days_late = max([
+                self.days_late - Trial.FINES_GRACE_PERIOD,
+                0])
         self.status = self.get_status()
         self.save()
 
