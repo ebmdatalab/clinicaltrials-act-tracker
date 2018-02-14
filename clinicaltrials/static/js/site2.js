@@ -120,7 +120,7 @@ function rankingTable(latestDate) {
   var table = $('#sponsor_table').DataTable( {
     "dom": '<"datatable-top"fi>rt<"bottom"lp><"clear">',
     'drawCallback': setCsvLinkAndTableDecoration('rankings'),
-    "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
+    "order": [[ 3, 'asc' ], [ 0, 'asc' ]],
     "language": {
       "infoFiltered": '',
       "search": "",
