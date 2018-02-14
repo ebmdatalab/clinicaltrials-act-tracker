@@ -52,16 +52,16 @@ def index(request):
 
 def sponsor(request, slug):
     sponsor = Sponsor.objects.get(slug=slug)
-    days_late = sponsor.trial_set.aggregate(Sum(F('days_late')-30))['days_late__sum']
+    days_late = sponsor.trial_set.aggregate(days_late=Sum(F('days_late')-30))['days_late']
     if days_late:
         fine = days_late * 10000
     else:
         fine = None
-    #f = TrialStatusFilter(request.GET, queryset=sponsor.trials())
+    statuses = sponsor.trial_set.values_list('status').distinct()
+    status_choices = [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
     context = {'sponsor': sponsor,
-               'title': "All of {}'s Applicable Clinical Trials".format(sponsor),
-               'status_choices': Trial.objects.filter(
-                   sponsor=sponsor).status_choices_with_counts(),
+               'title': "All Applicable Clinical Trials at {}'s ".format(sponsor),
+               'status_choices': status_choices,
                'fine': fine
     }
     return render(request, 'sponsor.html', context=context)
