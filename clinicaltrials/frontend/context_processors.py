@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.utils.dateparse import parse_date
 
 from common import utils
 
@@ -21,3 +22,7 @@ def google_tracking_id(request):
 
 def latest_date(request):
     return {'LATEST_DATE': Ranking.objects.latest('date').date}
+
+
+def next_planned_update(request):
+    return {'NEXT_PLANNED_UPDATE': parse_date(settings.NEXT_PLANNED_UPDATE)}

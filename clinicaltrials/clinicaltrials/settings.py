@@ -104,6 +104,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'frontend.context_processors.google_tracking_id',
                 'frontend.context_processors.latest_date',
+                'frontend.context_processors.next_planned_update',
             ],
         },
     },
@@ -198,3 +199,6 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, '../static')
 # User stuff
 
 LOGIN_REDIRECT_URL = '/'
+
+NEXT_PLANNED_UPDATE = '2018-06-01'
+

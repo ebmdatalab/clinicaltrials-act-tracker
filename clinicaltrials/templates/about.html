@@ -113,7 +113,7 @@
           </li>
           <li>
             <strong>When was the data last updated?</strong>
-            The current data was taken from ClinicalTrials.gov on [Date]. Our next update of the data is planned for [Date].
+            The current data was taken from ClinicalTrials.gov on {{ LATEST_DATE|date:"j F Y" }}. Our next update of the data is planned for {{ NEXT_PLANNED_UPDATE|date:"j F Y" }}.
           </li>
         </ul>
       </div>
