@@ -83,7 +83,6 @@ function resizeCards() {
         largestHeight = h;
       }
     });
-    console.log(largestHeight);
     $('#summary-cards .header').height(largestHeight + 'px');
   } else {
     $('#summary-cards .big-text').css('font-size', fontSize + 'px');
