@@ -42,7 +42,8 @@ class TrialManager(models.Manager):
 
     def status_choices_with_counts(self):
         return (
-            ('overdue', 'Due', self.overdue().count()),
+            ('due', 'Due', self.due().count()),
+            ('overdue', 'Overdue', self.overdue().count()),
             ('ongoing', 'Ongoing', self.not_due().count()),
             ('reported', 'Reported', self.reported().count()),
             ('reported-late', 'Reported late', self.reported_late().count())
@@ -77,6 +78,7 @@ class Sponsor(models.Model):
 class Trial(models.Model):
     FINES_GRACE_PERIOD = 30
     STATUS_CHOICES = (
+        ('due', 'Due'),
         ('overdue', 'Overdue'),
         ('ongoing', 'Ongoing'),
         ('reported', 'Reported'),
@@ -189,7 +191,7 @@ class Trial(models.Model):
                         status = 'overdue'
                     else:
                         # We're in the grace period
-                        status = 'ongoing'
+                        status = 'due'
         else:
             if self.has_results:
                 # Reported early! Might want to track separately in
