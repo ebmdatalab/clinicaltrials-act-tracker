@@ -1721,22 +1721,36 @@ h1, h2 {
   height: 100%;
 }
 
-.label-info {
+.checkbox-info .btn-primary {
   background-color: $green-mid;
+  color: white;
 }
 
-.label-success {
+.checkbox-success .btn-primary {
   background-color: $teal-light;
+  color: white;
 }
 
-.label-danger {
+.checkbox-danger .btn-primary {
   background-color: $red;
+  color: white;
 }
 
-.label-warning {
+
+.checkbox-warning  .btn-primary {
   background-color: $orange;
+  color: white;
 }
+
 
 .label-indeterminate {
   background-color: $teal-dark;
+}
+
+label#filter-trials {
+  display: block;
+}
+
+.checkbox-inline {
+  padding-right: 6px;
 }

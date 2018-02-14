@@ -3,25 +3,22 @@
 {% include '_summary_card.html' %}
 
 <form class="form">
-  {% for k, v, i in status_choices %}
-  <div class="btn-group" data-toggle="buttons">
-    <label for="filter-{{k}}" class="btn
-                                     {% if k == 'overdue' %}
-                                     btn-danger
-                                     {% elif k == 'reported' %}
-                                     btn-success
-                                     {% elif k == 'reported-late' %}
-                                     btn-warning
-                                     {% else %}
-                                     btn-info
-                                     {% endif %}
 
+  <label id="filter-trials">Filter trials by status:</label>
+  {% for k, v, i in status_choices %}
+    <label for="filter-{{k}}" class="checkbox-inline {% if k == 'overdue' %}
+                                     checkbox-danger
+                                     {% elif k == 'reported' %}
+                                     checkbox-success
+                                     {% elif k == 'reported-late' %}
+                                     checkbox-warning
+                                     {% else %}
+                                     checkbox-info
+                                     {% endif %}
                                      ">
-      <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}">
+      <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}" data-toggle="toggle">
       {{ v }}
-      ({{ i }})
     </label>
-  </div>
   {% endfor %}
 </form>
 <hr>
