@@ -147,9 +147,9 @@ function rankingTable(latestDate) {
            full['sponsor_name']+'</a>';
        },
       },
-      {'data': 'due'},
-      {'data': 'reported'},
-      {'data': 'percentage',
+      {'data': 'due', 'name': 'due'},
+      {'data': 'reported', 'name': 'reported'},
+      {'data': 'percentage', 'name': 'percentage',
        'render': function(data, type, full, meta) {
          return data + '%';
        },
@@ -235,7 +235,7 @@ function trialsTable(sponsor_slug) {
     'pageLength': 100,
     "order": [[ 3, 'asc' ]],
     'columns': [
-      {'data': 'status',
+      {'data': 'status', 'name': 'status',
        'render': function(data, type, full, meta) {
          var statusClass = '';
          if (data == 'overdue') {
@@ -257,13 +257,13 @@ function trialsTable(sponsor_slug) {
            full['sponsor_name']+'</a>';
        },
       },
-      {'data': 'registry_id',
+      {'data': 'registry_id', 'name': 'registry_id',
        'render': function(data, type, full, meta) {
          return '<a target="_blank" href="'+full['publication_url']+'">'+
            full['registry_id']+'</a>';
        },
       },
-      {'data': 'title',
+      {'data': 'title', 'name': 'title',
        'render': function(data, type, full, meta) {
          var title = full['title'];
          if (full['is_pact']) {
@@ -272,8 +272,8 @@ function trialsTable(sponsor_slug) {
          return title;
        },
       },
-      {'data': 'completion_date'},
-      {'data': 'days_late'},
+      {'data': 'completion_date', 'name': 'completion_date'},
+      {'data': 'days_late', 'name': 'days_late'},
     ],
   });
   $('.status_filter').on('change', function() {
