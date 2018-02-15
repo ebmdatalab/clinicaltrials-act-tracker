@@ -209,6 +209,9 @@ function trialsTable(sponsor_slug) {
   }
   setFormValues(params);
   var table = $('#trials_table').DataTable( {
+    'initComplete': function(settings, json) {
+      $('#results').fadeTo(500, 1);
+    },
     "dom": '<"datatable-top"fi>rt<"bottom"lp><"clear">',
     'drawCallback': setCsvLinkAndTableDecoration('trials'),
     'columnDefs': columnDefs,

@@ -2,10 +2,10 @@
 {% block content %}
 {% include '_summary_card.html' %}
 
-<form class="form">
-
-  <label id="filter-trials">Filter trials by status:</label>
-  {% for k, v, i in status_choices %}
+<div id="results">
+  <form class="form">
+    <label id="filter-trials">Filter trials by status:</label>
+    {% for k, v, i in status_choices %}
     <label for="filter-{{k}}" class="checkbox-inline {% if k == 'overdue' %}
                                      checkbox-danger
                                      {% elif k == 'reported' %}
@@ -21,23 +21,24 @@
       <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}" data-toggle="toggle">
       {{ v }}
     </label>
-  {% endfor %}
-</form>
-<hr>
+    {% endfor %}
+  </form>
+  <hr>
 
-<table id="trials_table" class="table" cellspacing="0" width="100%">
-  <thead>
-    <tr>
-      <th>Status</th>
-      <th>Sponsor</th>
-      <th>Trial ID</th>
-      <th>Title</th>
-      <th class="text-nowrap">Completion date</th>
-      <th class="text-nowrap">Days overdue</th
-    </tr>
-  </thead>
-</table>
-<a id="download" href="#" class="btn btn-default"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
+  <table id="trials_table" class="table" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Sponsor</th>
+        <th>Trial ID</th>
+        <th>Title</th>
+        <th class="text-nowrap">Completion date</th>
+        <th class="text-nowrap">Days overdue</th
+                                              </tr>
+    </thead>
+  </table>
+  <a id="download" href="#" class="btn btn-default"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
+</div>
 <script>
   $(document).ready(function() {
   trialsTable('{{ sponsor.slug }}');
