@@ -16,7 +16,7 @@ env.colorize_errors = True
 env.user = 'root'
 
 environments = {
-    'live': 'fdaaa_staging',
+    'live': 'fdaaa',
     'staging': 'fdaaa_staging',
 }
 

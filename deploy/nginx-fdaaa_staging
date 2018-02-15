@@ -1,4 +1,4 @@
-upstream fdaaa {
+upstream fdaaa_staging {
     server unix:/tmp/gunicorn-fdaaa_staging.sock fail_timeout=0;
     keepalive 60;
 }
@@ -23,7 +23,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header Host $http_host;
 
-        proxy_pass http://fdaaa;
+        proxy_pass http://fdaaa_staging;
     }
 
     location /static {

@@ -1,13 +1,20 @@
 upstream fdaaa {
-    server unix:/tmp/gunicorn-fdaaa_staging.sock fail_timeout=0;
+    server unix:/tmp/gunicorn-fdaaa.sock fail_timeout=0;
     keepalive 60;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name fda.trialstracker.net fdaa.trialstracker.net trialstracker.net;
+    rewrite ^/(.*)$ https://fdaaa.trialstracker.net/$1 redirect;
 }
 
 # Listen on HTTPS
 server {
     listen 80;
     listen [::]:80;
-    server_name fdaaa.ebmdatalab.net;
+    server_name fdaaa.trialstracker.net;
 
     resolver 8.8.8.8 8.8.4.4 valid=300s;
     resolver_timeout 5s;
@@ -24,7 +31,7 @@ server {
     }
 
     location /static {
-        alias   /var/www/fdaaa_staging/clinicaltrials-act-tracker/euctr/static;
+        alias   /var/www/fdaaa/clinicaltrials-act-tracker/clinicaltrials/static;
         expires max;
         access_log off;
     }

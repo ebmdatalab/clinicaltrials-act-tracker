@@ -127,7 +127,6 @@ COMPRESS_ENABLED = False
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-
     'compressor.finders.CompressorFinder',
 )
 
@@ -139,7 +138,7 @@ WSGI_APPLICATION = 'clinicaltrials.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'clinicaltrials',
+        'NAME': common.utils.get_env_setting('CLINICALTRIALS_DB'),
         'USER': common.utils.get_env_setting('CLINICALTRIALS_DB_NAME'),
         'PASSWORD': common.utils.get_env_setting('CLINICALTRIALS_DB_PASS'),
         'HOST': 'localhost',
