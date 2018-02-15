@@ -1707,3 +1707,21 @@ table.prelaunch td {
   background-color: $teal-dark;
 }
 
+
+.wf-loading .navbutton,
+.wf-loading .introtext,
+.wf-loading h1,
+.wf-loading h2,
+.wf-loading h3,
+.wf-loading .big-text {
+  visibility: hidden;
+}
+
+.wf-active .navbutton,
+.wf-active .introtext,
+.wf-active h1,
+.wf-active h2,
+.wf-active h3,
+.wf-active .big-text {
+  visibility: visible;
+}
