@@ -23,7 +23,7 @@ def download_and_extract():
     print("Downloading. This takes at least 30 mins on a fast connection!")
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
     # download and extract
-    wget_command = 'wget -N -O /mnt/database/clinicaltrials/data.zip'
+    wget_command = 'wget -O /mnt/database/clinicaltrials/data.zip'
     os.system('%s %s' % (wget_command, url))
     os.system('unzip -d /mnt/database/clinicaltrials/ /mnt/database/clinicaltrials/data.zip')
 
