@@ -182,6 +182,7 @@ urlpatterns = [
     path('sponsor/<slug:slug>/', views.sponsor, name='views.sponsor'),
     path('api/', include('rest_framework.urls')),
     path('about/', TemplateView.as_view(template_name="about.html")),
+    path('fund/', TemplateView.as_view(template_name="fund.html")),
     path('sitemap.xml', sitemap,
          {'sitemaps': {
              'static': StaticViewSitemap,
