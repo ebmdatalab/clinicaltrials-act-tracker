@@ -57,22 +57,22 @@
                     <ul class="nav navbar-nav navbar-right">
                         <li>
                             <a href="/">
-                              <p class="navbutton percentage card">Ranked sponsors</p>
+                              <p class="navbutton{% if request.path == '/' %} selected{% endif %}">Ranked sponsors</p>
                             </a>
                         </li>
                         <li>
                             <a href="/trials/">
-                                <p class="navbutton percentage card">All trials</p>
+                                <p class="navbutton{% if request.path == '/trials/' %} selected{% endif %}">All trials</p>
                             </a>
                         </li>
                         <li>
                             <a href="/about/">
-                              <p class="navbutton percentage card">About</p>
+                              <p class="navbutton{% if request.path == '/about/' %} selected{% endif %}">About</p>
                             </a>
                         </li>
                         <li>
                             <a href="/fund/">
-                              <p class="navbutton percentage card">Fund this work!</p>
+                              <p class="navbutton{% if request.path == '/fund/' %} selected{% endif %}"> Fund this work!</p>
                             </a>
                         </li>
                     </ul>

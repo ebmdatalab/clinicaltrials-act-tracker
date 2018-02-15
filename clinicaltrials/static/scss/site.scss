@@ -1696,3 +1696,14 @@ table.prelaunch td {
 #results {
   opacity: 0;
 }
+
+.navbutton {
+  background-color: $teal-light;
+  color: white;
+  border-radius: 12px;
+}
+
+.navbutton.selected {
+  background-color: $teal-dark;
+}
+
