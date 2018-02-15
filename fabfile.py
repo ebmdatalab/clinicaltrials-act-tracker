@@ -66,12 +66,11 @@ def deploy(environment, branch='master'):
     env.environment = environment
     env.path = "/var/www/%s" % env.app
     env.branch = branch
-
-
     make_directory()
     with cd(env.path):
-        venv_init()
-        update_from_git()
-        pip_install()
-        setup_django()
-        setup_nginx()
+        with prefix("source /etc/profile.d/%s.sh" % env.app):
+            venv_init()
+            update_from_git()
+            pip_install()
+            setup_django()
+            setup_nginx()
