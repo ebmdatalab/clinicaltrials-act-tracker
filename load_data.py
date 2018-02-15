@@ -34,7 +34,7 @@ def upload_to_cloud():
 
 
 def convert_to_json():
-    dpath = '/mnt/database/clinicaltrials/search_result/'
+    dpath = '/mnt/database/clinicaltrials/NCT*/'
     files = [x for x in sorted(glob.glob(dpath + '*.xml'))]
     start = datetime.datetime.now()
     completed = 0
