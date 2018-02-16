@@ -78,9 +78,8 @@
   $(document).ready(function() {
     if ({% if prelaunch_mode %}false{% else %}true{% endif %}) {
       rankingTable('{{ LATEST_DATE|date:"Y-m-d" }}');
-    } else {
-      $('#results').fadeTo(500, 1);
     }
+    $('#results').fadeTo(500, 1);
     showPerformance();
     });
 </script>
