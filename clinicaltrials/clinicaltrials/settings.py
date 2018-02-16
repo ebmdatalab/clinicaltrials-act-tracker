@@ -31,7 +31,9 @@ CLINICALTRIALS_DEBUG = common.utils.get_env_setting('CLINICALTRIALS_DEBUG')
 assert CLINICALTRIALS_DEBUG in ['yes', 'no']
 DEBUG = CLINICALTRIALS_DEBUG == 'yes'
 
-ALLOWED_HOSTS = ['staging-fdaaa.ebmdatalab.net', '127.0.0.1', '192.168.0.55', 'localhost']
+ALLOWED_HOSTS = [
+    'staging-fdaaa.ebmdatalab.net', '127.0.0.1', '192.168.0.55', 'localhost',
+    'fdaaa.trialstracker.net']
 
 
 # Parameters
