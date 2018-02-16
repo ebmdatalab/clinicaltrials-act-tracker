@@ -20,9 +20,5 @@ def google_tracking_id(request):
     return {'GOOGLE_TRACKING_ID': google_tracking_id}
 
 
-def latest_date(request):
-    return {'LATEST_DATE': Ranking.objects.latest('date').date}
-
-
 def next_planned_update(request):
     return {'NEXT_PLANNED_UPDATE': parse_date(settings.NEXT_PLANNED_UPDATE)}
