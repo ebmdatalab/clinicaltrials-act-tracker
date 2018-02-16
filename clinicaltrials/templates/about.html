@@ -30,7 +30,7 @@
         made, errors, omissions, and feature requests.</p>
 
         <h2>Who made the FDAAA TrialsTracker?</h2>
-        <p>We are the <a href="https://ebmdatalab.net">Evidence Based Medicine DataLab</a> at the University of Oxford, a team of academics, software engineers, and clinicians. <a href="https://ebmdatalab.net/seb-bacon/">Seb Bacon</a> was the software engineer; <a href="https://ebmdatalab.net/nicholas-devito/">Nick DeVito</a> the researcher; <a href="https://ebmdatalab.net/ben-goldacre/">Ben Goldacre was the PI</a>; <a href="http://bentheillustrator.com/">Ben O’Brien</a> was the illustrator; and <a href="https://ebmdatalab.net/#team">everyone in the DataLab team</a> contributed. </p>
+        <p>We are the <a href="https://ebmdatalab.net/">Evidence Based Medicine DataLab</a> at the University of Oxford, a team of academics, software engineers, and clinicians working together to make live interactive tools as well as academic papers. <a href="https://ebmdatalab.net/seb-bacon/">Seb Bacon</a> was the software engineer; <a href="https://ebmdatalab.net/nicholas-devito/">Nick DeVito</a> the researcher; <a href="https://ebmdatalab.net/ben-goldacre/">Ben Goldacre</a>  devised the project and was PI; <a href="http://bentheillustrator.com/">Ben O’Brien</a> was the illustrator; <a href="https://ebmdatalab.net/#team">everyone in the DataLab team</a> contributed. Read more about our work at <a href="https://ebmdatalab.net/">ebmdatalab.net</a></p>
 
         <h2>Why do we need all trials to report their results?</h2>
         <p>Clinical trials are the gold standard in medicine: they are
@@ -48,12 +48,12 @@
         processed, how the law operates, and how we translate that
           into code.</p>
 
-        <p>There is <a href="/api/">an API</a>. It's
-        somewhat self-explanatory, but <a href="mailto:hello@ebmdatalab.net">get in touch</a> if you would like
-        to use it and we'll help you out (and write the
-          documentation!)</p>
+        <p>There is <a href="/api/">an API</a>. It's somewhat
+        self-explanatory; however, if you would like to use it and
+        need some help <a href="mailto:hello@ebmdatalab.net">get in
+        touch</a>.</p>
 
-        <p>The code is <a href="https://github.com/ebmdatalab/clinicaltrials-act-tracker/">in Github</a>.</p>
+        <p>. If you want to read the code for the website, it’s on Github <a href="https://github.com/ebmdatalab/clinicaltrials-act-tracker/">here</a>.</p>
 
         <h2>How can I help the FDAAA TrialsTracker?</h2>
         <p>In many, many ways!</p>
@@ -113,15 +113,14 @@
 
             <p>If after reading this you think we are missing a due trial, please <a href="mailto:hello@ebmdatalab.net">get in touch</a>!</p>
           </li>
-          <li>
-            <strong>How do you calculate what fines a sponsor could receive?</strong>
-            The FDA can fine non-reporting sponsors up to $10,000 a day following a 30 day notice period. We calculate the maximum possible fine assuming the sponsor was notified the day after they failed to meet their submission deadline. So each day after 395 days since trial completion without submitted results is another $10,000. You can read more on this in our paper.
-          </li>
-          <li>
-            <strong>When was the data last updated?</strong>
-            The current data was taken from ClinicalTrials.gov on {{ LATEST_DATE|date:"j F Y" }}. Our next update of the data is planned for {{ NEXT_PLANNED_UPDATE|date:"j F Y" }}.
-          </li>
         </ul>
+
+        <h2>How do you calculate what fines a sponsor could receive?</h2>
+        <p>The FDA can fine non-reporting sponsors up to $10,000 a day following a 30 day notice period. We calculate the maximum possible fine assuming the sponsor was notified the day after they failed to meet their submission deadline. So each day after 395 days since trial completion without submitted results is another $10,000. You can read more on this in our paper.</p>
+        <h2>When was the data last updated?</h2>
+        <p>
+          The current data was taken from ClinicalTrials.gov on {{ LATEST_DATE|date:"j F Y" }}. Our next update of the data is planned for {{ NEXT_PLANNED_UPDATE|date:"j F Y" }}.
+        </p>
       </div>
     </div>
 
