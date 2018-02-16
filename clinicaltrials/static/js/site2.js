@@ -62,7 +62,7 @@ function resizeCards() {
   var largestHeight = 19;
   if ($(window).width() >= 768) {
     $('#summary-cards .header').css('height', 'auto');
-    var maxFontSize = 90;
+    var maxFontSize = 150;
     var minFontSize = 10;
     var smallestFont = maxFontSize;
     var sizes = $.each($('#summary-cards .content'), function(i, container) {
