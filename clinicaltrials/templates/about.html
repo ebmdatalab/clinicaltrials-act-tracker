@@ -43,7 +43,8 @@
 
         <h2>I’m a nerd! How is this website built, and what assumptions do you make about the data?</h2>
 
-        <p>Our paper [link] is the best place to read the full
+        <p><a href="/static/fdaaa_trialstracker_2018.pdf">Our paper</a>
+          is the best place to read the full
         technical details of how this site was made, how the data is
         processed, how the law operates, and how we translate that
           into code.</p>
@@ -96,7 +97,7 @@
         <ul>
           <li>
             <strong>The trial may have become due within the last month:</strong>
-            After the trial becomes due, even when the results are submitted to clinicaltrials.gov, there is a window of time in the legislation where clinicaltrials.gov staff can review the submission, and go back to the researchers with queries and requests. The legislation also allows a month for sponsors to send in results after they are nudged on the due day. We therefore allow an additional 30 days, following the 1 year from completion, before we consider a trial’s results due to appear. You can read more detail on this in our paper [link].
+            After the trial becomes due, even when the results are submitted to clinicaltrials.gov, there is a window of time in the legislation where clinicaltrials.gov staff can review the submission, and go back to the researchers with queries and requests. The legislation also allows a month for sponsors to send in results after they are nudged on the due day. We therefore allow an additional 30 days, following the 1 year from completion, before we consider a trial’s results due to appear. You can read more detail on this in <a href="/static/fdaaa_trialstracker_2018.pdf">our paper</a>.
           </li>
           <li>
             <strong>The sponsor may have applied for an exemption:</strong>
@@ -104,7 +105,7 @@
           </li>
           <li>
             <strong>The trial may not be required to report results under FDAAA:</strong>
-            Unfortunately, only a subset of all trials registered on ClinicalTrials.gov are required to report results: essentially the law covers trials on drugs and devices: so a trial on a surgical technique, a public health intervention to reduce smoking, or a talking treatment for mental health problems, would likely be exempt. The trials covered by FDAAA are known as “Applicable Clinical Trials” or ACTs. Unhelpfully, although ClinicalTrials.gov know which trials are ACTs, they do not make this information public. We are, however, able to infer whether a trial is an ACT by using other publicly available data. You can read in detail about how we do this, in our paper [Link].
+            Unfortunately, only a subset of all trials registered on ClinicalTrials.gov are required to report results: essentially the law covers trials on drugs and devices: so a trial on a surgical technique, a public health intervention to reduce smoking, or a talking treatment for mental health problems, would likely be exempt. The trials covered by FDAAA are known as “Applicable Clinical Trials” or ACTs. Unhelpfully, although ClinicalTrials.gov know which trials are ACTs, they do not make this information public. We are, however, able to infer whether a trial is an ACT by using other publicly available data. You can read in detail about how we do this, in <a href="/static/fdaaa_trialstracker_2018.pdf">our paper</a>.
           </li>
           <li>
             <p>
@@ -116,7 +117,7 @@
         </ul>
 
         <h2>How do you calculate what fines a sponsor could receive?</h2>
-        <p>The FDA can fine non-reporting sponsors up to $10,000 a day following a 30 day notice period. We calculate the maximum possible fine assuming the sponsor was notified the day after they failed to meet their submission deadline. So each day after 395 days since trial completion without submitted results is another $10,000. You can read more on this in our paper.</p>
+        <p>The FDA can fine non-reporting sponsors up to $10,000 a day following a 30 day notice period. We calculate the maximum possible fine assuming the sponsor was notified the day after they failed to meet their submission deadline. So each day after 395 days since trial completion without submitted results is another $10,000. You can read more on this in <a href="/static/fdaaa_trialstracker_2018.pdf">our paper</a>.</p>
         <h2>When was the data last updated?</h2>
         <p>
           The current data was taken from ClinicalTrials.gov on {{ LATEST_DATE|date:"j F Y" }}. Our next update of the data is planned for {{ NEXT_PLANNED_UPDATE|date:"j F Y" }}.
