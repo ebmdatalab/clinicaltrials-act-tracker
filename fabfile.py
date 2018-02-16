@@ -49,6 +49,9 @@ def setup_django():
         run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py collectstatic --noinput --settings=clinicaltrials.settings')
         run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py migrate --settings=clinicaltrials.settings')
 
+def restart_gunicorn():
+    run("supervisorctl restart %s" % env.app)
+
 #def run_migrations():
 #    if env.environment == 'live':
 #        with prefix('source .venv/bin/activate'):
@@ -74,3 +77,4 @@ def deploy(environment, branch='master'):
             pip_install()
             setup_django()
             setup_nginx()
+            restart_gunicorn()
