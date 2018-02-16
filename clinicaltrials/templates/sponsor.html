@@ -4,19 +4,29 @@
 {% block content %}
   {% include '_summary_card.html' %}
 
-  {% if request.user.is_authenticated %}
+<div id="results">
+  {% if status_choices %}
   <form class="form">
-    <div class="form-group">
-      {% for k, v, i in status_choices %}
-      <div class="checkbox">
-        <label>
-          <input class="status_filter" type="checkbox" name="status" value="{{ k }}" checked>
-          {{ v }} ({{ i }})
-        </label>
-      </div>
-      {% endfor %}
-    </div>
+    <label id="filter-trials">Filter trials by status:</label>
+    {% for k, v, i in status_choices %}
+    <label for="filter-{{k}}" class="checkbox-inline {% if k == 'overdue' %}
+                                     checkbox-danger
+                                     {% elif k == 'reported' %}
+                                     checkbox-success
+                                     {% elif k == 'reported-late' %}
+                                     checkbox-warning
+                                     {% elif k == 'due' %}
+                                     checkbox-due
+                                     {% else %}
+                                     checkbox-info
+                                     {% endif %}
+                                     ">
+      <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}" data-toggle="toggle">
+      {{ v }}
+    </label>
+    {% endfor %}
   </form>
+  <hr>
   {% endif %}
 
   <table id="trials_table" class="table" cellspacing="0" width="100%">

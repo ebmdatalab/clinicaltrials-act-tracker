@@ -62,8 +62,14 @@ def sponsor(request, slug):
         fine = days_late * 10000
     else:
         fine = None
-    statuses = sponsor.trial_set.values_list('status').distinct()
-    status_choices = [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
+    statuses = [x[0] for x in
+                sponsor.trial_set.order_by(
+                    'status').values_list(
+                        'status').distinct(
+                            'status')]
+    status_choices = [x for x in Trial.objects.status_choices_with_counts() if x[0] in statuses]
+    if len(status_choices) == 1:
+        status_choices = []  # don't show options where there's only one choice
     context = {'sponsor': sponsor,
                'title': "All Applicable Clinical Trials at {}'s ".format(sponsor),
                'status_choices': status_choices,
