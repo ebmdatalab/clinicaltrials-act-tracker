@@ -20,13 +20,13 @@ class TrialManager(models.Manager):
             no_longer_on_website=False).prefetch_related('trialqa_set')
 
     def due(self):
-        return self.filter(results_due=True)
+        return self.filter(status__in=['overdue', 'reported', 'reported-late'])
 
     def not_due(self):
-        return self.filter(results_due=False)
+        return self.filter(status='ongoing')
 
     def unreported(self):
-        return self.filter(has_results=False)
+        return self.filter(status__in=['overdue', 'ongoing'])
 
     def reported(self):
         return self.filter(status__in=['reported', 'reported-late'])
