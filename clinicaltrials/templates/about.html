@@ -29,17 +29,12 @@
         always keen to hear feedback, user stories, insights you’ve
         made, errors, omissions, and feature requests.</p>
 
+        <h2>What’s this all about?</h2>
+
+        <p>The FDA Amendment Act 2007 (“FDAAA”) is a law which says that certain clinical trials have to report their results, within 12 months of completion. This is really important. Doctors and patients use the results of clinical trials to make informed choices about which medicine works best. But the best currently available evidence shows that trial results are routinely withheld. Previously, laws and guidelines aiming to fix this issue have been widely ignored, despite energetic <a href="http://www.alltrials.net/">campaigns</a>. So we built this website, to increase public accountability, and to help researchers make sure they report all their trials. You can read more about the problem in general, and this website, in our <a href="/static/fdaaa_trialstracker_2018.pdf">paper</a> on the project.</p>
+
         <h2>Who made the FDAAA TrialsTracker?</h2>
-        <p>We are the <a href="https://ebmdatalab.net/">Evidence Based Medicine DataLab</a> at the University of Oxford, a team of academics, software engineers, and clinicians working together to make live interactive tools as well as academic papers. <a href="https://ebmdatalab.net/seb-bacon/">Seb Bacon</a> was the software engineer; <a href="https://ebmdatalab.net/nicholas-devito/">Nick DeVito</a> the researcher; <a href="https://ebmdatalab.net/ben-goldacre/">Ben Goldacre</a>  devised the project and was PI; <a href="http://bentheillustrator.com/">Ben O’Brien</a> was the illustrator; <a href="https://ebmdatalab.net/#team">everyone in the DataLab team</a> contributed. Read more about our work at <a href="https://ebmdatalab.net/">ebmdatalab.net</a></p>
-
-        <h2>Why do we need all trials to report their results?</h2>
-        <p>Clinical trials are the gold standard in medicine: they are
-        generally the most fair test of which treatment works best. We
-        use the results of clinical trials to make real-world
-        decisions about which treatments patients should receive. We can’t make
-        informed choices if the results of clinical trials are
-        withheld from doctors, researchers, and patients.</p>
-
+        <p>We are the <a href="https://ebmdatalab.net/">Evidence Based Medicine DataLab</a> at the University of Oxford, a team of academics, software engineers, and clinicians working together to make live interactive tools as well as academic papers. <a href="https://ebmdatalab.net/seb-bacon/">Seb Bacon</a> was the software engineer; <a href="https://ebmdatalab.net/nicholas-devito/">Nick DeVito</a> the researcher; <a href="https://ebmdatalab.net/ben-goldacre/">Ben Goldacre</a>  devised the project and was PI; <a href="http://bentheillustrator.com/">Ben O’Brien</a> was the illustrator; <a href="https://ebmdatalab.net/#team">everyone in the DataLab team</a> contributed. You can read more about our all work - on research integrity, and health informatics more broadly - at <a href="https://ebmdatalab.net/">ebmdatalab.net</a></p>
 
         <h2>I’m a nerd! How is this website built, and what assumptions do you make about the data?</h2>
 
@@ -92,12 +87,31 @@
         clinical trial
         at <a href="https://trialsTracker.net">TrialsTracker.net</a></p>
 
+
+        <h2>What is the difference between an ACT and a pACT?</h2>
+
+        <p>ACT stands for “Applicable Clinical Trial”. These are the
+        specific trials required to report results under FDAAA. ACT,
+        in the context of this tracker, is specifically referring to
+        trials that began after the effective date of the 2016 “Final
+        Rule” (January 18, 2017). While the Final Rule created much
+        clearer criteria for identifying an ACT, trials that began
+        before, and end after, the effective date may be required to
+        report, but data on the criteria for judging whether they are
+        is less available. These trials are called “probable ACTs”, or
+        “pACTS” (by everybody, not just us!) and are identified by a
+        different methodology. We have added a tag to every trial so
+        you know which methodology was used to identify that
+        trial. You can read the details on ACTs and pACTs in our
+        paper.</p>
+
+
         <h2>I found a trial I think is due to report results, under FDAAA, but it’s not listed as due?</h2>
         <p>There are a number of reasons why a trial that completed 12 months ago may not yet be due to report results under FDAAA.</p>
         <ul>
           <li>
             <strong>The trial may have become due within the last month:</strong>
-            After the trial becomes due, even when the results are submitted to clinicaltrials.gov, there is a window of time in the legislation where clinicaltrials.gov staff can review the submission, and go back to the researchers with queries and requests. The legislation also allows a month for sponsors to send in results after they are nudged on the due day. We therefore allow an additional 30 days, following the 1 year from completion, before we consider a trial’s results due to appear. You can read more detail on this in <a href="/static/fdaaa_trialstracker_2018.pdf">our paper</a>.
+            After the trial becomes due, even when the results are submitted to ClinicalTrials.gov, there is a 30 day administrative window to post results. If a trial has submitted results, even if they haven’t been fully posted yet, this should be noted in the study record, and our “webscraping” tool will automatically find that information. However, to be safe, and to account for any updating delays by ClinicalTrials.gov, we wait this entire 30 day period before calling a trial “overdue”. If results show up in the meantime, we will show them as reported. You can read more detail on this in <a href="/static/fdaaa_trialstracker_2018.pdf">our paper</a>.
           </li>
           <li>
             <strong>The sponsor may have applied for an exemption:</strong>
