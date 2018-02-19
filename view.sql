@@ -125,6 +125,7 @@ website_data AS (
     AND (available_completion_date >= '2017-01-18')
     AND (start_date < '2017-01-18')
     AND study_status <> 'Withdrawn'
+    AND (fda_reg_drug <> 'No' AND fda_reg_device <> 'No') -- for trials which were pACTs and the sponsor subsequently updated
     AND (regexp_contains(location, concat("\\b", "United States", "\\b"))
     OR regexp_contains(location, concat("\\b", "American Samoa", "\\b"))
     OR regexp_contains(location, concat("\\b", "Guam", "\\b"))
