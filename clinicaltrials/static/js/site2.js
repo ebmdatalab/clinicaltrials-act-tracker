@@ -89,6 +89,16 @@ function resizeCards() {
   }
 }
 
+function waitForEl(selector, callback) {
+  if ($(selector).length) {
+    callback();
+  } else {
+    setTimeout(function() {
+      waitForEl(selector, callback);
+    }, 100);
+  }
+};
+
 function showPerformance(sponsorSlug) {
   var params = getTrialParams();
   if(typeof sponsorSlug !== 'undefined' && sponsorSlug !== '') {
@@ -102,7 +112,7 @@ function showPerformance(sponsorSlug) {
       $('#percent-amount').text(percentage + '%');
     }
     $('#fine-amount').text(d['fines_str']);
-    resizeCards();
+    waitForEl('html.wf-active', resizeCards);
     $(window).resize(function() {
       resizeCards();
     });
