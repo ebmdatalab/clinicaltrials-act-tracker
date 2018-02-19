@@ -145,7 +145,7 @@ website_data AS (
   case when certificate_date is not null then 1 else 0 end as has_certificate,
   certificate_date,
   case when
-  #sets the deadline for results as 1 year + 30 days from completion date
+   -- sets the deadline for results as 1 year + 30 days from completion date
   (Date_Add(Date_Add(available_completion_date, INTERVAL 1 YEAR), INTERVAL 30 DAY) < current_date())
 
     AND
