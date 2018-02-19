@@ -6,7 +6,7 @@ upstream fdaaa {
 server {
     listen 80;
     listen [::]:80;
-    server_name fda.trialstracker.net fdaa.trialstracker.net trialstracker.net;
+    server_name fda.trialstracker.net fdaa.trialstracker.net trialstracker.net fdaaa.ebmdatalab.net;
     rewrite ^/(.*)$ https://fdaaa.trialstracker.net/$1 redirect;
 }
 
