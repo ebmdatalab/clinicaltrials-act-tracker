@@ -52,6 +52,9 @@ def setup_django():
 def restart_gunicorn():
     run("supervisorctl restart %s" % env.app)
 
+def reload_nginx():
+    run("/etc/init.d/nginx reload")
+
 #def run_migrations():
 #    if env.environment == 'live':
 #        with prefix('source .venv/bin/activate'):
@@ -78,3 +81,4 @@ def deploy(environment, branch='master'):
             setup_django()
             setup_nginx()
             restart_gunicorn()
+            reload_nginx()
