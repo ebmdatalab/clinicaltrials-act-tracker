@@ -165,6 +165,7 @@ website_data AS (
     AND (regexp_contains(intervention, '"Biological"') OR regexp_contains(intervention, '"Drug"')
     OR regexp_contains(intervention, '"Device"') OR regexp_contains(intervention, '"Genetic"') OR regexp_contains(intervention, '"Radiation"'))
     AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' or phase = 'Phase 3' or phase = 'Phase 4' or phase = 'N/A')
+    AND (primary_purpose <> 'Device Feasibility')
     AND (available_completion_date >= '2017-01-18')
     AND (start_date < '2017-01-18')
     AND (study_status <> 'Withdrawn')
