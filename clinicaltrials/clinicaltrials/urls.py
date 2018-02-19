@@ -166,10 +166,14 @@ router.register(r'sponsors', SponsorViewSet)
 
 class StaticViewSitemap(Sitemap):
     priority = 0.5
-    changefreq = 'weekly'
+    changefreq = 'daily'
 
     def items(self):
-        return ['index',]
+        return ['index',
+                'views.trials',
+                'views.about',
+                'views.fund',
+                'views.trials']
 
     def location(self, item):
         return reverse(item)
@@ -181,8 +185,8 @@ urlpatterns = [
     path('trials/', views.trials, name='views.trials'),
     path('sponsor/<slug:slug>/', views.sponsor, name='views.sponsor'),
     path('api/', include('rest_framework.urls')),
-    path('about/', TemplateView.as_view(template_name="about.html")),
-    path('fund/', TemplateView.as_view(template_name="fund.html")),
+    path('about/', TemplateView.as_view(template_name="about.html"), name='views.about'),
+    path('fund/', TemplateView.as_view(template_name="fund.html"), name='views.fund'),
     path('sitemap.xml', sitemap,
          {'sitemaps': {
              'static': StaticViewSitemap,
