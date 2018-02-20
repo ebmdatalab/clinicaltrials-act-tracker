@@ -25,8 +25,9 @@ def download_and_extract():
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
     # download and extract
     wget_command = 'wget -O /mnt/database/clinicaltrials/data.zip'
+    os.system('rm -rf /mnt/database/clinicaltrials/')
     os.system('%s %s' % (wget_command, url))
-    os.system('unzip -d /mnt/database/clinicaltrials/ /mnt/database/clinicaltrials/data.zip')
+    os.system('unzip -o -d /mnt/database/clinicaltrials/ /mnt/database/clinicaltrials/data.zip')
 
 
 def upload_to_cloud():
