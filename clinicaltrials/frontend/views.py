@@ -31,7 +31,7 @@ def performance(request):
         days_late=Sum('finable_days_late'))['days_late']
     fines_str = '$0'
     if days_late:
-        fines_str = "${:,}".format(days_late * 10000)
+        fines_str = "${:,}".format(days_late * settings.FINE_PER_DAY)
     return Response({
         'due': due,
         'reported': reported,

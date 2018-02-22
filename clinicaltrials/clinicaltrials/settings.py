@@ -145,6 +145,7 @@ TEMPLATES = [
                 'frontend.context_processors.google_tracking_id',
                 'frontend.context_processors.latest_date',
                 'frontend.context_processors.next_planned_update',
+                'frontend.context_processors.fine_per_day',
             ],
         },
     },
@@ -237,6 +238,10 @@ STATIC_URL = '/static/'
 LOGIN_REDIRECT_URL = '/'
 
 NEXT_PLANNED_UPDATE = '2018-02-20'
+
+# Fine for each day a trial is late
+# https://www.gpo.gov/fdsys/pkg/FR-2017-02-03/pdf/2017-02300.pdf
+FINE_PER_DAY = 11569
 
 PRELAUNCH_MODE = False
 

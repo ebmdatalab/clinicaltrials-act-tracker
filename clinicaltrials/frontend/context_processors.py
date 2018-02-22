@@ -31,3 +31,6 @@ def latest_date(request):
 
 def next_planned_update(request):
     return {'NEXT_PLANNED_UPDATE': parse_date(settings.NEXT_PLANNED_UPDATE)}
+
+def fine_per_day(request):
+    return {'FINE_PER_DAY': settings.FINE_PER_DAY}

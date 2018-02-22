@@ -131,14 +131,14 @@
           </li>
         </ul>
 
-        <h2>I found a journal article/conference abstract/other document containing results from this study. Why are you saying it has unreported results?</h2>  
+        <h2>I found a journal article/conference abstract/other document containing results from this study. Why are you saying it has unreported results?</h2>
         <p>The FDAAA 2007 is a law that requires all applicable trials to report their results on ClinicalTrials.gov within 12 months of completion. This is to ensure that results are shared in a timely manner without editorial delays; to ensure that results can be easily located; and to ensure that results are completely and correctly reported. FDAAA sets out a standard format for reporting clinical trials. <a href="http://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1001566">Previous research has shown</a> that overall journal publications are significantly less complete than structured reports on ClinicalTrials.gov: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4650202/">for example, journals often permit misreporting of prespecified outcomes</a>, and are less complete on safety data. Journal reporting is often interesting and useful but the law requires results to be reported on ClinicalTrials.gov.</p>
-        
-        <h2>This trial’s primary completion date has passed, but it has not yet reached its completion date. Why are you saying it is required to report?</h2>  
+
+        <h2>This trial’s primary completion date has passed, but it has not yet reached its completion date. Why are you saying it is required to report?</h2>
         <p>Under FDAAA trials are required to report within 12 months of their “Primary Completion Date”. The “Completion Date” is a different data field. These data fields have <a href="https://prsinfo.clinicaltrials.gov/definitions.html">very specific meanings and definitions on ClinicalTrials.gov</a>. The Primary Completion Date is the last visit of the last subject for measurement of the primary outcomes. Some trials may additionally continue to follow-up with patients for weeks, months, or even years after they finish collecting data on their primary outcomes. The responsible party is required to report the results for the primary outcomes 12 months after the Primary Completion Date. We use the “Completion Date” field to measure when a trial is due to report if the “Primary Completion Date” field is missing. ClinicalTrials.gov allows trial results records to be updated and amended, as needed, to accommodate additional results if and when they become available.</p>
-          
+
         <h2>How do you calculate what fines a sponsor could receive?</h2>
-        <p>The FDA can fine non-reporting sponsors up to $10,000 a day following a 30 day notice period. We calculate the maximum possible fine assuming the sponsor was notified the day after they failed to meet their submission deadline. So each day after 395 days since trial completion without submitted results is another $10,000. You can read more on this in <a href="https://doi.org/10.1101/266452">our paper</a>.</p>
+        <p>The FDA can fine non-reporting sponsors up to ${{ FINE_PER_DAY|intcomma }} a day following a 30 day notice period. We calculate the maximum possible fine assuming the sponsor was notified the day after they failed to meet their submission deadline. So each day after 395 days since trial completion without submitted results is another ${{ FINE_PER_DAY|intcomma }}. You can read more on this in <a href="https://doi.org/10.1101/266452">our paper</a>.</p>
         <h2>When was the data last updated?</h2>
         <p>
           The current data was taken from ClinicalTrials.gov on {{ LATEST_DATE|date:"j F Y" }}. Our next update of the data is planned for {{ NEXT_PLANNED_UPDATE|date:"j F Y" }}.
