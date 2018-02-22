@@ -103,7 +103,7 @@ SELECT
   json_EXTRACT(json,
     "$.clinical_study.intervention_browse") AS intervention_mesh
 FROM
-   ebmdatalab.clinicaltrials.clinicaltrials_json),
+   ebmdatalab.clinicaltrials.current_raw_json),
 
 website_data AS (
  SELECT
