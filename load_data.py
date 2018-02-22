@@ -30,13 +30,14 @@ def download_and_extract():
     print("Downloading. This takes at least 30 mins on a fast connection!")
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
     # download and extract
-    wget_command = 'wget -O /mnt/database/clinicaltrials/data.zip'
+    wget_command = 'wget -O /mnt/database/clinicaltrials/data.zip {}'.format(url)
     os.system('rm -rf /mnt/database/clinicaltrials/')
     os.system('%s %s' % (wget_command, url))
     os.system('unzip -o -d /mnt/database/clinicaltrials/ /mnt/database/clinicaltrials/data.zip')
 
 
 def upload_to_cloud():
+    # XXX we should periodically delete old ones of these
     os.system("gsutil cp {}  gs://ebmdatalab/{}".format(raw_json_name(), STORAGE_PREFIX))
 
 
@@ -63,6 +64,7 @@ def convert_to_json():
             per_file = elapsed.seconds / completed
             remaining = int(per_file * (len(files) - completed) / 60.0)
             print(remaining, "minutes remaining")
+
 
 
 def convert_and_download():
