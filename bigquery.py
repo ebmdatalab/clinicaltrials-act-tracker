@@ -11,8 +11,6 @@ from google.cloud import bigquery as gcbq
 from google.cloud import storage as gcs
 from google.cloud.exceptions import Conflict, NotFound
 
-import pandas as pd
-
 PROJECT = 'ebmdatalab'
 BQ_LOCATION = 'EU'
 BQ_DEFAULT_TABLE_EXPIRATION_MS = None
@@ -161,20 +159,6 @@ class Client(object):
         wait_for_job(query.job)
 
         return query
-
-    def query_into_dataframe(self, sql, legacy=False):
-        sql = interpolate_sql(sql)
-        kwargs = {
-            'project_id': self.project_name,
-            'verbose': False,
-            'dialect': 'legacy' if legacy else 'standard',
-        }
-        try:
-            return pd.read_gbq(sql, **kwargs)
-        except:
-            for n, line in enumerate(sql.splitlines()):
-                print(n + 1, line)
-            raise
 
 
 class Table(object):
