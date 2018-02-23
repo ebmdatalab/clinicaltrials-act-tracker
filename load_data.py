@@ -9,7 +9,9 @@ import subprocess
 import json
 import glob
 import datetime
+import requests
 from google.cloud.exceptions import NotFound
+
 
 STORAGE_PREFIX = 'clinicaltrials/'
 WORKING_VOLUME = '/mnt/volume-lon1-01/'   # location with at least 10GB space
@@ -46,6 +48,23 @@ def download_and_extract():
 def upload_to_cloud():
     # XXX we should periodically delete old ones of these
     run("gsutil cp {}  gs://ebmdatalab/{}".format(raw_json_name(), STORAGE_PREFIX))
+
+
+def notify_slack(message):
+    """Posts the message to #general
+    """
+    # Set the webhook_url to the one provided by Slack when you create
+    # the webhook at
+    # https://my.slack.com/services/new/incoming-webhook/
+    webhook_url = os.environ['SLACK_GENERAL_POST_KEY']
+    slack_data = {'text': message}
+
+    response = requests.post(webhook_url, json=slack_data)
+    if response.status_code != 200:
+        raise ValueError(
+            'Request to slack returned an error %s, the response is:\n%s'
+            % (response.status_code, response.text)
+        )
 
 
 def convert_to_json():
@@ -122,7 +141,10 @@ if __name__ == '__main__':
     upload_to_cloud()
     convert_and_download()
     run("source /etc/profile.d/fdaaa_staging.sh &&  /var/www/fdaaa_staging/venv/bin/python /var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=clinicaltrials.settings")
-    print("""Check staging. If it looks good, run
-         source /etc/profile.d/fdaaa_staging.sh &&  /var/www/fdaaa/venv/bin/python /var/www/fdaaa/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=clinicaltrials.settings
+    notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.
 
+If this looks good, a dev should run the following on smallweb1:
+
+```source /etc/profile.d/fdaaa.sh &&  /var/www/fdaaa/venv/bin/python /var/www/fdaaa/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=clinicaltrials.settings
+```
 """)
