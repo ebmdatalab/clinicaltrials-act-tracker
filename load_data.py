@@ -11,7 +11,7 @@ import datetime
 from google.cloud.exceptions import NotFound
 
 STORAGE_PREFIX = 'clinicaltrials/'
-
+WORKING_VOLUME = '/mnt/volume-lon1-01/'   # location with at least 10GB space
 
 def raw_json_name():
     date = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -30,10 +30,10 @@ def download_and_extract():
     print("Downloading. This takes at least 30 mins on a fast connection!")
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
     # download and extract
-    wget_command = 'wget -O /mnt/database/clinicaltrials/data.zip {}'.format(url)
-    os.system('rm -rf /mnt/database/clinicaltrials/')
-    os.system('%s %s' % (wget_command, url))
-    os.system('unzip -o -d /mnt/database/clinicaltrials/ /mnt/database/clinicaltrials/data.zip')
+    wget_command = "wget -O {}clinicaltrials/data.zip {}".format(WORKING_VOLUME, url)
+    os.system("rm -rf {}clinicaltrials/".format(WORKING_VOLUME))
+    os.system("%s %s" % (wget_command, url))
+    os.system("unzip -o -d {}clinicaltrials/ {}clinicaltrials/data.zip".format(WORKING_VOLUME, WORKING_VOLUME))
 
 
 def upload_to_cloud():
@@ -42,7 +42,7 @@ def upload_to_cloud():
 
 
 def convert_to_json():
-    dpath = '/mnt/database/clinicaltrials/NCT*/'
+    dpath = WORKING_VOLUME + 'clinicaltrials/NCT*/'
     files = [x for x in sorted(glob.glob(dpath + '*.xml'))]
     start = datetime.datetime.now()
     completed = 0
