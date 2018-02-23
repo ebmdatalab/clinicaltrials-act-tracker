@@ -38,7 +38,7 @@ def download_and_extract():
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
     # download and extract
     wget_command = "wget -O {}clinicaltrials/data.zip {}".format(WORKING_VOLUME, url)
-    run("rm -rf {}clinicaltrials/".format(WORKING_VOLUME))
+    run("rm -rf {}clinicaltrials/*".format(WORKING_VOLUME))
     run("%s %s" % (wget_command, url))
     run("unzip -o -d {}clinicaltrials/ {}clinicaltrials/data.zip".format(WORKING_VOLUME, WORKING_VOLUME))
 
