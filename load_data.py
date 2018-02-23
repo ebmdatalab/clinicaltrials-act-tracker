@@ -47,7 +47,7 @@ def download_and_extract():
 
 def upload_to_cloud():
     # XXX we should periodically delete old ones of these
-    run("gsutil cp {}  gs://ebmdatalab/{}".format(raw_json_name(), STORAGE_PREFIX))
+    run("gsutil cp {}{}  gs://ebmdatalab/{}".format(WORKING_VOLUME, raw_json_name(), STORAGE_PREFIX))
 
 
 def notify_slack(message):
@@ -72,7 +72,7 @@ def convert_to_json():
     files = [x for x in sorted(glob.glob(dpath + '*.xml'))]
     start = datetime.datetime.now()
     completed = 0
-    with open(raw_json_name(), 'a') as f2:
+    with open(WORKING_VOLUME + raw_json_name(), 'a') as f2:
         for source in files:
             print("Converting", source)
             with open(source, 'rb') as f:
