@@ -101,22 +101,21 @@ def convert_and_download():
     t1_exporter.export_to_storage()
 
     #with tempfile.NamedTemporaryFile(mode='r+') as f:
-    with open('outfile.csv', 'w') as f:
+    with open('/tmp/clinical_trials.csv', 'w') as f:
         t1_exporter.download_from_storage_and_unzip(f)
 
 
 if __name__ == '__main__':
     try:
-        os.remove("data.json")
+        os.remove("/tmp/clinical_trials.csv")
     except OSError:
         pass
     download_and_extract()
     convert_to_json()
     upload_to_cloud()
     convert_and_download()
-    print("""
-    Run:
-        . /etc/profile.d/fdaaa.sh && ../../venv/bin/python manage.py process_data --input-csv=/tmp/launch.csv --settings=clinicaltrials.settings
+    os.system("source /etc/profile.d/fdaaa_staging.sh &&  /var/www/fdaaa_staging/venv/bin/python /var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=clinicaltrials.settings")
+    print("""Check staging. If it looks good, run
+         source /etc/profile.d/fdaaa_staging.sh &&  /var/www/fdaaa/venv/bin/python /var/www/fdaaa/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=clinicaltrials.settings
 
-    Finally, update NEXT_PLANNED_UPDATE in settings.py and restart the server
-    """)
+""")
