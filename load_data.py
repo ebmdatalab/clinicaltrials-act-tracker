@@ -5,6 +5,7 @@ from bigquery import wait_for_job
 from bigquery import gen_job_name
 import xmltodict
 import os
+import subprocess
 import json
 import glob
 import datetime
@@ -16,6 +17,12 @@ WORKING_VOLUME = '/mnt/volume-lon1-01/'   # location with at least 10GB space
 def raw_json_name():
     date = datetime.datetime.now().strftime('%Y-%m-%d')
     return "raw_clincialtrials_json_{}.csv".format(date)
+
+
+def run(cmd):
+    completed = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if completed.returncode > 0:
+        raise RuntimeError(completed.stderr)
 
 
 def postprocessor(path, key, value):
@@ -31,14 +38,14 @@ def download_and_extract():
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
     # download and extract
     wget_command = "wget -O {}clinicaltrials/data.zip {}".format(WORKING_VOLUME, url)
-    os.system("rm -rf {}clinicaltrials/".format(WORKING_VOLUME))
-    os.system("%s %s" % (wget_command, url))
-    os.system("unzip -o -d {}clinicaltrials/ {}clinicaltrials/data.zip".format(WORKING_VOLUME, WORKING_VOLUME))
+    run("rm -rf {}clinicaltrials/".format(WORKING_VOLUME))
+    run("%s %s" % (wget_command, url))
+    run("unzip -o -d {}clinicaltrials/ {}clinicaltrials/data.zip".format(WORKING_VOLUME, WORKING_VOLUME))
 
 
 def upload_to_cloud():
     # XXX we should periodically delete old ones of these
-    os.system("gsutil cp {}  gs://ebmdatalab/{}".format(raw_json_name(), STORAGE_PREFIX))
+    run("gsutil cp {}  gs://ebmdatalab/{}".format(raw_json_name(), STORAGE_PREFIX))
 
 
 def convert_to_json():
@@ -114,7 +121,7 @@ if __name__ == '__main__':
     convert_to_json()
     upload_to_cloud()
     convert_and_download()
-    os.system("source /etc/profile.d/fdaaa_staging.sh &&  /var/www/fdaaa_staging/venv/bin/python /var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=clinicaltrials.settings")
+    run("source /etc/profile.d/fdaaa_staging.sh &&  /var/www/fdaaa_staging/venv/bin/python /var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=clinicaltrials.settings")
     print("""Check staging. If it looks good, run
          source /etc/profile.d/fdaaa_staging.sh &&  /var/www/fdaaa/venv/bin/python /var/www/fdaaa/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=clinicaltrials.settings
 
