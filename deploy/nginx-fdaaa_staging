@@ -8,8 +8,6 @@ server {
     listen 80;
     listen [::]:80;
     server_name staging-fdaaa.ebmdatalab.net;
-    auth_basic "For EBM DataLab eyes only";
-    auth_basic_user_file /etc/nginx/htpasswd-eutrialstracker.users;
 
     resolver 8.8.8.8 8.8.4.4 valid=300s;
     resolver_timeout 5s;
