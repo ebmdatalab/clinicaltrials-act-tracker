@@ -237,7 +237,7 @@ STATIC_URL = '/static/'
 
 LOGIN_REDIRECT_URL = '/'
 
-NEXT_PLANNED_UPDATE = '2018-02-20'
+NEXT_PLANNED_UPDATE = '2018-02-26'
 
 # Fine for each day a trial is late
 # https://www.gpo.gov/fdsys/pkg/FR-2017-02-03/pdf/2017-02300.pdf
