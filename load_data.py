@@ -15,6 +15,8 @@ from google.cloud.exceptions import NotFound
 
 STORAGE_PREFIX = 'clinicaltrials/'
 WORKING_VOLUME = '/mnt/volume-lon1-01/'   # location with at least 10GB space
+WORKING_DIR = WORKING_VOLUME + STORAGE_PREFIX
+
 
 def raw_json_name():
     date = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -39,15 +41,15 @@ def download_and_extract():
     print("Downloading. This takes at least 30 mins on a fast connection!")
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
     # download and extract
-    wget_command = "wget -O {}clinicaltrials/data.zip {}".format(WORKING_VOLUME, url)
-    run("rm -rf {}clinicaltrials/*".format(WORKING_VOLUME))
+    wget_command = "wget -O {}data.zip {}".format(WORKING_DIR, url)
+    run("rm -rf {}*".format(WORKING_DIR))
     run("%s %s" % (wget_command, url))
-    run("unzip -o -d {}clinicaltrials/ {}clinicaltrials/data.zip".format(WORKING_VOLUME, WORKING_VOLUME))
+    run("unzip -o -d {} {}data.zip".format(WORKING_DIR, WORKING_DIR))
 
 
 def upload_to_cloud():
     # XXX we should periodically delete old ones of these
-    run("gsutil cp {}{}  gs://ebmdatalab/{}".format(WORKING_VOLUME, raw_json_name(), STORAGE_PREFIX))
+    run("gsutil cp {}{}  gs://ebmdatalab/{}".format(WORKING_DIR, raw_json_name(), STORAGE_PREFIX))
 
 
 def notify_slack(message):
@@ -68,11 +70,11 @@ def notify_slack(message):
 
 
 def convert_to_json():
-    dpath = WORKING_VOLUME + 'clinicaltrials/NCT*/'
+    dpath = WORKING_DIR + 'NCT*/'
     files = [x for x in sorted(glob.glob(dpath + '*.xml'))]
     start = datetime.datetime.now()
     completed = 0
-    with open(WORKING_VOLUME + raw_json_name(), 'a') as f2:
+    with open(WORKING_DIR + raw_json_name(), 'a') as f2:
         for source in files:
             print("Converting", source)
             with open(source, 'rb') as f:
