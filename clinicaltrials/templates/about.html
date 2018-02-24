@@ -31,14 +31,14 @@
 
         <h2>What’s this all about?</h2>
 
-        <p>The FDA Amendments Act 2007 (“FDAAA”) is a law which says that certain clinical trials have to report their results, within 12 months of completion. This is really important. Doctors and patients use the results of clinical trials to make informed choices about which medicine works best. But the best currently available evidence shows that trial results are routinely withheld. Previously, laws and guidelines aiming to fix this issue have been widely ignored, despite energetic <a href="http://www.alltrials.net/">campaigns</a>. So we built this website, to increase public accountability, and to help researchers make sure they report all their trials. You can read more about the problem in general, and this website, in our <a href="https://doi.org/10.1101/266452">paper</a> on the project.</p>
+        <p>The <href a="https://www.gpo.gov/fdsys/pkg/PLAW-110publ85/pdf/PLAW-110publ85.pdf">FDA Amendments Act 2007</a> (“FDAAA”) is a law which says that <a href="https://www.gpo.gov/fdsys/pkg/FR-2016-09-21/pdf/2016-22129.pdf">certain clinical trials have to report their results, within 12 months of completion</a>. This is really important. Doctors and patients use the results of clinical trials to make informed choices about which medicine works best. But the best currently available evidence shows that trial results are routinely withheld. Previously, laws and guidelines aiming to fix this issue have been widely ignored, despite energetic <a href="http://www.alltrials.net/">campaigns</a>. So we built this website, to increase public accountability, and to help researchers make sure they report all their trials. You can read more about the problem in general, and this website, in our <a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">paper</a> on the project.</p>
 
         <h2>Who made the FDAAA TrialsTracker?</h2>
         <p>We are the <a href="https://ebmdatalab.net/">Evidence Based Medicine DataLab</a> at the University of Oxford, a team of academics, software engineers, and clinicians working together to make live interactive tools as well as academic papers. <a href="https://ebmdatalab.net/seb-bacon/">Seb Bacon</a> was the software engineer; <a href="https://ebmdatalab.net/nicholas-devito/">Nick DeVito</a> the researcher; <a href="https://ebmdatalab.net/ben-goldacre/">Ben Goldacre</a>  devised the project and was PI; <a href="http://bentheillustrator.com/">Ben O’Brien</a> was the illustrator; <a href="https://ebmdatalab.net/#team">everyone in the DataLab team</a> contributed. You can read more about our all work - on research integrity, and health informatics more broadly - at <a href="https://ebmdatalab.net/">ebmdatalab.net</a></p>
 
         <h2>I’m a nerd! How is this website built, and what assumptions do you make about the data?</h2>
 
-        <p><a href="https://doi.org/10.1101/266452">Our paper</a>
+        <p><a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">Our paper</a>
           is the best place to read the full
         technical details of how this site was made, how the data is
         processed, how the law operates, and how we translate that
@@ -102,8 +102,8 @@
         “pACTS” (by everybody, not just us!) and are identified by a
         different methodology. We have added a tag to every trial so
         you know which methodology was used to identify that
-        trial. You can read the details on ACTs and pACTs in our
-        paper.</p>
+        trial. You can read the details on ACTs and pACTs in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">our
+            paper</a>.</p>
 
         <p>If you think we have wrongly identified a trial, please <a href="mailto:hello@ebmdatalab.net">get in touch</a>!</p>
 
@@ -112,7 +112,7 @@
         <ul>
           <li>
             <strong>The trial may have become due within the last month:</strong>
-            After the trial becomes due, even when the results are submitted to ClinicalTrials.gov, there is a 30 day administrative window to post results. If a trial has submitted results, even if they haven’t been fully posted yet, this should be noted in the study record, and our “webscraping” tool will automatically find that information. However, to be safe, and to account for any updating delays by ClinicalTrials.gov, we wait this entire 30 day period before calling a trial “overdue”. If results show up in the meantime, we will show them as reported. You can read more detail on this in <a href="/static/fdaaa_trialstracker_2018.pdf">our paper</a>.
+            After the trial becomes due, even when the results are submitted to ClinicalTrials.gov, there is a 30 day administrative window to post results. If a trial has submitted results, even if they haven’t been fully posted yet, this should be noted in the study record, and our “webscraping” tool will automatically find that information. However, to be safe, and to account for any updating delays by ClinicalTrials.gov, we wait this entire 30 day period before calling a trial “overdue”. If results show up in the meantime, we will show them as reported. You can read more detail on this in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">our paper</a>.
           </li>
           <li>
             <strong>The sponsor may have applied for an exemption:</strong>
@@ -120,7 +120,7 @@
           </li>
           <li>
             <strong>The trial may not be required to report results under FDAAA:</strong>
-            Unfortunately, only a subset of all trials registered on ClinicalTrials.gov are required to report results: essentially the law covers trials on drugs and devices: so a trial on a surgical technique, a public health intervention to reduce smoking, or a talking treatment for mental health problems, would likely be exempt. The trials covered by FDAAA are known as “Applicable Clinical Trials” or ACTs. Unhelpfully, although ClinicalTrials.gov know which trials are ACTs, they do not make this information public. We are, however, able to infer whether a trial is an ACT by using other publicly available data. You can read in detail about how we do this, in <a href="/static/fdaaa_trialstracker_2018.pdf">our paper</a>.
+            Unfortunately, only a subset of all trials registered on ClinicalTrials.gov are required to report results: essentially the law covers trials on drugs and devices: so a trial on a surgical technique, a public health intervention to reduce smoking, or a talking treatment for mental health problems, would likely be exempt. The trials covered by FDAAA are known as “Applicable Clinical Trials” or ACTs. Unhelpfully, although ClinicalTrials.gov know which trials are ACTs, they do not make this information public. We are, however, able to infer whether a trial is an ACT by using other publicly available data. You can read in detail about how we do this, in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">our paper</a>.
           </li>
           <li>
             <p>
@@ -138,7 +138,7 @@
         <p>Under FDAAA trials are required to report within 12 months of their “Primary Completion Date”. The “Completion Date” is a different data field. These data fields have <a href="https://prsinfo.clinicaltrials.gov/definitions.html">very specific meanings and definitions on ClinicalTrials.gov</a>. The Primary Completion Date is the last visit of the last subject for measurement of the primary outcomes. Some trials may additionally continue to follow-up with patients for weeks, months, or even years after they finish collecting data on their primary outcomes. The responsible party is required to report the results for the primary outcomes 12 months after the Primary Completion Date. We use the “Completion Date” field to measure when a trial is due to report if the “Primary Completion Date” field is missing. ClinicalTrials.gov allows trial results records to be updated and amended, as needed, to accommodate additional results if and when they become available.</p>
 
         <h2>How do you calculate what fines a sponsor could receive?</h2>
-        <p>The FDA can fine (per 333(f)(3)(B) in table <a href="https://www.gpo.gov/fdsys/pkg/FR-2017-02-03/pdf/2017-02300.pdf">here</a>) non-reporting sponsors up to ${{ FINE_PER_DAY|intcomma }} a day following a 30 day notice period. We calculate the maximum possible fine assuming the sponsor was notified the day after they failed to meet their submission deadline. So each day after 1 year plus 30 days since trial completion without submitted results is another ${{ FINE_PER_DAY|intcomma }}. You can read more on this in <a href="https://doi.org/10.1101/266452">our paper</a>.</p>
+        <p>The FDA can fine (per 333(f)(3)(B) in table <a href="https://www.gpo.gov/fdsys/pkg/FR-2017-02-03/pdf/2017-02300.pdf">here</a>) non-reporting sponsors up to ${{ FINE_PER_DAY|intcomma }} a day following a 30 day notice period. We calculate the maximum possible fine assuming the sponsor was notified the day after they failed to meet their submission deadline. So each day after 1 year plus 30 days since trial completion without submitted results is another ${{ FINE_PER_DAY|intcomma }}. You can read more on this in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">our paper</a>.</p>
 
         <h2>When was the data last updated?</h2>
         <p>
