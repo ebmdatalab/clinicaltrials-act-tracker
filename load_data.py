@@ -115,7 +115,8 @@ def convert_and_download():
         schema,
         storage_path
     )
-    with open('view.sql', 'r') as sql_file:
+    sql_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'view.sql')
+    with open(sql_path, 'r') as sql_file:
         job = table.gcbq_client.run_async_query(gen_job_name(), sql_file.read())
         job.destination = tmp_table
         job.use_legacy_sql = False
