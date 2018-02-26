@@ -7,6 +7,7 @@ from django.db import models
 from django.db import transaction
 from django.db.models import F
 from django.db.models import Q
+from django.db.models import Sum
 from django.utils.text import slugify
 from django.utils.dateparse import parse_date
 from django.urls import reverse
@@ -242,21 +243,26 @@ class RankingManager(models.Manager):
                 reported = Trial.objects.reported().filter(
                         sponsor=sponsor).count()
                 total = sponsor.trial_set.count()
-                try:
-                    ranking = sponsor.rankings.get(
-                        date=sponsor.updated_date)
-                    ranking.due = due
-                    ranking.reported = reported
-                    ranking.total = total
-                    ranking.save()
-                except Ranking.DoesNotExist:
-                    ranking = sponsor.rankings.create(
-                        date=sponsor.updated_date,
-                        due=due,
-                        reported=reported,
-                        total=total
-                    )
-            self._compute_ranks()
+                days_late = sponsor.trial_set.aggregate(
+                    total_days_late=Sum('days_late'))['total_days_late']
+                finable_days_late = sponsor.trial_set.aggregate(
+                    total_finable_days_late=Sum('finable_days_late'))['total_finable_days_late']
+                d = {
+                    'due': due,
+                    'reported': reported,
+                    'total': total,
+                    'date': sponsor.updated_date,
+                    'days_late': days_late,
+                    'finable_days_late': finable_days_late
+                }
+                ranking = sponsor.rankings.filter(
+                    date=sponsor.updated_date)
+                if len(ranking) == 0:
+                    ranking = sponsor.rankings.create(**d)
+                else:
+                    assert len(ranking) == 1
+                    ranking.update(**d)
+                self._compute_ranks()
 
 
 class Ranking(models.Model):
@@ -266,6 +272,8 @@ class Ranking(models.Model):
     date = models.DateField(db_index=True)
     rank = models.IntegerField(null=True)
     due = models.IntegerField()
+    days_late = models.IntegerField(null=True, blank=True)
+    finable_days_late = models.IntegerField(null=True, blank=True)
     total = models.IntegerField()
     reported = models.IntegerField()
     percentage = models.IntegerField(null=True)
