@@ -243,7 +243,5 @@ NEXT_PLANNED_UPDATE = '2018-02-26'
 # https://www.gpo.gov/fdsys/pkg/FR-2017-02-03/pdf/2017-02300.pdf
 FINE_PER_DAY = 11569
 
-PRELAUNCH_MODE = False
-
 BQ_PROJECT = 'clinicaltrials'
 BQ_HSCIC_DATASET = ''
