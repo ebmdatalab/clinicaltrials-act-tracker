@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from bigquery import Client
 from bigquery import TableExporter
 from bigquery import wait_for_job
@@ -17,6 +18,7 @@ STORAGE_PREFIX = 'clinicaltrials/'
 WORKING_VOLUME = '/mnt/volume-lon1-01/'   # location with at least 10GB space
 WORKING_DIR = WORKING_VOLUME + STORAGE_PREFIX
 
+logging.basicConfig(filename='{}data_load.log'.format(WORKING_DIR), level=logging.DEBUG)
 
 def raw_json_name():
     date = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -38,7 +40,7 @@ def postprocessor(path, key, value):
 
 
 def download_and_extract():
-    print("Downloading. This takes at least 30 mins on a fast connection!")
+    logging.info("Downloading. This takes at least 30 mins on a fast connection!")
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
     # download and extract
     wget_command = "wget -O {}data.zip {}".format(WORKING_DIR, url)
@@ -49,6 +51,7 @@ def download_and_extract():
 
 def upload_to_cloud():
     # XXX we should periodically delete old ones of these
+    logging.info("Uploading to cloud")
     run("gsutil cp {}{}  gs://ebmdatalab/{}".format(WORKING_DIR, raw_json_name(), STORAGE_PREFIX))
 
 
@@ -70,13 +73,14 @@ def notify_slack(message):
 
 
 def convert_to_json():
+    logging.info("Converting to JSON...")
     dpath = WORKING_DIR + 'NCT*/'
     files = [x for x in sorted(glob.glob(dpath + '*.xml'))]
     start = datetime.datetime.now()
     completed = 0
     with open(WORKING_DIR + raw_json_name(), 'a') as f2:
         for source in files:
-            print("Converting", source)
+            logging.info("Converting %s", source)
             with open(source, 'rb') as f:
                 f2.write(
                     json.dumps(
@@ -91,11 +95,12 @@ def convert_to_json():
             elapsed = datetime.datetime.now() - start
             per_file = elapsed.seconds / completed
             remaining = int(per_file * (len(files) - completed) / 60.0)
-            print(remaining, "minutes remaining")
+            logging.info("%s minutes remaining", remaining)
 
 
 
 def convert_and_download():
+    logging.info("Executing SQL in cloud and downloading results...")
     storage_path = STORAGE_PREFIX + raw_json_name()
     schema = [
         {'name': 'json', 'type': 'string'},
