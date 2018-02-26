@@ -18,7 +18,7 @@ STORAGE_PREFIX = 'clinicaltrials/'
 WORKING_VOLUME = '/mnt/volume-lon1-01/'   # location with at least 10GB space
 WORKING_DIR = WORKING_VOLUME + STORAGE_PREFIX
 
-logging.basicConfig(filename='{}data_load.log'.format(WORKING_DIR), level=logging.DEBUG)
+logging.basicConfig(filename='{}data_load.log'.format(WORKING_VOLUME), level=logging.DEBUG)
 
 def raw_json_name():
     date = datetime.datetime.now().strftime('%Y-%m-%d')

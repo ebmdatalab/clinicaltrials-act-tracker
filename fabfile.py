@@ -3,6 +3,7 @@ from fabric.api import prefix, warn, abort
 from fabric.api import settings, task, env, shell_env
 from fabric.contrib.files import exists
 from fabric.context_managers import cd
+from fabric.operations import prompt
 
 from datetime import datetime
 import json
@@ -63,8 +64,7 @@ def reload_nginx():
 #    else:
 #        warn("Refusing to run migrations in staging environment")
 
-@task
-def deploy(environment, branch='master'):
+def setup(environment, branch='master'):
     if environment not in environments:
         abort("Specified environment must be one of %s" %
               ",".join(environments.keys()))
@@ -72,6 +72,12 @@ def deploy(environment, branch='master'):
     env.environment = environment
     env.path = "/var/www/%s" % env.app
     env.branch = branch
+    return env
+
+
+@task
+def deploy(environment, branch='master'):
+    env = setup(environment, branch)
     make_directory()
     with cd(env.path):
         with prefix("source /etc/profile.d/%s.sh" % env.app):
@@ -82,3 +88,15 @@ def deploy(environment, branch='master'):
             setup_nginx()
             restart_gunicorn()
             reload_nginx()
+@task
+def update(environment):
+    # This currently assumes a workflow where data is first deployed
+    # to staging, then reviewed, then copied to live.  Longer term we
+    # may miss out the moderation step and scrape directly to live
+    env = setup(environment)
+    if environment == 'staging':
+        run('screen -dm {}/clinicaltrials-act-tracker/deploy/run_update_staging.sh'.format(env.path))
+    else:
+        do_run = prompt("Copy data from staging database to live?")
+        if do_run.lower() == 'y':
+            run("su -c '/usr/bin/pg_dump --clean -t frontend_trial -t frontend_sponsor -t frontend_ranking -t frontend_trialqa clinicaltrials_staging | psql clinicaltrials' postgres")
