@@ -71,7 +71,7 @@ def sponsor(request, slug):
     if len(status_choices) == 1:
         status_choices = []  # don't show options where there's only one choice
     context = {'sponsor': sponsor,
-               'title': "All Applicable Clinical Trials at {}'s ".format(sponsor),
+               'title': "All Applicable Clinical Trials at {}".format(sponsor),
                'status_choices': status_choices,
                'fine': fine
     }
