@@ -112,12 +112,13 @@ class Trial(models.Model):
 
     def compute_metadata(self):
         self.days_late = self.get_days_late()
+        self.finable_days_late = None
         if self.days_late:
             self.finable_days_late = max([
                 self.days_late - Trial.FINES_GRACE_PERIOD,
                 0])
-        else:
-            self.finable_days_late = 0
+            if self.finable_days_late == 0:
+                self.finable_days_late = None
         self.status = self.get_status()
         self.save()
 
@@ -169,6 +170,8 @@ class Trial(models.Model):
                         0])
                     if (days_late - GRACE_PERIOD) <= 0:
                         days_late = 0
+            if days_late == 0:
+                days_late = None
 
         return days_late
 
