@@ -88,15 +88,29 @@ def deploy(environment, branch='master'):
             setup_nginx()
             restart_gunicorn()
             reload_nginx()
+
+def run_bg(cmd, before=None, sockname="dtach"):
+    if before:
+        cmd = "{}; dtach -n `mktemp -u /tmp/{}.XXXX` {}".format(
+            before, sockname, cmd)
+    else:
+        cmd = "dtach -n `mktemp -u /tmp/{}.XXXX` {}".format(sockname, cmd)
+    return run(cmd)
+
+
 @task
 def update(environment):
     # This currently assumes a workflow where data is first deployed
     # to staging, then reviewed, then copied to live.  Longer term we
     # may miss out the moderation step and scrape directly to live
-    env = setup(environment)
     if environment == 'staging':
-        run('screen -dm {}/clinicaltrials-act-tracker/deploy/run_update_staging.sh'.format(env.path))
+        run_bg(
+            "/var/www/fdaaa_staging/venv/bin/python "
+            "/var/www/fdaaa_staging/clinicaltrials-act-tracker/load_data.py",
+            before=". /etc/profile.d/fdaaa_staging.sh")
+
     else:
         do_run = prompt("Copy data from staging database to live?")
+
         if do_run.lower() == 'y':
             run("su -c '/usr/bin/pg_dump --clean -t frontend_trial -t frontend_sponsor -t frontend_ranking -t frontend_trialqa clinicaltrials_staging | psql clinicaltrials' postgres")
