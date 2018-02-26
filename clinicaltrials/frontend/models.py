@@ -115,6 +115,8 @@ class Trial(models.Model):
             self.finable_days_late = max([
                 self.days_late - Trial.FINES_GRACE_PERIOD,
                 0])
+        else:
+            self.finable_days_late = 0
         self.status = self.get_status()
         self.save()
 

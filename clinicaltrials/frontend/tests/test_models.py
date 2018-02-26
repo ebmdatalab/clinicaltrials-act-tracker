@@ -249,6 +249,29 @@ class SponsorTrialsLatenessTestCase(TestCase):
             completion_date='2016-01-01',
             reported_date= '2017-01-01')
         self.assertEqual(trial.days_late, 1)
+        self.assertEqual(trial.finable_days_late, 0)
+
+    def test_reported_trial_finably_late(self):
+        trial = _makeTrial(
+            self.sponsor,
+            has_results=True,
+            results_due=True,
+            completion_date='2015-01-01',
+            reported_date= '2017-01-01')
+        self.assertEqual(trial.days_late, 366)
+        self.assertEqual(trial.finable_days_late, 366 - Trial.FINES_GRACE_PERIOD)
+
+    def test_reported_trial_no_longer_late(self):
+        trial = _makeTrial(
+            self.sponsor,
+            has_results=True,
+            results_due=True,
+            completion_date='2015-01-01',
+            reported_date= '2017-01-01')
+        trial.results_due = False
+        trial.save()
+        trial.compute_metadata()
+        self.assertEqual(trial.finable_days_late, 0)
 
     def test_reported_trial_not_late(self):
         trial = _makeTrial(
