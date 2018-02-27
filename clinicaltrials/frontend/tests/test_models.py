@@ -90,37 +90,37 @@ class SponsorTrialsTestCase(TestCase):
         self.assertEqual(self.sponsor.slug, 'sponsor-1')
 
     def test_zombie_sponsor(self):
-        self.assertEqual(len(self.sponsor.trials().all()), 3)
+        self.assertEqual(len(self.sponsor.trial_set.all()), 3)
         due = self.due_trial
         due.no_longer_on_website = True
         due.save()
-        self.assertEqual(len(self.sponsor.trials().all()), 2)
+        self.assertEqual(len(self.sponsor.trial_set.all()), 2)
 
     def test_trials_due(self):
         self.assertEqual(
-            list(self.sponsor.trials().due()),
+            list(self.sponsor.trial_set.due()),
             [self.due_trial, self.reported_trial])
 
     def test_trials_unreported(self):
         self.assertEqual(
-            list(self.sponsor.trials().unreported()),
+            list(self.sponsor.trial_set.unreported()),
             [self.due_trial, self.not_due_trial])
         self.assertEqual(self.not_due_trial.status, 'ongoing')
 
     def test_trials_reported(self):
         self.assertEqual(
-            list(self.sponsor.trials().reported()),
+            list(self.sponsor.trial_set.reported()),
             [self.reported_trial])
 
     def test_trials_overdue(self):
         self.assertEqual(self.due_trial.status, 'overdue')
         self.assertEqual(
-            list(self.sponsor.trials().overdue()),
+            list(self.sponsor.trial_set.overdue()),
             [self.due_trial])
 
     def test_trials_reported_early(self):
         self.assertEqual(
-            list(self.sponsor.trials().reported_early()),
+            list(self.sponsor.trial_set.reported_early()),
             [])
 
 class SponsorTrialsStatusTestCase(TestCase):
@@ -163,7 +163,7 @@ class SponsorTrialsStatusTestCase(TestCase):
             completion_date='2016-01-01')
         self.assertEqual(trial.status, 'overdue')
         self.assertEqual(
-            list(self.sponsor.trials().overdue()),
+            list(self.sponsor.trial_set.overdue()),
             [trial])
 
     def test_trial_ongoing(self):
@@ -183,7 +183,7 @@ class SponsorTrialsStatusTestCase(TestCase):
             reported_date= '2016-12-01')
         self.assertEqual(trial.status, 'reported')
         self.assertEqual(
-            list(self.sponsor.trials().reported_late()),
+            list(self.sponsor.trial_set.reported_late()),
             [])
 
     def test_reported_trial_under_qa(self):
@@ -223,7 +223,7 @@ class SponsorTrialsStatusTestCase(TestCase):
             reported_date= '2017-01-01')
         self.assertEqual(trial.status, 'reported-late')
         self.assertEqual(
-            list(self.sponsor.trials().reported_late()),
+            list(self.sponsor.trial_set.reported_late()),
             [trial])
 
 

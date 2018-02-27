@@ -35,10 +35,6 @@ class Sponsor(models.Model):
     def current_rank(self):
         return self.rankings.get(date=self.updated_date)
 
-    def trials(self):
-        # XXX redundant
-        return self.trial_set
-
     def status_choices(self):
         """A list of tuples representing valid choices for trial statuses
         """
