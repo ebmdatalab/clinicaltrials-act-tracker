@@ -8,6 +8,8 @@ from django.test import TestCase
 
 from frontend.models import Ranking
 from frontend.models import Trial
+from frontend.trial_computer import TrialComputer
+
 
 class DummyResponse(object):
     def __init__(self, content):
@@ -26,7 +28,7 @@ def dummy_ccgov_results(url):
 class CommandsTestCase(TestCase):
 
     @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
-    @mock.patch('frontend.models.date')
+    @mock.patch('frontend.trial_computer.date')
     def test_import(self, datetime_mock):
         " Test my custom command."
         datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
@@ -51,7 +53,7 @@ class CommandsTestCase(TestCase):
         overdueinqa = Trial.objects.get(registry_id='overdueinqa')
         self.assertEqual(overdueinqa.status, 'reported-late')
         self.assertEqual(overdueinqa.days_late, 12)
-        self.assertEqual(overdueinqa.qa_start_date(), date(2017,11,13))
+        self.assertEqual(TrialComputer(overdueinqa).qa_start_date(), date(2017,11,13))
 
         late_sponsor_ranking = Ranking.objects.filter(sponsor=overdueinqa.sponsor).first()
         self.assertEqual(late_sponsor_ranking.days_late, 73)

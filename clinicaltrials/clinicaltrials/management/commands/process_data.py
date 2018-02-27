@@ -85,7 +85,6 @@ def set_current():
             _compute_ranks()
 
 
-
 class Command(BaseCommand):
     help = 'XXX'
     # XXX the order matters here and could be better enforced in

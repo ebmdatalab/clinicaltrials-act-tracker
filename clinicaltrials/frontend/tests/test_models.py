@@ -339,7 +339,7 @@ class SponsorTrialsLatenessTestCase(TestCase):
         trial.compute_metadata()
         self.assertEqual(trial.days_late, 1)
 
-    @patch('frontend.models.date')
+    @patch('frontend.trial_computer.date')
     def test_unreported_trial_late_within_grace(self, datetime_mock):
         datetime_mock.today = Mock(return_value=date(2017,1,30))
         trial = _makeTrial(
@@ -349,7 +349,7 @@ class SponsorTrialsLatenessTestCase(TestCase):
             completion_date='2016-01-01')
         self.assertEqual(trial.days_late, None)
 
-    @patch('frontend.models.date')
+    @patch('frontend.trial_computer.date')
     def test_unreported_trial_late_outside_grace(self, datetime_mock):
         datetime_mock.today = Mock(return_value=date(2017,1,31))
         trial = _makeTrial(

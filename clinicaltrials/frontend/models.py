@@ -12,8 +12,8 @@ from django.utils.text import slugify
 from django.utils.dateparse import parse_date
 from django.urls import reverse
 
+from frontend.trial_computer import TrialComputer
 
-GRACE_PERIOD = 30
 
 
 class Sponsor(models.Model):
@@ -128,103 +128,11 @@ class Trial(models.Model):
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
 
-    def compute_metadata(self):
-        self.days_late = self.get_days_late()
-        self.finable_days_late = None
-        if self.days_late:
-            self.finable_days_late = max([
-                self.days_late - Trial.FINES_GRACE_PERIOD,
-                0])
-            if self.finable_days_late == 0:
-                self.finable_days_late = None
-        self.status = self.get_status()
-        self.save()
-
-    def _datify(self):
-        """We sometimes maninpulate data before the model has been saved, and
-        therefore before any date strings have been converted to date
-        objects.
-
-        """
-        for field in ['reported_date',
-                      'completion_date']:
-            _field = getattr(self, field)
-            if isinstance(_field, str):
-                val = parse_date(_field)
-                setattr(self, field, val)
-
-
-    def qa_start_date(self):
-        first_event = self.trialqa_set.first()
-        if first_event:
-            return first_event.submitted_to_regulator
-        else:
-            return None
-
-    def get_days_late(self):
-        # See https://github.com/ebmdatalab/clinicaltrials-act-tracker/issues/38
-        overdue_delta = relativedelta(days=365)
-        days_late = None
-        if self.results_due:
-            self._datify()
-            if self.has_results:
-                assert self.reported_date, \
-                    "{} has_results but no reported date".format(self)
-                days_late = max([
-                    (self.reported_date
-                     - self.completion_date
-                     - overdue_delta).days,
-                    0])
-            else:
-                # still not reported.
-                qa_start_date = self.qa_start_date()
-                if qa_start_date:
-                    days_late = max([(qa_start_date - self.completion_date - overdue_delta).days, 0])
-                else:
-                    days_late = max([
-                        (date.today()
-                         - self.completion_date
-                         - overdue_delta).days,
-                        0])
-                    if (days_late - GRACE_PERIOD) <= 0:
-                        days_late = 0
-            if days_late == 0:
-                days_late = None
-
-        return days_late
-
-    def get_status(self):
-        # days_late() must have been called first
-        overdue = self.days_late and self.days_late > 0
-        if self.results_due:
-            if self.has_results:
-                if overdue:
-                    status = Trial.STATUS_REPORTED_LATE
-                else:
-                    status = Trial.STATUS_REPORTED
-            else:
-                if self.qa_start_date():
-                    if self.days_late:
-                        status = Trial.STATUS_REPORTED_LATE
-                    else:
-                        status = Trial.STATUS_REPORTED
-                else:
-                    if self.days_late:
-                        status = Trial.STATUS_OVERDUE
-                    else:
-                        # We're in the grace period
-                        status = Trial.STATUS_ONGOING
-        else:
-            if self.has_results:
-                # Reported early! Might want to track separately in
-                # the future
-                status = Trial.STATUS_REPORTED
-            else:
-                status = Trial.STATUS_ONGOING
-        return status
-
     class Meta:
         ordering = ('completion_date',)
+
+    def compute_metadata(self):
+        TrialComputer(self).compute_metadata()
 
 
 class TrialQA(models.Model):
