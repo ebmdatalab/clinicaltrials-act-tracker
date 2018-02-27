@@ -7,6 +7,7 @@
 cachetools==2.0.1         # via google-auth
 certifi==2018.1.18        # via requests
 chardet==3.0.4            # via requests
+coverage==4.5.1
 csscompressor==0.9.5
 dateparser==0.7.0
 django-appconf==1.0.2     # via django-compressor

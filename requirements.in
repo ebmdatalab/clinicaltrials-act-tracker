@@ -16,3 +16,4 @@ google-cloud-bigquery==0.26.0
 google-cloud-storage==1.3.2
 xmltodict
 lxml
+coverage
