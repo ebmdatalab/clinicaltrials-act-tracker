@@ -166,6 +166,34 @@ class SponsorTrialsStatusTestCase(TestCase):
     def setUp(self):
         self.sponsor = Sponsor.objects.create(name="Sponsor 1")
 
+    def test_status_choices(self):
+        _makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2016-01-01')
+        self.assertEqual(
+            self.sponsor.status_choices(),
+            [('overdue', 'Overdue')])
+        self.assertEqual(
+            Trial.objects.status_choices(),
+            [('overdue', 'Overdue')])
+        _makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=False,
+            completion_date='2016-01-01')
+        self.assertEqual(
+            self.sponsor.status_choices(),
+            [('overdue', 'Overdue'),
+             ('ongoing', 'Ongoing'),
+            ])
+        self.assertEqual(
+            Trial.objects.status_choices(),
+            [('overdue', 'Overdue'),
+             ('ongoing', 'Ongoing'),
+            ])
+
     def test_trial_overdue(self):
         trial = _makeTrial(
             self.sponsor,

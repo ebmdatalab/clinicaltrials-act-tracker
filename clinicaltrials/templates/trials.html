@@ -5,7 +5,7 @@
 <div id="results">
   <form class="form">
     <label id="filter-trials">Filter trials by status:</label>
-    {% for k, v, i in status_choices %}
+    {% for k, v in status_choices %}
     <label for="filter-{{k}}" class="checkbox-inline {% if k == 'overdue' %}
                                      checkbox-danger
                                      {% elif k == 'reported' %}

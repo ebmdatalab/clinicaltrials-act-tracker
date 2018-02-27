@@ -41,13 +41,15 @@ class TrialManager(models.Manager):
     def reported_early(self):
         return self.reported().filter(reported_date__lt=F('completion_date'))
 
-    def status_choices_with_counts(self):
-        return (
-            ('overdue', 'Due', self.overdue().count()),
-            ('ongoing', 'Ongoing', self.not_due().count()),
-            ('reported', 'Reported', self.reported().count()),
-            ('reported-late', 'Reported late', self.reported_late().count())
-        )
+    def status_choices(self):
+        """A list of tuples representing valid choices for trial statuses
+        """
+        statuses = [x[0] for x in
+                    Trial.objects.order_by(
+                        'status').values_list(
+                            'status').distinct(
+                                'status')]
+        return [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
 
 
 class Sponsor(models.Model):
@@ -73,15 +75,27 @@ class Sponsor(models.Model):
         # XXX redundant
         return self.trial_set
 
-
+    def status_choices(self):
+        """A list of tuples representing valid choices for trial statuses
+        """
+        statuses = [x[0] for x in
+                    self.trial_set.order_by(
+                        'status').values_list(
+                            'status').distinct(
+                                'status')]
+        return [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
 
 class Trial(models.Model):
     FINES_GRACE_PERIOD = 30
+    STATUS_OVERDUE = 'overdue'
+    STATUS_ONGOING = 'ongoing'
+    STATUS_REPORTED = 'reported'
+    STATUS_REPORTED_LATE = 'reported-late'
     STATUS_CHOICES = (
-        ('overdue', 'Overdue'),
-        ('ongoing', 'Ongoing'),
-        ('reported', 'Reported'),
-        ('reported-late', 'Reported (late)'),
+        (STATUS_OVERDUE, 'Overdue'),
+        (STATUS_ONGOING, 'Ongoing'),
+        (STATUS_REPORTED, 'Reported'),
+        (STATUS_REPORTED_LATE, 'Reported (late)'),
     )
     sponsor = models.ForeignKey(
         Sponsor,
@@ -98,7 +112,7 @@ class Trial(models.Model):
     days_late = models.IntegerField(default=None, null=True, blank=True)
     finable_days_late = models.IntegerField(default=None, null=True, blank=True)
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default='ongoing')
+        max_length=20, choices=STATUS_CHOICES, default=STATUS_ONGOING)
     completion_date = models.DateField(null=True, blank=True)
     no_longer_on_website = models.BooleanField(default=False)
 
@@ -181,28 +195,28 @@ class Trial(models.Model):
         if self.results_due:
             if self.has_results:
                 if overdue:
-                    status = 'reported-late'
+                    status = Trial.STATUS_REPORTED_LATE
                 else:
-                    status = 'reported'
+                    status = Trial.STATUS_REPORTED
             else:
                 if self.qa_start_date():
                     if self.days_late:
-                        status = 'reported-late'
+                        status = Trial.STATUS_REPORTED_LATE
                     else:
-                        status = 'reported'
+                        status = Trial.STATUS_REPORTED
                 else:
                     if self.days_late:
-                        status = 'overdue'
+                        status = Trial.STATUS_OVERDUE
                     else:
                         # We're in the grace period
-                        status = 'ongoing'
+                        status = Trial.STATUS_ONGOING
         else:
             if self.has_results:
                 # Reported early! Might want to track separately in
                 # the future
-                status = 'reported'
+                status = Trial.STATUS_REPORTED
             else:
-                status = 'ongoing'
+                status = Trial.STATUS_ONGOING
         return status
 
     class Meta:
