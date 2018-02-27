@@ -12,7 +12,7 @@ from django.utils.text import slugify
 from django.utils.dateparse import parse_date
 from django.urls import reverse
 
-from frontend.trial_computer import TrialComputer
+from frontend.trial_computer import compute_metadata
 
 
 
@@ -132,7 +132,7 @@ class Trial(models.Model):
         ordering = ('completion_date', 'start_date', 'id')
 
     def compute_metadata(self):
-        TrialComputer(self).compute_metadata()
+        return compute_metadata(self)
 
 
 class TrialQA(models.Model):

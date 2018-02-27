@@ -8,7 +8,8 @@ from django.test import TestCase
 
 from frontend.models import Ranking
 from frontend.models import Trial
-from frontend.trial_computer import TrialComputer
+
+from frontend.trial_computer import qa_start_date
 
 
 class DummyResponse(object):
@@ -53,7 +54,7 @@ class CommandsTestCase(TestCase):
         overdueinqa = Trial.objects.get(registry_id='overdueinqa')
         self.assertEqual(overdueinqa.status, 'reported-late')
         self.assertEqual(overdueinqa.days_late, 12)
-        self.assertEqual(TrialComputer(overdueinqa).qa_start_date(), date(2017,11,13))
+        self.assertEqual(qa_start_date(overdueinqa), date(2017,11,13))
 
         late_sponsor_ranking = Ranking.objects.filter(sponsor=overdueinqa.sponsor).first()
         self.assertEqual(late_sponsor_ranking.days_late, 73)
