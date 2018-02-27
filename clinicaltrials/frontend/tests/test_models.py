@@ -7,7 +7,7 @@ from frontend.models import Sponsor
 from frontend.models import Trial
 from frontend.models import TrialQA
 from frontend.models import Ranking
-from clinicaltrials.management.commands.process_data import set_current
+from frontend.management.commands.process_data import set_current
 
 from unittest.mock import patch, Mock
 

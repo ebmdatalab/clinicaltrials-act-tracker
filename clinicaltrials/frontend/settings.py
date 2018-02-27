@@ -126,7 +126,7 @@ LOGGING = {
 
 ADMINS = [('Seb', 'seb.bacon@gmail.com'),]  # XXX change to tech@ebmdatalab.net on launch
 
-ROOT_URLCONF = 'clinicaltrials.urls'
+ROOT_URLCONF = 'frontend.urls'
 
 TEMPLATES = [
     {
@@ -170,7 +170,7 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
-WSGI_APPLICATION = 'clinicaltrials.wsgi.application'
+WSGI_APPLICATION = 'frontend.wsgi.application'
 
 
 # Database
