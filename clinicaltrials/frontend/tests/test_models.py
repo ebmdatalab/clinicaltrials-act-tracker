@@ -87,19 +87,19 @@ class RankingTestCase(TestCase):
         self.assertEqual(self.sponsor2.rankings.get(date=self.date3).percentage, 100.0)
 
     def test_compute_ranks(self):
-        ranks = Ranking.objects.with_rank().filter(date=self.date1).all()
+        ranks = Ranking.objects.filter(date=self.date1).all()
         self.assertEqual(ranks[0].rank, 1)
         self.assertEqual(ranks[0].sponsor, self.sponsor2)
         self.assertEqual(ranks[1].rank, 2)
         self.assertEqual(ranks[1].sponsor, self.sponsor1)
 
-        ranks = Ranking.objects.with_rank().filter(date=self.date2).all()
+        ranks = Ranking.objects.filter(date=self.date2).all()
         self.assertEqual(ranks[0].rank, 1)
         self.assertEqual(ranks[0].sponsor, self.sponsor1)
         self.assertEqual(ranks[1].rank, 2)
         self.assertEqual(ranks[1].sponsor, self.sponsor2)
 
-        ranks = Ranking.objects.with_rank().filter(date=self.date3).all()
+        ranks = Ranking.objects.filter(date=self.date3).all()
         self.assertEqual(ranks[0].rank, 1)
         self.assertEqual(ranks[0].sponsor, self.sponsor1)
         self.assertEqual(ranks[1].rank, 1)

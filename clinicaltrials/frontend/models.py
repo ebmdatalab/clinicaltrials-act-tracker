@@ -216,8 +216,6 @@ class TrialQA(models.Model):
 
 
 class RankingManager(models.Manager):
-    def with_rank(self):
-        return self.filter(rank__isnull=False)
 
     def _compute_ranks(self):
         # XXX should only bother computing ranks for *current* date;
