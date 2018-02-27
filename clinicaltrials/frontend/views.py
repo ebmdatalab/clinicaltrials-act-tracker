@@ -56,7 +56,7 @@ def sponsor(request, slug):
     days_late = sponsor.trial_set.aggregate(
         days_late=Sum('finable_days_late'))['days_late']
     if days_late:
-        fine = days_late * 10000
+        fine = days_late * settings.FINE_PER_DAY
     else:
         fine = None
     status_choices = sponsor.status_choices()

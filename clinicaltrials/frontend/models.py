@@ -49,6 +49,9 @@ class Sponsor(models.Model):
                                 'status')]
         return [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
 
+    class Meta:
+        ordering = ('name',)
+
 
 class TrialManager(models.Manager):
     def get_queryset(self):

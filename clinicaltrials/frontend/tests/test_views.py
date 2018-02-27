@@ -1,8 +1,11 @@
+import csv
+import io
 from datetime import date
 from unittest.mock import patch
 from unittest.mock import Mock
 
 from django.test import TestCase
+from django.test import Client
 
 from rest_framework.test import APIClient
 
@@ -11,6 +14,55 @@ from frontend.management.commands.process_data import set_current
 from frontend.models import Sponsor
 
 
+class FrontendTestCase(TestCase):
+    @patch('frontend.trial_computer.date')
+    def setUp(self, datetime_mock):
+        datetime_mock.today = Mock(return_value=date(2017,1,31))
+        self.sponsor = Sponsor.objects.create(name="Sponsor 1")
+        self.due_trial = makeTrial(
+            self.sponsor,
+            results_due=True,
+            has_results=False)
+        self.reported_trial = makeTrial(
+            self.sponsor,
+            results_due=True,
+            has_results=True,
+            reported_date=date(2016,12,1))
+        set_current()
+
+        client = APIClient()
+        response = client.get('/api/trials/', format='json').json()
+
+    def test_index(self):
+        client = Client()
+        response = client.get('/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_sponsor(self):
+        client = Client()
+        response = client.get('/sponsor/sponsor-1/')
+        self.assertEqual(response.status_code, 200)
+        context = response.context
+        self.assertEqual(context['sponsor'], self.sponsor)
+        self.assertEqual(
+            context['status_choices'],
+            [('overdue', 'Overdue'), ('reported', 'Reported')])
+        self.assertEqual(context['fine'], 11569)
+        self.assertIn(self.sponsor.name, context['title'])
+
+    def test_trials(self):
+        client = Client()
+        response = client.get('/trials/')
+        context = response.context
+        self.assertEqual(
+            context['status_choices'],
+            [('overdue', 'Overdue'), ('reported', 'Reported')])
+
+    def test_sitemap(self):
+        client = Client()
+        response = client.get('/sitemap.xml')
+        content = response.content
+        self.assertIn(b'http://testserver/sponsor/sponsor-1/', content)
 
 
 class ApiResultsTestCase(TestCase):
@@ -30,6 +82,11 @@ class ApiResultsTestCase(TestCase):
             reported_date=date(2016,12,1))
         set_current()
 
+    def test_trial_csv(self):
+        client = APIClient()
+        response = client.get('/api/trials.csv')
+        results = list(csv.DictReader(io.StringIO(response.content.decode('utf-8'))))
+        self.assertEqual(results[0]['sponsor_slug'], 'sponsor-1')
 
     def test_trial_results(self):
         client = APIClient()
@@ -149,4 +206,13 @@ class ApiResultsTestCase(TestCase):
                 'reported': 1,
                 'days_late': 1,
                 'fines_str': '$11,569'}
+        )
+        response = client.get('/api/performance/', {'sponsor': 'XXX'}, format='json').json()
+        self.assertEqual(
+            response,
+            {
+                'due': 0,
+                'reported': 0,
+                'days_late': None,
+                'fines_str': '$0'}
         )
