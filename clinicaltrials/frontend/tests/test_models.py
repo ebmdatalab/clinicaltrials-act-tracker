@@ -7,6 +7,7 @@ from frontend.models import Sponsor
 from frontend.models import Trial
 from frontend.models import TrialQA
 from frontend.models import Ranking
+from clinicaltrials.management.commands.process_data import set_current
 
 from unittest.mock import patch, Mock
 
@@ -37,7 +38,7 @@ def _simulateImport(test_trials):
         if updated_date != last_date:
             # simulate a new import; this means deleting all
             # existing Trials and updating rankings (see below)
-            Ranking.objects.set_current()
+            set_current()
             Trial.objects.all().delete()
         sponsor.updated_date = updated_date
         sponsor.save()
@@ -48,7 +49,7 @@ def _simulateImport(test_trials):
             reported_date=updated_date
         )
         last_date = updated_date
-    Ranking.objects.set_current()
+    set_current()
 
 
 class RankingTestCase(TestCase):

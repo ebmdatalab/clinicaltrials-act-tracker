@@ -2,7 +2,10 @@ import csv
 import datetime
 
 from django.db import transaction
+from django.db.models import Sum
+from django.db import connection
 from django.core.management.base import BaseCommand
+
 from frontend.models import Trial
 from frontend.models import TrialQA
 from frontend.models import Sponsor
@@ -31,6 +34,56 @@ def set_qa_metadata(trial):
                     submitted_to_regulator=submitted,
                     returned_to_sponsor=returned,
                     trial=trial)
+
+
+def _compute_ranks():
+    # XXX should only bother computing ranks for *current* date;
+    # this does it for all of them.
+    sql = ("WITH ranked AS (SELECT date, ranking.id, RANK() OVER ("
+           "  PARTITION BY date "
+           "ORDER BY percentage DESC"
+           ") AS computed_rank "
+           "FROM frontend_ranking ranking WHERE percentage IS NOT NULL "
+           ")")
+
+    sql += ("UPDATE "
+            " frontend_ranking "
+            "SET "
+            " rank = ranked.computed_rank "
+            "FROM ranked "
+            "WHERE ranked.id = frontend_ranking.id AND ranked.date = frontend_ranking.date")
+    with connection.cursor() as c:
+            c.execute(sql)
+
+def set_current():
+    with transaction.atomic():
+        for sponsor in Sponsor.objects.all():
+            due = Trial.objects.due().filter(
+                sponsor=sponsor).count()
+            reported = Trial.objects.reported().filter(
+                    sponsor=sponsor).count()
+            total = sponsor.trial_set.count()
+            days_late = sponsor.trial_set.aggregate(
+                total_days_late=Sum('days_late'))['total_days_late']
+            finable_days_late = sponsor.trial_set.aggregate(
+                total_finable_days_late=Sum('finable_days_late'))['total_finable_days_late']
+            d = {
+                'due': due,
+                'reported': reported,
+                'total': total,
+                'date': sponsor.updated_date,
+                'days_late': days_late,
+                'finable_days_late': finable_days_late
+            }
+            ranking = sponsor.rankings.filter(
+                date=sponsor.updated_date)
+            if len(ranking) == 0:
+                ranking = sponsor.rankings.create(**d)
+            else:
+                assert len(ranking) == 1
+                ranking.update(**d)
+            _compute_ranks()
+
 
 
 class Command(BaseCommand):
@@ -105,4 +158,4 @@ class Command(BaseCommand):
 
             # This should only happen after Trial statuses have been set
             print("Setting current rankings")
-            Ranking.objects.set_current()
+            set_current()
