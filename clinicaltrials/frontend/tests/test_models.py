@@ -138,12 +138,12 @@ class SponsorTrialsTestCase(TestCase):
     def test_trials_due(self):
         self.assertEqual(
             list(self.sponsor.trials().due()),
-            [self.reported_trial, self.due_trial])
+            [self.due_trial, self.reported_trial])
 
     def test_trials_unreported(self):
         self.assertEqual(
             list(self.sponsor.trials().unreported()),
-            [self.not_due_trial, self.due_trial])
+            [self.due_trial, self.not_due_trial])
         self.assertEqual(self.not_due_trial.status, 'ongoing')
 
     def test_trials_reported(self):

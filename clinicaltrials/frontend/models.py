@@ -129,7 +129,7 @@ class Trial(models.Model):
         return "{}: {}".format(self.registry_id, self.title)
 
     class Meta:
-        ordering = ('completion_date',)
+        ordering = ('completion_date', 'start_date', 'id')
 
     def compute_metadata(self):
         TrialComputer(self).compute_metadata()
