@@ -1,4 +1,3 @@
-from datetime import date
 from django.urls import include
 from django.urls import path
 from django.contrib.sitemaps import GenericSitemap
@@ -9,8 +8,6 @@ from django.views.generic import TemplateView
 
 from rest_framework import routers
 
-from frontend.models import Ranking
-from frontend.models import Trial
 from frontend.models import Sponsor
 from frontend import views
 
