@@ -3,7 +3,7 @@ django_compressor
 django-libsass
 csscompressor
 gunicorn
-psycopg2
+psycopg2-binary
 djangorestframework
 djangorestframework-csv
 django-filter
