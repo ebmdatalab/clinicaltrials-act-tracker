@@ -15,42 +15,6 @@ from django.urls import reverse
 
 GRACE_PERIOD = 30
 
-class TrialManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            no_longer_on_website=False).prefetch_related('trialqa_set')
-
-    def due(self):
-        return self.filter(status__in=['overdue', 'reported', 'reported-late'])
-
-    def not_due(self):
-        return self.filter(status='ongoing')
-
-    def unreported(self):
-        return self.filter(status__in=['overdue', 'ongoing'])
-
-    def reported(self):
-        return self.filter(status__in=['reported', 'reported-late'])
-
-    def reported_late(self):
-        return self.filter(status='reported-late')
-
-    def overdue(self):
-        return self.filter(status='overdue')
-
-    def reported_early(self):
-        return self.reported().filter(reported_date__lt=F('completion_date'))
-
-    def status_choices(self):
-        """A list of tuples representing valid choices for trial statuses
-        """
-        statuses = [x[0] for x in
-                    Trial.objects.order_by(
-                        'status').values_list(
-                            'status').distinct(
-                                'status')]
-        return [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
-
 
 class Sponsor(models.Model):
     slug = models.SlugField(max_length=200, primary_key=True)
@@ -84,6 +48,46 @@ class Sponsor(models.Model):
                             'status').distinct(
                                 'status')]
         return [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
+
+
+class TrialManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            no_longer_on_website=False).prefetch_related('trialqa_set')
+
+    def status_choices(self):
+        """A list of tuples representing valid choices for trial statuses
+        """
+        statuses = [x[0] for x in
+                    Trial.objects.order_by(
+                        'status').values_list(
+                            'status').distinct(
+                                'status')]
+        return [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
+
+
+class TrialQuerySet(models.QuerySet):
+    def due(self):
+        return self.filter(status__in=['overdue', 'reported', 'reported-late'])
+
+    def not_due(self):
+        return self.filter(status='ongoing')
+
+    def unreported(self):
+        return self.filter(status__in=['overdue', 'ongoing'])
+
+    def reported(self):
+        return self.filter(status__in=['reported', 'reported-late'])
+
+    def reported_late(self):
+        return self.filter(status='reported-late')
+
+    def overdue(self):
+        return self.filter(status='overdue')
+
+    def reported_early(self):
+        return self.reported().filter(reported_date__lt=F('completion_date'))
+
 
 class Trial(models.Model):
     FINES_GRACE_PERIOD = 30
@@ -119,7 +123,7 @@ class Trial(models.Model):
     first_seen_date = models.DateField(default=date.today)
     updated_date = models.DateField(default=date.today)
     reported_date = models.DateField(null=True, blank=True)
-    objects = TrialManager()
+    objects = TrialManager.from_queryset(TrialQuerySet)()
 
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
