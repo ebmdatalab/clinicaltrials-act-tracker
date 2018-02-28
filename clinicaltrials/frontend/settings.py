@@ -65,10 +65,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
-    'DEFAULT_PAGINATION_CLASS': 'frontend.rest_framework.DataTablesPagination',
+    'DEFAULT_PAGINATION_CLASS': 'frontend.custom_rest_backends.DataTablesPagination',
     'SEARCH_PARAM': 'search[value]',
     'DEFAULT_FILTER_BACKENDS': (
-        'frontend.rest_framework.DataTablesOrderingFilter',
+        'frontend.custom_rest_backends.DataTablesOrderingFilter',
         'rest_framework.filters.SearchFilter',
         'django_filters.rest_framework.DjangoFilterBackend',
         ),

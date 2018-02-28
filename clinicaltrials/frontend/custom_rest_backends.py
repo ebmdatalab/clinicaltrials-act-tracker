@@ -1,5 +1,7 @@
 """View-related code to customise behaviour of REST Framework to suit
-DataTables
+DataTables javascript library (see `site.js`)
+
+See also `custom_rest_views.py`
 
 """
 from collections import OrderedDict
