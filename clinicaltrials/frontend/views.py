@@ -23,10 +23,8 @@ def performance(request):
     queryset = Trial.objects.all()
     if 'sponsor' in request.GET:
         queryset = queryset.filter(sponsor__slug=request.GET['sponsor'])
-    due = queryset.filter(
-        status__in=['overdue', 'reported', 'reported-late']).count()
-    reported = queryset.filter(
-        status__in=['reported', 'reported-late']).count()
+    due = queryset.due().count()
+    reported = queryset.reported().count()
     days_late = queryset.aggregate(
         days_late=Sum('finable_days_late'))['days_late']
     fines_str = '$0'
@@ -58,15 +56,10 @@ def sponsor(request, slug):
     days_late = sponsor.trial_set.aggregate(
         days_late=Sum('finable_days_late'))['days_late']
     if days_late:
-        fine = days_late * 10000
+        fine = days_late * settings.FINE_PER_DAY
     else:
         fine = None
-    statuses = [x[0] for x in
-                sponsor.trial_set.order_by(
-                    'status').values_list(
-                        'status').distinct(
-                            'status')]
-    status_choices = [x for x in Trial.objects.status_choices_with_counts() if x[0] in statuses]
+    status_choices = sponsor.status_choices()
     if len(status_choices) == 1:
         status_choices = []  # don't show options where there's only one choice
     context = {'sponsor': sponsor,
@@ -82,5 +75,5 @@ def trials(request):
     #f = TrialStatusFilter(request.GET, queryset=sponsor.trials())
     context = {'sponsor': trials,
                'title': "All Applicable Clinical Trials",
-               'status_choices': Trial.objects.status_choices_with_counts()}
+               'status_choices': Trial.objects.status_choices()}
     return render(request, 'trials.html', context=context)

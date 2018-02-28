@@ -12,42 +12,8 @@ from django.utils.text import slugify
 from django.utils.dateparse import parse_date
 from django.urls import reverse
 
+from frontend.trial_computer import compute_metadata
 
-GRACE_PERIOD = 30
-
-class TrialManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            no_longer_on_website=False).prefetch_related('trialqa_set')
-
-    def due(self):
-        return self.filter(status__in=['overdue', 'reported', 'reported-late'])
-
-    def not_due(self):
-        return self.filter(status='ongoing')
-
-    def unreported(self):
-        return self.filter(status__in=['overdue', 'ongoing'])
-
-    def reported(self):
-        return self.filter(status__in=['reported', 'reported-late'])
-
-    def reported_late(self):
-        return self.filter(status='reported-late')
-
-    def overdue(self):
-        return self.filter(status='overdue')
-
-    def reported_early(self):
-        return self.reported().filter(reported_date__lt=F('completion_date'))
-
-    def status_choices_with_counts(self):
-        return (
-            ('overdue', 'Due', self.overdue().count()),
-            ('ongoing', 'Ongoing', self.not_due().count()),
-            ('reported', 'Reported', self.reported().count()),
-            ('reported-late', 'Reported late', self.reported_late().count())
-        )
 
 
 class Sponsor(models.Model):
@@ -69,19 +35,70 @@ class Sponsor(models.Model):
     def current_rank(self):
         return self.rankings.get(date=self.updated_date)
 
-    def trials(self):
-        # XXX redundant
-        return self.trial_set
+    def status_choices(self):
+        """A list of tuples representing valid choices for trial statuses
+        """
+        statuses = [x[0] for x in
+                    self.trial_set.order_by(
+                        'status').values_list(
+                            'status').distinct(
+                                'status')]
+        return [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
 
+    class Meta:
+        ordering = ('name',)
+
+
+class TrialManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            no_longer_on_website=False).prefetch_related('trialqa_set')
+
+    def status_choices(self):
+        """A list of tuples representing valid choices for trial statuses
+        """
+        statuses = [x[0] for x in
+                    Trial.objects.order_by(
+                        'status').values_list(
+                            'status').distinct(
+                                'status')]
+        return [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
+
+
+class TrialQuerySet(models.QuerySet):
+    def due(self):
+        return self.filter(status__in=['overdue', 'reported', 'reported-late'])
+
+    def not_due(self):
+        return self.filter(status='ongoing')
+
+    def unreported(self):
+        return self.filter(status__in=['overdue', 'ongoing'])
+
+    def reported(self):
+        return self.filter(status__in=['reported', 'reported-late'])
+
+    def reported_late(self):
+        return self.filter(status='reported-late')
+
+    def overdue(self):
+        return self.filter(status='overdue')
+
+    def reported_early(self):
+        return self.reported().filter(reported_date__lt=F('completion_date'))
 
 
 class Trial(models.Model):
     FINES_GRACE_PERIOD = 30
+    STATUS_OVERDUE = 'overdue'
+    STATUS_ONGOING = 'ongoing'
+    STATUS_REPORTED = 'reported'
+    STATUS_REPORTED_LATE = 'reported-late'
     STATUS_CHOICES = (
-        ('overdue', 'Overdue'),
-        ('ongoing', 'Ongoing'),
-        ('reported', 'Reported'),
-        ('reported-late', 'Reported (late)'),
+        (STATUS_OVERDUE, 'Overdue'),
+        (STATUS_ONGOING, 'Ongoing'),
+        (STATUS_REPORTED, 'Reported'),
+        (STATUS_REPORTED_LATE, 'Reported (late)'),
     )
     sponsor = models.ForeignKey(
         Sponsor,
@@ -98,174 +115,41 @@ class Trial(models.Model):
     days_late = models.IntegerField(default=None, null=True, blank=True)
     finable_days_late = models.IntegerField(default=None, null=True, blank=True)
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default='ongoing')
+        max_length=20, choices=STATUS_CHOICES, default=STATUS_ONGOING)
     completion_date = models.DateField(null=True, blank=True)
     no_longer_on_website = models.BooleanField(default=False)
 
     first_seen_date = models.DateField(default=date.today)
     updated_date = models.DateField(default=date.today)
     reported_date = models.DateField(null=True, blank=True)
-    objects = TrialManager()
+    objects = TrialManager.from_queryset(TrialQuerySet)()
 
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
 
-    def compute_metadata(self):
-        self.days_late = self.get_days_late()
-        self.finable_days_late = None
-        if self.days_late:
-            self.finable_days_late = max([
-                self.days_late - Trial.FINES_GRACE_PERIOD,
-                0])
-            if self.finable_days_late == 0:
-                self.finable_days_late = None
-        self.status = self.get_status()
-        self.save()
-
-    def _datify(self):
-        """We sometimes maninpulate data before the model has been saved, and
-        therefore before any date strings have been converted to date
-        objects.
-
-        """
-        for field in ['reported_date',
-                      'completion_date']:
-            _field = getattr(self, field)
-            if isinstance(_field, str):
-                val = parse_date(_field)
-                setattr(self, field, val)
-
-
-    def qa_start_date(self):
-        first_event = self.trialqa_set.first()
-        if first_event:
-            return first_event.submitted_to_regulator
-        else:
-            return None
-
-    def get_days_late(self):
-        # See https://github.com/ebmdatalab/clinicaltrials-act-tracker/issues/38
-        overdue_delta = relativedelta(days=365)
-        days_late = None
-        if self.results_due:
-            self._datify()
-            if self.has_results:
-                assert self.reported_date, \
-                    "{} has_results but no reported date".format(self)
-                days_late = max([
-                    (self.reported_date
-                     - self.completion_date
-                     - overdue_delta).days,
-                    0])
-            else:
-                # still not reported.
-                qa_start_date = self.qa_start_date()
-                if qa_start_date:
-                    days_late = max([(qa_start_date - self.completion_date - overdue_delta).days, 0])
-                else:
-                    days_late = max([
-                        (date.today()
-                         - self.completion_date
-                         - overdue_delta).days,
-                        0])
-                    if (days_late - GRACE_PERIOD) <= 0:
-                        days_late = 0
-            if days_late == 0:
-                days_late = None
-
-        return days_late
-
-    def get_status(self):
-        # days_late() must have been called first
-        overdue = self.days_late and self.days_late > 0
-        if self.results_due:
-            if self.has_results:
-                if overdue:
-                    status = 'reported-late'
-                else:
-                    status = 'reported'
-            else:
-                if self.qa_start_date():
-                    if self.days_late:
-                        status = 'reported-late'
-                    else:
-                        status = 'reported'
-                else:
-                    if self.days_late:
-                        status = 'overdue'
-                    else:
-                        # We're in the grace period
-                        status = 'ongoing'
-        else:
-            if self.has_results:
-                # Reported early! Might want to track separately in
-                # the future
-                status = 'reported'
-            else:
-                status = 'ongoing'
-        return status
-
     class Meta:
-        ordering = ('completion_date',)
+        ordering = ('completion_date', 'start_date', 'id')
+
+    def compute_metadata(self):
+        return compute_metadata(self)
 
 
 class TrialQA(models.Model):
+    """Represents a QA event for a Trial.
+
+    When a trial is submitted to ClinicalTrials.gov, it immediately
+    enters a QA process which can take several months.  However, when
+    it leaves the QA process, it's submission date is considered the
+    date it entered the QA process.
+
+    The QA process involves a ping-pong between sponsor and
+    regulator. Each time the regulator returns a trial to the sponsor
+    for alterations, the sponsor gets 30 days to respond.
+
+    """
     trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
     submitted_to_regulator = models.DateField()
     returned_to_sponsor = models.DateField(null=True, blank=True)
-
-
-class RankingManager(models.Manager):
-    def with_rank(self):
-        return self.filter(rank__isnull=False)
-
-    def _compute_ranks(self):
-        # XXX should only bother computing ranks for *current* date;
-        # this does it for all of them.
-        sql = ("WITH ranked AS (SELECT date, ranking.id, RANK() OVER ("
-               "  PARTITION BY date "
-               "ORDER BY percentage DESC"
-               ") AS computed_rank "
-               "FROM frontend_ranking ranking WHERE percentage IS NOT NULL "
-               ")")
-
-        sql += ("UPDATE "
-                " frontend_ranking "
-                "SET "
-                " rank = ranked.computed_rank "
-                "FROM ranked "
-                "WHERE ranked.id = frontend_ranking.id AND ranked.date = frontend_ranking.date")
-        with connection.cursor() as c:
-                c.execute(sql)
-
-    def set_current(self):
-        with transaction.atomic():
-            for sponsor in Sponsor.objects.all():
-                due = Trial.objects.due().filter(
-                    sponsor=sponsor).count()
-                reported = Trial.objects.reported().filter(
-                        sponsor=sponsor).count()
-                total = sponsor.trial_set.count()
-                days_late = sponsor.trial_set.aggregate(
-                    total_days_late=Sum('days_late'))['total_days_late']
-                finable_days_late = sponsor.trial_set.aggregate(
-                    total_finable_days_late=Sum('finable_days_late'))['total_finable_days_late']
-                d = {
-                    'due': due,
-                    'reported': reported,
-                    'total': total,
-                    'date': sponsor.updated_date,
-                    'days_late': days_late,
-                    'finable_days_late': finable_days_late
-                }
-                ranking = sponsor.rankings.filter(
-                    date=sponsor.updated_date)
-                if len(ranking) == 0:
-                    ranking = sponsor.rankings.create(**d)
-                else:
-                    assert len(ranking) == 1
-                    ranking.update(**d)
-                self._compute_ranks()
 
 
 class Ranking(models.Model):
@@ -280,8 +164,6 @@ class Ranking(models.Model):
     total = models.IntegerField()
     reported = models.IntegerField()
     percentage = models.IntegerField(null=True)
-
-    objects = RankingManager()
 
     def __str__(self):
         return "{}: {} at {}% on {}".format(self.rank, self.sponsor, self.percentage, self.date)

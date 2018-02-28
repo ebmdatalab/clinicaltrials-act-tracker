@@ -1,3 +1,9 @@
+"""View-related code to customise behaviour of REST Framework to suit
+DataTables javascript library (see `site.js`)
+
+See also `custom_rest_views.py`
+
+"""
 from collections import OrderedDict
 import re
 
@@ -7,6 +13,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 
 from frontend.models import Ranking
+
 
 class DataTablesPagination(LimitOffsetPagination):
     """Configure REST api pagination to match variable names expected by
@@ -71,6 +78,7 @@ def get_datatables_ordering(params):
             direction = ""
         orderings.append("{}{}".format(direction, v))
     return ",".join(orderings)
+
 
 class DataTablesOrderingFilter(OrderingFilter):
     # The URL query parameter used for the ordering.

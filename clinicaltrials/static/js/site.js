@@ -1,357 +1,303 @@
-/****************************************************************/
-/* General */
+function getQueryVariable(variable, coerceArray) {
+  var query = window.location.search.substring(1);
+  var vars = query.split('&');
+  var vals = [];
+  for (var i=0; i<vars.length; i++) {
+    var pair = vars[i].split('=');
+    var decoded = decodeURIComponent(pair[0]);
+    if (decoded == variable) {
+      vals.push(pair[1]);
+    } else if (decoded == variable + '[]') {
+      vals.push(pair[1]);
+    }
+  }
+  if (!coerceArray && vals.length == 1) {
+    return vals[0];
+  } else {
+    return vals;
+  }
 
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-})
-
-/****************************************************************/
-/* Front page */
-
-function hide_sponsor_datatable() {
-    /* Hide while loading to prevent style change jitter */
-    $('#sponsor_table').hide()
-    $('#sponsor_table_loading').show()
-    $('#table-pills').hide()
-
-    $('#search_sponsors').show()
 }
 
-const DEFAULT_SPONSOR_ORDER = 0
-const DEFAULT_SPONSOR_ORDER_DIR = "asc"
-const MAJOR_SPONSOR_COLUMN = 5
 
-const DEFAULT_TRIAL_ORDER = 1
-const DEFAULT_TRIAL_ORDER_DIR = "desc"
-const DUE_TRIAL_COLUMN=4
+function setFormValues(params) {
+  $('#total__gte').val(params['min_total']);
+  if (params['is_industry_sponsor']) {
+    $('.sponsor_type[value="'+params['is_industry_sponsor']+'"]').prop('checked', true);
+  }
+  if (params['status']) {
+    $('.status_filter').prop('checked', false).bootstrapToggle('off');
+    $.each(params['status'], function(i, d) {
+      $('.status_filter[value="'+d+'"]').prop('checked', true).bootstrapToggle('on');
+    });
+  }
+}
 
-function activate_sponsor_datatable() {
-    var t = $('#sponsor_table').DataTable({
-        "fixedHeader": true,
-        "order": [[ DEFAULT_SPONSOR_ORDER, DEFAULT_SPONSOR_ORDER_DIR ]],
-        "pageLength": 10,
-        "lengthMenu": [ [10, 100, 500, -1], [10, 100, 500, "All"] ],
-        "orderClasses": false, // Turns off column highlighting, so sorting much faster
-        "dom": "tlpr",
-        "autoWidth": false,
-        "aoColumns": [
-            { "width": "26%", "orderSequence": [ "asc", "desc" ] },
-            { "width": "18.5%", "orderSequence": [ "desc", "asc" ], "className": "dt-center" },
-            { "width": "18.5%", "orderSequence": [ "desc", "asc" ], "className": "dt-center"  },
-            { "width": "18.5%", "orderSequence": [ "desc", "asc" ], "className": "dt-center", "type": "num-fmt" },
-            { "width": "18.5%", "orderSequence": [ "desc", "asc" ], "className": "dt-center"  },
-            { "width": "0%", "orderSequence": [ "asc", "desc" ] }, // Hidden column
-        ],
+function setCsvLinkAndTableDecoration(viewName) {
+  return function(settings) {
+    var api = this.api();
+    var currentParams = JSON.parse(JSON.stringify(api.ajax.params()));
+    currentParams.format = 'csv';
+    // remove 'length' so we can download everything, unpaginated
+    delete currentParams.length;
+    $('#download').attr('href', '/api/' + viewName + '.csv?' + $.param(currentParams));
+    var hasPages = api.page.info().pages > 1;
+    var wrapper = $(this).closest('.dataTables_wrapper');
+    var filter = wrapper.find('.dataTables_filter');
+    filter.toggle(Boolean(filter.find('input').val() || hasPages));
+    var pagination = wrapper.find('.dataTables_paginate');
+    pagination.toggle(hasPages);
+    var length = wrapper.find('.dataTables_length');
+    length.toggle(hasPages);
+    var info = wrapper.find('.dataTables_info');
+    info.toggle(hasPages);
+  };
+}
+
+function resizeCards() {
+  // find the widest text; OR. the smallest font size!
+  // find the largest font size that won't overflow the container
+  // apply that to all the boxes
+  var fontSize = 14;
+  var largestHeight = 19;
+  if ($(window).width() >= 768) {
+    $('#summary-cards .header').css('height', 'auto');
+    var maxFontSize = 150;
+    var minFontSize = 10;
+    var smallestFont = maxFontSize;
+    var sizes = $.each($('#summary-cards .content'), function(i, container) {
+      container = $(container);
+      var data = BigText.calculateSizes(
+        container, container.find('.big-text'), container.width(), maxFontSize, minFontSize);
+      if(data.fontSizes[0] < smallestFont) {
+        smallestFont = data.fontSizes[0];
+      }
+    });
+    fontSize = smallestFont;
+    $('#summary-cards .big-text').css('font-size', fontSize + 'px');
+    var sizes = $.each($('#summary-cards .header'), function(i, container) {
+      container = $(container);
+      var h = container.height();
+      if (h > largestHeight) {
+        largestHeight = h;
+      }
+    });
+    $('#summary-cards .header').height(largestHeight + 'px');
+  } else {
+    $('#summary-cards .big-text').css('font-size', fontSize + 'px');
+    $('#summary-cards .header').height(largestHeight + 'px');
+  }
+}
+
+function waitForEl(selector, callback) {
+  if ($(selector).length) {
+    callback();
+  } else {
+    setTimeout(function() {
+      waitForEl(selector, callback);
+    }, 100);
+  }
+};
+
+function showPerformance(sponsorSlug) {
+  var params = getTrialParams();
+  if(typeof sponsorSlug !== 'undefined' && sponsorSlug !== '') {
+    params['sponsor'] = sponsorSlug;
+  }
+  $.get('/api/performance/', params, function(d) {
+    $('#num').text(d['reported']);
+    $('#denom').text(d['due']);
+    if (d['due']) {
+      var percentage = (d['reported']/d['due'] * 100).toFixed(1);
+      $('#percent-amount').text(percentage + '%');
+    }
+    $('#fine-amount').text(d['fines_str']);
+    waitForEl('html.wf-active', resizeCards);
+    $(window).resize(function() {
+      resizeCards();
     });
 
-    /* The three tabs - major, all and search - can be flipped between
-     * at will. So the front page loads fast (necessary for e.g. Twitter cards)
-     * only partial list of sponsors is loaded for "major". First time going
-     * to "all" or "search" a whole new page is loaded. After that, it is
-     * all done with Javascript so is instant.
-     *
-     * There is use of window.history to make sure the back button behaves
-     * consistently with these two ways of reaching the same page.
-     */
-    var show_all = function(ev) {
-        t.search("")
-        t.columns(MAJOR_SPONSOR_COLUMN).search("").draw()
-        $('#all_sponsors').addClass('active')
-        $('#major_sponsors').removeClass('active')
-        $('#search_sponsors').removeClass('active')
-        if (ev) {
-            window.history.pushState('all', '', '/?all');
-        }
-        return false
-    }
-    var show_major = function(ev) {
-        t.search("")
-        t.columns(MAJOR_SPONSOR_COLUMN).search("major").draw()
-        $('#major_sponsors').addClass('active')
-        $('#all_sponsors').removeClass('active')
-        $('#search_sponsors').removeClass('active')
-        if (ev) {
-            window.history.pushState('major', '', '/');
-        }
-        return false
-    }
-    var show_search = function(ev) {
-        var search = $('#search_sponsors input').val()
-        t.search(search)
-        t.columns(MAJOR_SPONSOR_COLUMN).search("")
-        var count = t.page.info().recordsDisplay
-        if (count < 16) {
-            // Prevent jumping in scrolling as values are filtered
-            $('footer').css("margin-bottom", "420px")
-        } else {
-            $('footer').css("margin-bottom", "0px")
-        }
-        t.draw(false)
-        $('#major_sponsors').removeClass('active')
-        $('#all_sponsors').removeClass('active')
-        $('#search_sponsors').addClass('active')
-        $('#search_sponsors .badge').text(count)
-        if (ev) {
-            window.history.pushState('search', '', '/?search');
-        }
-        return false
-    }
-
-    // save vertical scrolling in cookie so tabs don't make page jump
-    var save_scroll_position = function() {
-        $.cookie("sponsor_scrolltop", $(window).scrollTop())
-    }
-    var restore_scroll_position = function() {
-        var scrolltop = $.cookie("sponsor_scrolltop")
-        if (scrolltop) {
-            $(document).scrollTop(scrolltop)
-            $.removeCookie("sponsor_scrolltop")
-        }
-    }
-
-    var redirect_search = function() {
-        $('#search_sponsors input').blur()
-        save_scroll_position()
-        $(location).attr('href', '/?search')
-        return false
-    }
-    if (showing_all_sponsors) {
-        $('#all_sponsors').on('click', show_all)
-        $(window).ready(restore_scroll_position)
-    } else {
-        $('#all_sponsors').on('click', function() {
-            save_scroll_position()
-            $(location).attr('href', '/?all')
-            return false
-        })
-    }
-    $('#major_sponsors').on('click', show_major)
-    if (showing_all_sponsors) {
-        $('#search_sponsors input').on('input', show_search)
-        $('#search_sponsors').on('click', show_search)
-        $('#search_sponsors button').on('submit', show_search)
-    } else {
-        $('#search_sponsors input').on('input', redirect_search)
-        $('#search_sponsors').on('click', redirect_search)
-        $('#search_sponsors button').on('submit', redirect_search)
-    }
-    function initial_tab() {
-        if (activate_search) {
-            show_search(null)
-            $('#search_sponsors input').focus()
-        } else if (showing_all_sponsors) {
-            show_all(null);
-        } else {
-            show_major(null);
-        }
-    }
-
-    window.onpopstate = function(ev) {
-        if (ev.state == "search") {
-            show_search(null)
-        } else if (ev.state == "all") {
-            show_all(null)
-        } else if (ev.state == "major") {
-            show_major(null)
-        } else {
-            initial_tab()
-        }
-    }
-
-    /* Show after style change */
-    $('#sponsor_table_loading').hide()
-    $('#table-pills').show()
-    $('#sponsor_table').show()
-    $('#sponsor_table').show()
-    initial_tab()
-    t.draw()
+    $('#summary-cards').fadeTo(1000, 1);
+  });
 }
 
-
-/****************************************************************/
-/* Sponsor page */
-
-function hide_trials_datatable() {
-    /* Hide while loading to prevent style change jitter */
-    $('#trials_table').hide()
-    $('#trials_table_loading').show()
-
-    $('#search_trials').show()
-    $('.nav > li.full-interface-tab').show()
-    $('#all_trials').hide()
-}
-
-function activate_trials_datatable() {
-    var t = $('#trials_table').DataTable({
-        "fixedHeader": true,
-        "order": [[ DEFAULT_TRIAL_ORDER, DEFAULT_TRIAL_ORDER_DIR ]],
-        "pageLength": 100,
-        "lengthMenu": [ [10, 100, 500, -1], [10, 100, 500, "All"] ],
-        "orderClasses": false, // Turns off column highlighting, so sorting much faster
-        "dom": "tlpr",
-        "autoWidth": false,
-        "aoColumns": [
-            { "orderData": [0,1], "width": "20%", "orderSequence": [ "asc", "desc" ] },
-            { "width": "16%", "orderSequence": [ "asc", "desc" ] },
-            { "width": "46%", "orderSequence": [ "asc", "desc" ] },
-            { "width": "18%", "orderSequence": [ "desc", "asc" ] },
-            { "width": "0%", "orderSequence": [ "asc", "desc" ] }, // Hidden column
-        ]
-    });
-    $('#trials_table').on('draw.dt', function() {
-        $('#trials_table [data-toggle="tooltip"]').tooltip()
-    })
-
-    var show_due = function() {
-        t.search("")
-        t.columns(DUE_TRIAL_COLUMN).search("due-trials").draw()
-        $('li.active').removeClass('active')
-        $('#due_trials').addClass('active')
-        $('.trials_preamble > *').hide()
-        $('.due_trials_preamble').show()
-        return false
-    }
-    var show_not_yet_due = function() {
-        t.search("")
-        t.columns(DUE_TRIAL_COLUMN).search("not-yet-due").draw()
-        $('li.active').removeClass('active')
-        $('#not_yet_due_trials').addClass('active')
-        $('.trials_preamble > *').hide()
-        $('.not_yet_due_preamble').show()
-        return false
-    }
-    var show_bad_data = function() {
-        t.search("")
-        t.columns(DUE_TRIAL_COLUMN).search("bad-data").draw()
-        $('li.active').removeClass('active')
-        $('#bad_data_trials').addClass('active')
-        $('.trials_preamble > *').hide()
-        $('.bad_data_preamble').show()
-        return false
-    }
-     var show_search = function() {
-        var search = $('#search_trials input').val()
-        t.search(search)
-        t.columns(DUE_TRIAL_COLUMN).search("").draw()
-        var count = t.page.info().recordsDisplay
-        if (count < 16) {
-            // Prevent jumping in scrolling as values are filtered
-            $('footer').css("margin-bottom", "420px")
-        } else {
-            $('footer').css("margin-bottom", "0px")
-        }
-        t.draw(false)
-        $('#search_trials .badge').text(count)
-
-        $('li.active').removeClass('active')
-        $('#search_trials').addClass('active')
-        $('.trials_preamble > *').hide()
-        $('#search_trials input').focus()
-        return false
-    }
-
-    $('#due_trials').on('click', show_due)
-    $('#not_yet_due_trials').on('click', show_not_yet_due)
-    $('#bad_data_trials').on('click', show_bad_data)
-    $('#search_trials input').on('input', show_search)
-    $('#search_trials').on('click', show_search)
-    $('#search_trials button').on('submit', show_search)
-    show_due()
-
-    /* Show after style change */
-    $('#trials_table_loading').hide()
-    $('#trials_table').show()
-}
-
-function make_pointer(el, x, y1, y2, colour) {
-    holderclass = ""
-    if (y1 > y2) {
-        holderclass = "pointer-xflip"
-        var swap = y1
-        y1 = y2
-        y2 = swap
-        y2 = y2 + 15
-        y1 = y1 - 7
-    }
-
-    holderclass = holderclass + " pointer-" + colour
-
-    if (y2 - y1 < 48) {
-        var missing = 48 - (y2 - y1)
-            y2 = y2 + (missing / 2)
-            y1 = y1 - (missing / 2)
-    }
-
-    var holder_start = "<div class='" + holderclass + " pointer-holder' style='left: " + x + "px; top: " + y1 + "px; height: "+ (y2 - y1) + "px'>"
-    var top_html = "<div class='pointer-top'></div>"
-    var mid_html = "<div class='pointer-mid' style='top:24px; height:" + (y2 - y1 - 48) + "px'></div>"
-    var bottom_html = "<div class='pointer-bottom' style='top:" + (y2 - y1 - 24) + "px'></div>"
-    var holder_end = "</div>"
-    var new_el = jQuery(holder_start + top_html + mid_html + bottom_html + holder_end)
-    new_el.appendTo(el)
-}
-
-function make_pointers() {
-    $('.pointer-holder').remove()
-
-    /* Don't show pointer for the all/none extreme cases where there's no pie */
-    if ($('#unreported_chart').length) {
-        var par = $('#late-reporting-column')
-        var y1 = ($('#not-reported-bar').offset().top + $('#reported-bar').offset().top) / 2 - par.offset().top - 7
-        var y2 = $('#chartcopy-brash-1').offset().top - par.offset().top + $('#chartcopy-brash-1').height() / 2 - 7
-        var x = $('#not-reported-bar').offset().left - par.offset().left - 23
-        make_pointer(par, x, y1, y2, "default")
-    }
-
-    if (inconsistent_trials > 0) {
-        var par = $('#inconsistent-data-column')
-        var y1 = $('#inconsistent-data-bar').offset().top - par.offset().top + $('#inconsistent-data-bar').height() / 2 + 8
-        var y2 = $('#chartcopy-7').offset().top - par.offset().top + $('#chartcopy-7').height() / 2 - 7
-        var x = $('#inconsistent-data-bar').offset().left - par.offset().left + $('#inconsistent-data-bar').width() + 24
-        make_pointer(par, x, y2, y1, "grey")
-    }
-}
-
-function activate_charts() {
-    /* Charts */
-    Chart.defaults.global.defaultFontFamily = "Lato, 'Times New Roman', Times, serif"
-    Chart.defaults.global.defaultFontSize = 15
-    Chart.defaults.global.defaultFontColor = '#333'
-
-    /* Pie chart 1 */
-    var unreported_data = {
-        labels: [ "Reported on time", "Late reporting results" ],
-        datasets: [
-        {
-            data: [total_due - total_unreported, total_unreported],
-            backgroundColor: [ "#343434", "#e95436" ],
-            hoverBackgroundColor: [ "#343434", "#e95436" ]
-        },
-        ]
-    }
-    var unreported_options = {
-        legend: { display: false },
-        animation: {
-            animateRotate: false,
-            duration: 0
-        }
-    }
-    var unreported_ctx = document.getElementById("unreported_chart");
-    if (unreported_ctx) {
-        window.unreported_chart = new Chart(unreported_ctx, {
-            type: 'pie' ,
-            data: unreported_data,
-            options: unreported_options
+function rankingTable(latestDate) {
+  var url = '/api/rankings/?limit=5000';
+  var params = getRankingParams();
+  params['date'] = latestDate;
+  params['due__gte'] = 1;
+  setFormValues(params);
+  var table = $('#sponsor_table').DataTable( {
+    "dom": '<"datatable-top"fi>rt<"bottom"lp><"clear">',
+    'drawCallback': setCsvLinkAndTableDecoration('rankings'),
+    "order": [[ 3, 'asc' ], [ 0, 'asc' ]],
+    "language": {
+      "infoFiltered": '',
+      "search": "",
+      "searchPlaceholder": "Search sponsors"
+    },
+    'ajax': {
+      'url': url,
+      'dataSrc': 'results',
+      'data': function(d) {
+        return $.extend(d, params, {
+          'total__gte': $('#total__gte').val(),
+          'with_trials_due': $('.overdue_type:checked').val(),
+          'sponsor__is_industry_sponsor': $('.sponsor_type:checked').val(),
         });
-    }
+      },
+    },
+    'pageLength': 100,
+    'serverSide': true,
+    'columns': [
+      {'name': 'sponsor__name', 'data': 'sponsor_name',
+       'render': function(data, type, full, meta) {
+         return '<a href="/sponsor/'+full['sponsor_slug']+'">'+
+           full['sponsor_name']+'</a>';
+       },
+      },
+      {'data': 'due', 'name': 'due'},
+      {'data': 'reported', 'name': 'reported'},
+      {'data': 'percentage', 'name': 'percentage',
+       'render': function(data, type, full, meta) {
+         return data + '%';
+       },
+      },
+    ],
+  });
+  $('#total__gte').on('input', function() {
+    table.draw();
+    params['min_total'] = $('#total__gte').val();
+    window.history.pushState('min_total', params, '?' + $.param(params));
+  });
+  $('.sponsor_type').on('change', function() {
+    table.draw();
+    params['is_industry_sponsor'] = $('.sponsor_type:checked').val();
+    window.history.pushState('industry_sponsor', params, '?' + $.param(params));
+  });
+  $('.overdue_type').on('change', function() {
+    table.draw();
+    params['with_trials_due'] = $('.with_trials_due:checked').val();
+    window.history.pushState('with_trials_due', params, '?' + $.param(params));
+  });
+  $(window).bind('popstate', function () {
+    var params = getRankingParams();
+    setFormValues(params);
+    table.draw();
+  });
+}
 
-    /* Make pointers - done with Javscript because complexity of relative
-     * positions needed isn't possible in CSS3 */
-    make_pointers()
-    /* Redraw pointers when document ready, in case layout changes need to
-     * shift them */
-    $(window).ready(make_pointers)
-    /* Pointers on bar chart move when window resizes - e.g. if it
-     * started at a narrow mobile size, expanded to wholes creen */
-    $(window).resize(make_pointers)
+function getRankingParams() {
+  var is_industry_sponsor = getQueryVariable('is_industry_sponsor');
+  var min_total = getQueryVariable('min_total');
+  var q = getQueryVariable('q');
+  var with_trials_due = getQueryVariable('with_trials_due');
+  var params = {
+    'is_industry_sponsor': is_industry_sponsor,
+    'min_total': min_total,
+    'with_trials_due': with_trials_due,
+    'q': q,
+  };
+  return params;
+}
+
+function getTrialParams() {
+  var status = getQueryVariable('status', true);
+  var params = {
+    'status': status,
+  };
+  return params;
+}
+
+function trialsTable(sponsor_slug) {
+  var url = '/api/trials/';
+  var params = getTrialParams();
+  var columnDefs = [];
+  if(typeof sponsor_slug !== 'undefined' && sponsor_slug !== '') {
+    params['sponsor'] = sponsor_slug;
+    columnDefs = [{className: 'sponsor-col', targets: [1]}];
+  }
+  setFormValues(params);
+  var table = $('#trials_table').DataTable( {
+    'initComplete': function(settings, json) {
+      $('#results').fadeTo(500, 1);
+    },
+    "dom": '<"datatable-top"fi>rt<"bottom"lp><"clear">',
+    'drawCallback': setCsvLinkAndTableDecoration('trials'),
+    'columnDefs': columnDefs,
+    "language": {
+      "infoFiltered": '',
+      "search": "",
+      "searchPlaceholder": "Search"
+    },
+    'ajax': {
+      'url': url,
+      'dataSrc': 'results',
+      'data': function(d) {
+        var adjusted = $.extend(d, params, {
+          'status': $.map(
+            $('.status_filter:checked'), function(x) {
+              return $(x).val();
+            }),
+        });
+        return adjusted;
+      },
+    },
+    'serverSide': true,
+    'pageLength': 100,
+    "order": [[ 3, 'asc' ]],
+    'columns': [
+      {'data': 'status', 'name': 'status',
+       'render': function(data, type, full, meta) {
+         var statusClass = '';
+         if (data == 'overdue') {
+           statusClass = 'danger';
+         } else if (data == 'reported') {
+           statusClass = 'success';
+         } else if (data == 'reported-late') {
+           statusClass = 'warning';
+         } else {
+           statusClass = 'info';
+         }
+         return '<span class="label label-' +
+           statusClass + '">' + data + '</span>';
+       },
+      },
+      {'name': 'sponsor__name', 'data': 'sponsor_name',
+       'render': function(data, type, full, meta) {
+         return '<a href="/sponsor/'+full['sponsor_slug']+'">'+
+           full['sponsor_name']+'</a>';
+       },
+      },
+      {'data': 'registry_id', 'name': 'registry_id',
+       'render': function(data, type, full, meta) {
+         return '<a target="_blank" href="'+full['publication_url']+'">'+
+           full['registry_id']+'</a>';
+       },
+      },
+      {'data': 'title', 'name': 'title',
+       'render': function(data, type, full, meta) {
+         var title = full['title'];
+         if (full['is_pact']) {
+           title += ' <span class="pact">[pACT]</span>';
+         }
+         return title;
+       },
+      },
+      {'data': 'completion_date', 'name': 'completion_date'},
+      {'data': 'days_late', 'name': 'days_late'},
+    ],
+  });
+  $('.status_filter').on('change', function() {
+    table.draw();
+    params['status'] = $.map($('.status_filter:checked'), function(x) {
+      return $(x).val();
+    });
+    window.history.pushState('status', params, '?' + $.param(params));
+  });
+  $(window).bind('popstate', function () {
+    var params = getTrialParams();
+    setFormValues(params);
+    table.draw();
+  });
 }

@@ -47,8 +47,8 @@ def setup_nginx():
 
 def setup_django():
     with prefix('source venv/bin/activate'):
-        run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py collectstatic --noinput --settings=clinicaltrials.settings')
-        run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py migrate --settings=clinicaltrials.settings')
+        run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py collectstatic --noinput --settings=frontend.settings')
+        run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py migrate --settings=frontend.settings')
 
 def restart_gunicorn():
     run("supervisorctl restart %s" % env.app)

@@ -65,11 +65,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
-    #'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'DEFAULT_PAGINATION_CLASS': 'frontend.pagination.DataTablesPagination',
+    'DEFAULT_PAGINATION_CLASS': 'frontend.custom_rest_backends.DataTablesPagination',
     'SEARCH_PARAM': 'search[value]',
     'DEFAULT_FILTER_BACKENDS': (
-        'frontend.pagination.DataTablesOrderingFilter',
+        'frontend.custom_rest_backends.DataTablesOrderingFilter',
         'rest_framework.filters.SearchFilter',
         'django_filters.rest_framework.DjangoFilterBackend',
         ),
@@ -127,7 +126,7 @@ LOGGING = {
 
 ADMINS = [('Seb', 'seb.bacon@gmail.com'),]  # XXX change to tech@ebmdatalab.net on launch
 
-ROOT_URLCONF = 'clinicaltrials.urls'
+ROOT_URLCONF = 'frontend.urls'
 
 TEMPLATES = [
     {
@@ -171,7 +170,7 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
-WSGI_APPLICATION = 'clinicaltrials.wsgi.application'
+WSGI_APPLICATION = 'frontend.wsgi.application'
 
 
 # Database
