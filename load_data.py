@@ -12,6 +12,7 @@ import glob
 import datetime
 import requests
 from google.cloud.exceptions import NotFound
+from xml.parsers.expat import ExpatError
 
 
 STORAGE_PREFIX = 'clinicaltrials/'
@@ -82,13 +83,16 @@ def convert_to_json():
         for source in files:
             logging.info("Converting %s", source)
             with open(source, 'rb') as f:
-                f2.write(
-                    json.dumps(
-                        xmltodict.parse(
-                            f,
-                            item_depth=0,
-                            postprocessor=postprocessor)
-                    ) + "\n")
+                try:
+                    f2.write(
+                        json.dumps(
+                            xmltodict.parse(
+                                f,
+                                item_depth=0,
+                                postprocessor=postprocessor)
+                        ) + "\n")
+                except ExpatError:
+                    logging.warn("Unable to parse %s", source)
 
         completed += 1
         if completed % 100 == 0:
