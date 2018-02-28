@@ -90,6 +90,12 @@ def set_current_rankings():
         _compute_ranks()
 
 
+def truthy(val):
+    """Turn a one or zero value into a boolean.
+    """
+    return bool(int(val))
+
+
 class Command(BaseCommand):
     help = 'XXX'
     # XXX the order matters here and could be better enforced in
@@ -107,7 +113,7 @@ class Command(BaseCommand):
         with transaction.atomic():
             today = date.today()
             for row in csv.DictReader(f):
-                has_act_flag = (int(row['act_flag']) > 0 or int(row['included_pact_flag']) > 0)
+                has_act_flag = truthy(row['act_flag']) or truthy(row['included_pact_flag'])
 
                 if has_act_flag:
                     sponsor, created = Sponsor.objects.get_or_create(
@@ -126,10 +132,10 @@ class Command(BaseCommand):
                         'registry_id': row['nct_id'],
                         'publication_url': row['url'],
                         'title': row['title'],
-                        'has_exemption': bool(int(row['has_certificate'])),
-                        'has_results': bool(int(row['has_results'])),
-                        'results_due': bool(int(row['results_due'])),
-                        'is_pact': bool(int(row['included_pact_flag'])),
+                        'has_exemption': truthy(row['has_certificate']),
+                        'has_results': truthy(row['has_results']),
+                        'results_due': truthy(row['results_due']),
+                        'is_pact': truthy(row['included_pact_flag']),
                         'sponsor_id': sponsor.pk,
                         'start_date': row['start_date'],
                         'reported_date': row['results_submitted_date'] or None,
