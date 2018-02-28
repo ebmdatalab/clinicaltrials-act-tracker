@@ -50,40 +50,35 @@ Using Python 3, create and enter a virtualenv, as [described
 here](https://docs.djangoproject.com/en/1.10/intro/contributing/).
 For example:
 
-```
-python3.5 -m venv venv
-. venv/bin/activate
-```
+    python3.5 -m venv venv
+    . venv/bin/activate
 
 Install required Python packages.
 
-```
-pip install pip-tools
-pip-sync
-```
+    pip install pip-tools
+    pip-sync
 
 Set environment variables required (edit `environment` and then run `source environment`).
 
 
 Checkout the data respository.
 
-```
-cd ..
-git clone git@github.com:ebmdatalab/clinicaltrials-act-tracker.git
-cd -
-```
+    cd ..
+    git clone git@github.com:ebmdatalab/clinicaltrials-act-tracker.git
+    cd -
+
 Run the application.
 
-```
-cd clinicaltrials
-./manage.py runserver
-```
+    cd clinicaltrials
+    ./manage.py runserver
 
 There are a few tests.
 
-```
-./manage.py test
-```
+    coverage run --source='.' manage.py test
+
+Make a coverage report:
+
+    coverage html -d /tmp/coverage_html
 
 Deployment
 ==========
