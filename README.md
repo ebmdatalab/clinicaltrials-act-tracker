@@ -1,5 +1,41 @@
 # euctr-tracker
 
+Overview
+========
+
+This software is designed to process a subset of trial registry data
+from ClinicalTrials.gov that are subject to FDAAA 2017, i.e. which
+come with a legal obligation to report results.  Such trials are known
+as ACTs (Applicable Clinical Trials) or pACTs (probable ACTS).
+
+This subset is displayed in a website that makes tracking and
+reporting easier.
+
+Operational overview:
+
+1. Python script `load_data.py`:
+ * downloads a zip clinical trials registry data from ClinicalTrials.gov
+ * converts the XML to JSON
+ * uploads it to BigQuery
+ * runs SQL to transform it to tabular format including fields to
+   indentify ACTs and their lateness
+ * downloads SQL as a CSV file
+
+2. Django management command `process_data`:
+  * imports CSV file into Django models
+  * precomputes aggregate statistics and turns these into rankings
+  * handles other metadata (in particular, hiding trials that are no
+    longer ACTs)
+  * directly scrapes the website for metadata not in the zip
+    (specifically, trials which have been submitted but are under a QA
+    process).
+
+These two commands are run daily via a `fab` script, and the results
+loaded into a staging database / website.
+
+A separate command copies new data from staging to production
+(following moderation).
+
 Development
 ===========
 

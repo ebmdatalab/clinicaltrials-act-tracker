@@ -1,3 +1,7 @@
+"""Custom django-filters.  Used by our custom django-rest-framework
+views (q.v.)
+
+"""
 from django_filters import AllValuesFilter
 from django_filters import MultipleChoiceFilter
 from django_filters import BooleanFilter
@@ -11,7 +15,6 @@ from frontend.models import Sponsor
 from frontend.models import Trial
 
 
-# Django-filters stuff
 class TrialStatusFilter(FilterSet):
     status = MultipleChoiceFilter(
         label='Trial status',

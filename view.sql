@@ -1,3 +1,9 @@
+-- Takes a JSON dump of clinicaltrials.gov in BigQuery and turns it to
+-- a tabular format which includes fields necessary to identify ACTs
+-- and their lateness (or otherwise)
+--
+-- The logic is documented here: https://github.com/ebmdatalab/clinicaltrials-act-tracker/issues/2#issuecomment-358318279
+
 WITH full_data_extract AS (
 SELECT
   TRIM(json_EXTRACT(json,

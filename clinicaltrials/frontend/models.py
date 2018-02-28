@@ -135,6 +135,18 @@ class Trial(models.Model):
 
 
 class TrialQA(models.Model):
+    """Represents a QA event for a Trial.
+
+    When a trial is submitted to ClinicalTrials.gov, it immediately
+    enters a QA process which can take several months.  However, when
+    it leaves the QA process, it's submission date is considered the
+    date it entered the QA process.
+
+    The QA process involves a ping-pong between sponsor and
+    regulator. Each time the regulator returns a trial to the sponsor
+    for alterations, the sponsor gets 30 days to respond.
+
+    """
     trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
     submitted_to_regulator = models.DateField()
     returned_to_sponsor = models.DateField(null=True, blank=True)

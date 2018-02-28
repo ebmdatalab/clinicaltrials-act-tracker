@@ -1,3 +1,9 @@
+"""Miscellaneous commands for computing extra metadata (specifically,
+days late and status) about trials.
+
+Called during the import process.
+
+"""
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -25,6 +31,10 @@ def _datify(trial):
 
 
 def compute_metadata(trial):
+    """Compute days late and status for a trial.
+    """
+    # NB order matters; logic in trial status calculations depends on
+    # how many days late a trial is.
     trial.days_late = get_days_late(trial)
     if trial.days_late:
         trial.finable_days_late = max([
@@ -38,16 +48,25 @@ def compute_metadata(trial):
     trial.status = get_status(trial)
     trial.save()
 
+
 def qa_start_date(trial):
+    """Return the date a trial started the QA procedure, or None if
+    unavailable.
+
+    """
     first_event = trial.trialqa_set.first()
     if first_event:
-        date = first_event.submitted_to_regulator
+        qa_date = first_event.submitted_to_regulator
     else:
-        date = None
-    return date
+        qa_date = None
+    return qa_date
+
 
 def get_days_late(trial):
-    # See https://github.com/ebmdatalab/clinicaltrials-act-tracker/issues/38
+    """Calculate the number of days a trial is late
+    """
+    # Logic behind this implementation is discussed here:
+    # https://github.com/ebmdatalab/clinicaltrials-act-tracker/issues/38
     overdue_delta = relativedelta(days=365)
     days_late = None
     if trial.results_due:
@@ -61,10 +80,10 @@ def get_days_late(trial):
                  - overdue_delta).days,
                 0])
         else:
-            # still not reported.
             qa_date = qa_start_date(trial)
             if qa_date:
-                days_late = max([(qa_date - trial.completion_date - overdue_delta).days, 0])
+                days_late = max(
+                    [(qa_date - trial.completion_date - overdue_delta).days, 0])
             else:
                 days_late = max([
                     (date.today()
@@ -75,36 +94,35 @@ def get_days_late(trial):
                     days_late = 0
         if days_late == 0:
             days_late = None
-
     return days_late
 
+
 def get_status(trial):
-    # days_late() must have been called first
     overdue = trial.days_late and trial.days_late > 0
-    Trial = type(trial)
+    trial_class = type(trial)
     if trial.results_due:
         if trial.has_results:
             if overdue:
-                status = Trial.STATUS_REPORTED_LATE
+                status = trial_class.STATUS_REPORTED_LATE
             else:
-                status = Trial.STATUS_REPORTED
+                status = trial_class.STATUS_REPORTED
         else:
             if qa_start_date(trial):
                 if trial.days_late:
-                    status = Trial.STATUS_REPORTED_LATE
+                    status = trial_class.STATUS_REPORTED_LATE
                 else:
-                    status = Trial.STATUS_REPORTED
+                    status = trial_class.STATUS_REPORTED
             else:
                 if trial.days_late:
-                    status = Trial.STATUS_OVERDUE
+                    status = trial_class.STATUS_OVERDUE
                 else:
                     # We're in the grace period
-                    status = Trial.STATUS_ONGOING
+                    status = trial_class.STATUS_ONGOING
     else:
         if trial.has_results:
-            # Reported early! Might want to track separately in
-            # the future
-            status = Trial.STATUS_REPORTED
+            # Reported early! Might want to track with its own state
+            # in the future.
+            status = trial_class.STATUS_REPORTED
         else:
-            status = Trial.STATUS_ONGOING
+            status = trial_class.STATUS_ONGOING
     return status

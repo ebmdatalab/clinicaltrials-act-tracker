@@ -1,3 +1,13 @@
+"""Custom django-rest-framework views to support API representation of
+our data.
+
+The names of the ordering and search fields are coupled to names
+expected to be used by the DataTables javascript library (see
+`site.js`).
+
+See also custom_rest_backends.py
+
+"""
 from django.db.models import Count
 
 
@@ -54,8 +64,11 @@ class SponsorSerializer(serializers.HyperlinkedModelSerializer):
 
 
 
-# REST Framework stuff
 class CSVNonPagingViewSet(viewsets.ModelViewSet):
+    """A viewset that allows downloading a CSV in its entirety, rather
+    than in pages.
+
+    """
     @property
     def paginator(self):
         """Overrides paginator lookup in base class
