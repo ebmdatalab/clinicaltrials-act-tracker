@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from datetime import date
@@ -18,26 +20,38 @@ class RankingTestCase(TestCase):
         self.date1 = date(2016, 1, 1)
         self.date2 = date(2016, 2, 1)
         self.date3 = date(2016, 3, 1)
-        self.sponsor1 = Sponsor.objects.create(name="Sponsor 1")
-        self.sponsor2 = Sponsor.objects.create(name="Sponsor 2")
-        self.sponsor3 = Sponsor.objects.create(name="Sponsor 3")
+        self.sponsor1 = Sponsor.objects.create(
+            name="Sponsor 1")
+        self.sponsor2 = Sponsor.objects.create(
+            name="Sponsor 2")
+        self.sponsor3 = Sponsor.objects.create(
+            name="Sponsor 3")
 
-        test_trials = [
-            # date,  sponsor, due, reported
-            (self.date1, self.sponsor1, True, False),
-            (self.date1, self.sponsor2, True, True),
-            (self.date1, self.sponsor2, True, True),
+        test_trials = OrderedDict(
+            {
+                self.date1: [
+                    # sponsor, due, reported
+                    (self.sponsor1, True, False),
+                    (self.sponsor2, True, True),
+                    (self.sponsor2, True, True),
+                ],
 
-            (self.date2, self.sponsor1, True, False),
-            (self.date2, self.sponsor1, True, True),
-            (self.date2, self.sponsor2, True, False),
-            (self.date2, self.sponsor2, True, False),
+                self.date2: [
+                    # sponsor, due, reported
+                    (self.sponsor1, True, False),
+                    (self.sponsor1, True, True),
+                    (self.sponsor2, True, False),
+                    (self.sponsor2, True, False),
+                ],
 
-            (self.date3, self.sponsor2, True, True),
-            (self.date3, self.sponsor2, True, True),
-            (self.date3, self.sponsor1, True, True),
-            (self.date3, self.sponsor1, True, True),
-        ]
+                self.date3: [
+                    # sponsor, due, reported
+                    (self.sponsor2, True, True),
+                    (self.sponsor2, True, True),
+                    (self.sponsor1, True, True),
+                    (self.sponsor1, True, True),
+                ]
+            })
         simulateImport(test_trials)
 
     def test_percentage_set(self):

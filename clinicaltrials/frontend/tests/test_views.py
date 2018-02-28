@@ -10,7 +10,7 @@ from django.test import Client
 from rest_framework.test import APIClient
 
 from frontend.tests.common import makeTrial
-from frontend.management.commands.process_data import set_current
+from frontend.management.commands.process_data import set_current_rankings
 from frontend.models import Sponsor
 
 
@@ -28,7 +28,7 @@ class FrontendTestCase(TestCase):
             results_due=True,
             has_results=True,
             reported_date=date(2016,12,1))
-        set_current()
+        set_current_rankings()
 
         client = APIClient()
         response = client.get('/api/trials/', format='json').json()
@@ -69,8 +69,11 @@ class ApiResultsTestCase(TestCase):
     maxDiff = 6000
     @patch('frontend.trial_computer.date')
     def setUp(self, datetime_mock):
-        datetime_mock.today = Mock(return_value=date(2017,1,31))
-        self.sponsor = Sponsor.objects.create(name="Sponsor 1")
+        self.mock_today = date(2017,1,31)
+        datetime_mock.today = Mock(return_value=self.mock_today)
+        self.sponsor = Sponsor.objects.create(
+            name="Sponsor 1",
+            updated_date=self.mock_today)
         self.due_trial = makeTrial(
             self.sponsor,
             results_due=True,
@@ -80,7 +83,7 @@ class ApiResultsTestCase(TestCase):
             results_due=True,
             has_results=True,
             reported_date=date(2016,12,1))
-        set_current()
+        set_current_rankings()
 
     def test_trial_csv(self):
         client = APIClient()
@@ -155,7 +158,7 @@ class ApiResultsTestCase(TestCase):
              'num_trials': 2,
              'slug': 'sponsor-1',
              'is_industry_sponsor': None,
-             'updated_date': '2018-02-27'}
+             'updated_date': self.mock_today.strftime('%Y-%m-%d')}
         )
 
     def test_sponsor_filter(self):
@@ -176,7 +179,7 @@ class ApiResultsTestCase(TestCase):
         self.assertEqual(response['recordsFiltered'], 1)
         self.assertEqual(
             response['results'][0],
-            {'date': '2018-02-27',
+            {'date': self.mock_today.strftime('%Y-%m-%d'),
              'total': 2,
              'sponsor_name': 'Sponsor 1',
              'is_industry_sponsor': None,
@@ -207,7 +210,7 @@ class ApiResultsTestCase(TestCase):
                 'days_late': 1,
                 'fines_str': '$11,569'}
         )
-        response = client.get('/api/performance/', {'sponsor': 'XXX'}, format='json').json()
+        response = client.get('/api/performance/', {'sponsor': 'XYZ'}, format='json').json()
         self.assertEqual(
             response,
             {

@@ -1,8 +1,9 @@
 from datetime import date
 from datetime import timedelta
 
+from frontend.models import Sponsor
 from frontend.models import Trial
-from frontend.management.commands.process_data import set_current
+from frontend.management.commands.process_data import set_current_rankings
 
 
 def makeTrial(sponsor, **kw):
@@ -25,20 +26,15 @@ def makeTrial(sponsor, **kw):
 def simulateImport(test_trials):
     """Do the same as the import script, but for an array of tuples
     """
-    last_date = None
-    for updated_date, sponsor, due, reported in test_trials:
-        if updated_date != last_date:
-            # simulate a new import; this means deleting all
-            # existing Trials and updating rankings (see below)
-            set_current()
-            Trial.objects.all().delete()
-        sponsor.updated_date = updated_date
-        sponsor.save()
-        makeTrial(
-            sponsor,
-            results_due=due,
-            has_results=reported,
-            reported_date=updated_date
-        )
-        last_date = updated_date
-    set_current()
+    for update_date, trial in test_trials.items():
+        Sponsor.objects.all().update(
+            updated_date = update_date)
+        for sponsor, due, reported in trial:
+            makeTrial(
+                sponsor,
+                results_due=due,
+                has_results=reported,
+                reported_date=update_date
+            )
+        set_current_rankings()
+        Trial.objects.all().delete()  # this is what the import process does

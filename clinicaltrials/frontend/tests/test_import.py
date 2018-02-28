@@ -77,10 +77,6 @@ class CommandsTestCase(TestCase):
 
     def test_second_import(self, mock_date_1, mock_date_2):
         ""
-        # XXX this fails when run as part of suite but succeeds when
-        # run in isolation. Related to the mock that the callee module
-        # receiving being different from the one whose date we change
-        # 12 lines below.
         mock_date_1.today = mock.Mock(return_value=date(2018,1,1))
         mock_date_2.today = mock.Mock(return_value=date(2018,1,1))
 

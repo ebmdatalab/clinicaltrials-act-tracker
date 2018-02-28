@@ -37,14 +37,13 @@ def set_qa_metadata(trial):
 
 
 def _compute_ranks():
-    # XXX should only bother computing ranks for *current* date;
-    # this does it for all of them.
     sql = ("WITH ranked AS (SELECT date, ranking.id, RANK() OVER ("
            "  PARTITION BY date "
            "ORDER BY percentage DESC"
            ") AS computed_rank "
            "FROM frontend_ranking ranking WHERE percentage IS NOT NULL "
-           ")")
+           "AND date = %s"
+           ") ")
 
     sql += ("UPDATE "
             " frontend_ranking "
@@ -52,10 +51,16 @@ def _compute_ranks():
             " rank = ranked.computed_rank "
             "FROM ranked "
             "WHERE ranked.id = frontend_ranking.id AND ranked.date = frontend_ranking.date")
+    on_date = Sponsor.objects.latest('updated_date').updated_date
     with connection.cursor() as c:
-            c.execute(sql)
+            c.execute(sql, [on_date])
 
-def set_current():
+
+def set_current_rankings():
+    """Compute a ranking for each sponsor, which aggregates statistics
+    about their trials and then puts them in ranked order.
+
+    """
     with transaction.atomic():
         for sponsor in Sponsor.objects.all():
             due = Trial.objects.due().filter(
@@ -82,7 +87,7 @@ def set_current():
             else:
                 assert len(ranking) == 1
                 ranking.update(**d)
-            _compute_ranks()
+        _compute_ranks()
 
 
 class Command(BaseCommand):
@@ -157,4 +162,4 @@ class Command(BaseCommand):
 
             # This should only happen after Trial statuses have been set
             print("Setting current rankings")
-            set_current()
+            set_current_rankings()
