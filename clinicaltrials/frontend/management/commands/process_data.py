@@ -111,61 +111,58 @@ class Command(BaseCommand):
         with transaction.atomic():
             today = date.today()
             for row in csv.DictReader(f):
-                has_act_flag = truthy(row['act_flag']) or truthy(row['included_pact_flag'])
+                # Create / update sponsor
+                sponsor, created = Sponsor.objects.get_or_create(
+                    name=row['sponsor'])
+                sponsor.updated_date = today
+                existing_sponsor = sponsor.is_industry_sponsor
+                is_industry_sponsor = row['sponsor_type'] == 'Industry'
+                if existing_sponsor is None:
+                    sponsor.is_industry_sponsor = is_industry_sponsor
+                else:
+                    assert (is_industry_sponsor == existing_sponsor), \
+                        "Inconsistent sponsor types for {}".format(sponsor)
+                sponsor.save()
 
-                if has_act_flag:
-                    # Create / update sponsor
-                    sponsor, created = Sponsor.objects.get_or_create(
-                        name=row['sponsor'])
-                    sponsor.updated_date = today
-                    existing_sponsor = sponsor.is_industry_sponsor
-                    is_industry_sponsor = row['sponsor_type'] == 'Industry'
-                    if existing_sponsor is None:
-                        sponsor.is_industry_sponsor = is_industry_sponsor
-                    else:
-                        assert (is_industry_sponsor == existing_sponsor), \
-                            "Inconsistent sponsor types for {}".format(sponsor)
-                    sponsor.save()
+                # Create / update Trial
+                d = {
+                    'registry_id': row['nct_id'],
+                    'publication_url': row['url'],
+                    'title': row['title'],
+                    'has_exemption': truthy(row['has_certificate']),
+                    'has_results': truthy(row['has_results']),
+                    'results_due': truthy(row['results_due']),
+                    'is_pact': truthy(row['included_pact_flag']),
+                    'sponsor_id': sponsor.pk,
+                    'start_date': row['start_date'],
+                    'reported_date': row['results_submitted_date'] or None,
+                }
+                if row['available_completion_date']:
+                    d['completion_date'] = row['available_completion_date']
+                trial_set = Trial.objects.filter(registry_id=row['nct_id'])
+                trial = trial_set.first()
+                if trial:
+                    d['updated_date'] = today
+                    trial_set.update(**d)
+                else:
+                    d['first_seen_date'] = today
+                    Trial.objects.create(**d)
 
-                    # Create / update Trial
-                    d = {
-                        'registry_id': row['nct_id'],
-                        'publication_url': row['url'],
-                        'title': row['title'],
-                        'has_exemption': truthy(row['has_certificate']),
-                        'has_results': truthy(row['has_results']),
-                        'results_due': truthy(row['results_due']),
-                        'is_pact': truthy(row['included_pact_flag']),
-                        'sponsor_id': sponsor.pk,
-                        'start_date': row['start_date'],
-                        'reported_date': row['results_submitted_date'] or None,
-                    }
-                    if row['available_completion_date']:
-                        d['completion_date'] = row['available_completion_date']
-                    trial_set = Trial.objects.filter(registry_id=row['nct_id'])
-                    trial = trial_set.first()
-                    if trial:
-                        d['updated_date'] = today
-                        trial_set.update(**d)
-                    else:
-                        d['first_seen_date'] = today
-                        Trial.objects.create(**d)
+        # Mark zombie trials
+        Trial.objects.filter(updated_date__lt=today).update(no_longer_on_website=True)
 
-            # Mark zombie trials
-            Trial.objects.filter(updated_date__lt=today).update(no_longer_on_website=True)
+        # Now scrape trials that might be in QA (these would be
+        # flagged as having no results, but if in QA we consider
+        # them submitted until QA finishes)
+        print("Fetching trial QA metadata")
+        for trial in Trial.objects.filter(results_due=True, has_results=False):
+            set_qa_metadata(trial)
 
-            # Now scrape trials that might be in QA (these would be
-            # flagged as having no results, but if in QA we consider
-            # them submitted until QA finishes)
-            print("Fetching trial QA metadata")
-            for trial in Trial.objects.filter(results_due=True, has_results=False):
-                set_qa_metadata(trial)
+        # Next, compute days_late and status for each trial
+        print("Computing trial metadata")
+        for trial in Trial.objects.all():
+            trial.compute_metadata()
 
-            # Next, compute days_late and status for each trial
-            print("Computing trial metadata")
-            for trial in Trial.objects.all():
-                trial.compute_metadata()
-
-            # This should only happen after Trial statuses have been set
-            print("Setting current rankings")
-            set_current_rankings()
+        # This should only happen after Trial statuses have been set
+        print("Setting current rankings")
+        set_current_rankings()
