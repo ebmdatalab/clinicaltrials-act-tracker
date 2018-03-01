@@ -1,34 +1,57 @@
-from fabric.api import run, sudo, put
+import os
+
+from fabric.api import run, sudo
 from fabric.api import prefix, warn, abort
-from fabric.api import settings, task, env, shell_env
+from fabric.api import task, env
 from fabric.contrib.files import exists
 from fabric.context_managers import cd
-from fabric.operations import prompt
-
-from datetime import datetime
-import json
-import os
-import requests
-import sys
 
 env.hosts = ['smallweb1.openprescribing.net']
 env.forward_agent = True
 env.colorize_errors = True
-env.user = 'root'
 
 environments = {
     'live': 'fdaaa',
     'staging': 'fdaaa_staging',
+    'test': 'fdaaa_test',
 }
 
+def sudo_script(script):
+    """Run script under `deploy/fab_scripts/` as sudo.
+
+    We don't use the `fabric` `sudo()` command, because instead we
+    expect the user that is running fabric to have passwordless sudo
+    access.  In this configuration, that is achieved by the user being
+    a member of the `fabric` group (see `setup_sudo()`, below).
+
+    """
+    return run('sudo ' +
+        os.path.join(
+            env.path,
+            'clinicaltrials-act-tracker/deploy/fab_scripts/%s' % script)
+    )
+
+def setup_sudo():
+    """Ensures members of `fabric` group can execute deployment scripts as
+    root without passwords
+
+    """
+    sudoer_file = '/etc/sudoers.d/fdaaa_fabric_{}'.format(env.app)
+    if not exists(sudoer_file):
+        sudo('echo "%fabric ALL = NOPASSWD: {}/clinicaltrials-act-tracker/deploy/fab_scripts/" > {}'.format(env.path, sudoer_file))
+
 def make_directory():
-    run('mkdir -p %s' % (env.path))
+    if not exists(env.path):
+        sudo("mkdir -p %s" % env.path)
+        sudo("chown -R www-data:www-data %s" % env.path)
+        sudo("chmod  g+w %s" % env.path)
 
 def venv_init():
     run('[ -e venv ] || python3.5 -m venv venv')
 
 def pip_install():
     with prefix('source venv/bin/activate'):
+        run('pip install --upgrade pip setuptools')
         run('pip install -q -r clinicaltrials-act-tracker/requirements.txt')
 
 def update_from_git():
@@ -38,12 +61,13 @@ def update_from_git():
     else:
         with cd("clinicaltrials-act-tracker"):
             run("git pull -q")
-
+            run("git checkout slackbot")
 
 def setup_nginx():
-    run('ln -sf %s/clinicaltrials-act-tracker/deploy/supervisor-%s.conf /etc/supervisor/conf.d/%s.conf' % (env.path, env.app, env.app))
-    run('ln -sf %s/clinicaltrials-act-tracker/deploy/nginx-%s /etc/nginx/sites-enabled/%s' % (env.path, env.app, env.app))
-    run('chown -R www-data:www-data /var/www/%s/{clinicaltrials-act-tracker,venv}' % (env.app,))
+    sudo_script('setup_nginx.sh %s %s' % (env.path, env.app))
+
+def setup_ebmbot():
+    sudo_script('setup_ebmbot.sh %s' % env.app)
 
 def setup_django():
     with prefix('source venv/bin/activate'):
@@ -51,18 +75,10 @@ def setup_django():
         run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py migrate --settings=frontend.settings')
 
 def restart_gunicorn():
-    run("supervisorctl restart %s" % env.app)
+    sudo_script("restart.sh %s" % env.app)
 
 def reload_nginx():
-    run("/etc/init.d/nginx reload")
-
-#def run_migrations():
-#    if env.environment == 'live':
-#        with prefix('source .venv/bin/activate'):
-#            run('cd openprescribing/ && python manage.py migrate '
-#                '--settings=openprescribing.settings.live')
-#    else:
-#        warn("Refusing to run migrations in staging environment")
+    sudo_script("reload_nginx.sh")
 
 def setup(environment, branch='master'):
     if environment not in environments:
@@ -79,42 +95,32 @@ def setup(environment, branch='master'):
 def deploy(environment, branch='master'):
     env = setup(environment, branch)
     make_directory()
+    setup_sudo()
     with cd(env.path):
         with prefix("source /etc/profile.d/%s.sh" % env.app):
             venv_init()
             update_from_git()
+            setup_ebmbot()
             pip_install()
             setup_django()
             setup_nginx()
             restart_gunicorn()
             reload_nginx()
 
-def run_bg(cmd, before=None, sockname="dtach"):
-    if before:
-        cmd = "{}; dtach -n `mktemp -u /tmp/{}.XXXX` {}".format(
-            before, sockname, cmd)
-    else:
-        cmd = "dtach -n `mktemp -u /tmp/{}.XXXX` {}".format(sockname, cmd)
-    return run(cmd)
-
+@task
+def frob(environment):
+    """A task for testing bot interaction
+    """
+    print("frob %s" % environment)
+    run("uname -a")
 
 @task
 def update(environment):
     # This currently assumes a workflow where data is first deployed
     # to staging, then reviewed, then copied to live.  Longer term we
     # may miss out the moderation step and scrape directly to live.
-    if environment == 'staging':
-        # This invocation uses `dtach` to run the load process. The
-        # indirection via bash is to capture any errors
-        run_bg(
-            "/bin/bash -c '/var/www/fdaaa_staging/venv/bin/python "
-            "/var/www/fdaaa_staging/clinicaltrials-act-tracker/load_data.py "
-            "&& rm -f /mnt/volume-lon1-01/data_load.stderr "
-            ">> /mnt/volume-lon1-01/data_load.out' 2>&1",
-            before=". /etc/profile.d/fdaaa_staging.sh")
-
-    else:
-        do_run = prompt("Copy data from staging database to live?")
-
-        if do_run.lower() == 'y':
-            run("su -c '/usr/bin/pg_dump --clean -t frontend_trial -t frontend_sponsor -t frontend_ranking -t frontend_trialqa clinicaltrials_staging | psql clinicaltrials' postgres")
+    env = setup(environment)
+    if environment == 'test':
+        sudo_script('kickoff_background_data_load.sh %s' % env.app)
+    elif environment == 'live':
+        sudo_script('copy_staging_to_live.sh')
