@@ -106,7 +106,8 @@ def update(environment):
     if environment == 'staging':
         run_bg(
             "/var/www/fdaaa_staging/venv/bin/python "
-            "/var/www/fdaaa_staging/clinicaltrials-act-tracker/load_data.py",
+            "/var/www/fdaaa_staging/clinicaltrials-act-tracker/load_data.py "
+            ">> /mnt/volume-lon1-01/data_load.stdout 2>&1",
             before=". /etc/profile.d/fdaaa_staging.sh")
 
     else:
