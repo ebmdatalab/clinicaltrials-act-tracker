@@ -1,4 +1,4 @@
-# euctr-tracker
+# ClinicalTrials.gov ACT Tracker
 
 Overview
 ========
