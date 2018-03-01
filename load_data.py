@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
+import traceback
+
 from bigquery import Client
 from bigquery import TableExporter
 from bigquery import wait_for_job
@@ -148,15 +150,19 @@ if __name__ == '__main__':
         os.remove("/tmp/clinical_trials.csv")
     except OSError:
         pass
-    download_and_extract()
-    convert_to_json()
-    upload_to_cloud()
-    convert_and_download()
-    run(". /etc/profile.d/fdaaa_staging.sh &&  /var/www/fdaaa_staging/venv/bin/python /var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=frontend.settings")
-    notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.
+    try:
+        download_and_extract()
+        convert_to_json()
+        upload_to_cloud()
+        convert_and_download()
+        run(". /etc/profile.d/fdaaa_staging.sh &&  /var/www/fdaaa_staging/venv/bin/python /var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=frontend.settings")
+        notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.
 
-If this looks good, a dev should run the following on smallweb1:
+    If this looks good, a dev should run the following on smallweb1:
 
-```. /etc/profile.d/fdaaa.sh &&  /var/www/fdaaa/venv/bin/python /var/www/fdaaa/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=frontend.settings
-```
-""")
+    ```. /etc/profile.d/fdaaa.sh &&  /var/www/fdaaa/venv/bin/python /var/www/fdaaa/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=frontend.settings
+    ```
+    """)
+    except:
+        notify_slack("Error in FDAAA import: {}".format(traceback.format_exc()))
+        raise
