@@ -125,4 +125,5 @@ class CommandsTestCase(TestCase):
         call_command('process_data', *args, **opts)
 
         # There should be no Trials visible
-        self.assertEqual(Trial.objects.count(), 0)
+        self.assertEqual(Trial.objects.count(), 5)
+        self.assertEqual(Trial.objects.visible().count(), 0)

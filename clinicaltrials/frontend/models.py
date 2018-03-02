@@ -39,7 +39,7 @@ class Sponsor(models.Model):
         """A list of tuples representing valid choices for trial statuses
         """
         statuses = [x[0] for x in
-                    self.trial_set.order_by(
+                    self.trial_set.visible().order_by(
                         'status').values_list(
                             'status').distinct(
                                 'status')]
@@ -50,15 +50,11 @@ class Sponsor(models.Model):
 
 
 class TrialManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(
-            no_longer_on_website=False).prefetch_related('trialqa_set')
-
     def status_choices(self):
         """A list of tuples representing valid choices for trial statuses
         """
         statuses = [x[0] for x in
-                    Trial.objects.order_by(
+                    Trial.objects.visible().order_by(
                         'status').values_list(
                             'status').distinct(
                                 'status')]
@@ -66,23 +62,27 @@ class TrialManager(models.Manager):
 
 
 class TrialQuerySet(models.QuerySet):
+    def visible(self):
+        return self.filter(
+            no_longer_on_website=False).prefetch_related('trialqa_set')
+
     def due(self):
-        return self.filter(status__in=['overdue', 'reported', 'reported-late'])
+        return self.visible().filter(status__in=['overdue', 'reported', 'reported-late'])
 
     def not_due(self):
-        return self.filter(status='ongoing')
+        return self.visible().filter(status='ongoing')
 
     def unreported(self):
-        return self.filter(status__in=['overdue', 'ongoing'])
+        return self.visible().filter(status__in=['overdue', 'ongoing'])
 
     def reported(self):
-        return self.filter(status__in=['reported', 'reported-late'])
+        return self.visible().filter(status__in=['reported', 'reported-late'])
 
     def reported_late(self):
-        return self.filter(status='reported-late')
+        return self.visible().filter(status='reported-late')
 
     def overdue(self):
-        return self.filter(status='overdue')
+        return self.visible().filter(status='overdue')
 
     def reported_early(self):
         return self.reported().filter(reported_date__lt=F('completion_date'))

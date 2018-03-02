@@ -67,10 +67,10 @@ def set_current_rankings():
                 sponsor=sponsor).count()
             reported = Trial.objects.reported().filter(
                     sponsor=sponsor).count()
-            total = sponsor.trial_set.count()
-            days_late = sponsor.trial_set.aggregate(
+            total = sponsor.trial_set.visible().count()
+            days_late = sponsor.trial_set.visible().aggregate(
                 total_days_late=Sum('days_late'))['total_days_late']
-            finable_days_late = sponsor.trial_set.aggregate(
+            finable_days_late = sponsor.trial_set.visible().aggregate(
                 total_finable_days_late=Sum('finable_days_late'))['total_finable_days_late']
             d = {
                 'due': due,
@@ -132,6 +132,7 @@ class Command(BaseCommand):
                         'registry_id': row['nct_id'],
                         'publication_url': row['url'],
                         'title': row['title'],
+                        'no_longer_on_website': False,
                         'has_exemption': truthy(row['has_certificate']),
                         'has_results': truthy(row['has_results']),
                         'results_due': truthy(row['results_due']),
