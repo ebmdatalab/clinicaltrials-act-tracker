@@ -1,7 +1,10 @@
 import logging
 import time
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.db.models import Sum
 from django.db.models import F
@@ -77,3 +80,21 @@ def trials(request):
                'title': "All Applicable Clinical Trials",
                'status_choices': Trial.objects.status_choices()}
     return render(request, 'trials.html', context=context)
+
+
+def trial(request, registry_id=None):
+    trial = get_object_or_404(Trial, registry_id=registry_id)
+    if trial.status == Trial.STATUS_OVERDUE:
+        status_desc ='An overdue trial'
+    elif trial.status == Trial.STATUS_ONGOING:
+        status_desc = 'An ongoing trial'
+    elif trial.status == Trial.STATUS_REPORTED:
+        status_desc = 'A reported trial'
+    else:
+        status_desc = 'A trial that was reported late'
+    due_date = trial.completion_date + relativedelta(days=365)
+    context = {'trial': trial,
+               'title': "{}: {} by {}".format(trial.registry_id, status_desc, trial.sponsor),
+               'due_date': datetime.combine(due_date, datetime.min.time())}
+
+    return render(request, 'trial.html', context=context)
