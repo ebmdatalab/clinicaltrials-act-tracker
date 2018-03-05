@@ -2,7 +2,7 @@ language: python
 python:
   - "3.5"
 script:
-  - cd clinicaltrials && python manage.py test
+  - cd clinicaltrials && coverage run --source='.' manage.py test
 notifications:
   email:
     - tech@ebmdatalab.net
