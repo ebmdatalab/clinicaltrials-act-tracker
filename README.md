@@ -1,5 +1,11 @@
 # ClinicalTrials.gov ACT Tracker
 
+[![Build Status](https://travis-ci.org/ebmdatalab/clinicaltrials-act-tracker.svg?branch=master)](https://travis-ci.org/ebmdatalab/clinicaltrials-act-tracker)
+
+[![Coverage Status](https://coveralls.io/repos/github/ebmdatalab/clinicaltrials-act-tracker/badge.svg?branch=master)](https://coveralls.io/github/ebmdatalab/clinicaltrials-act-tracker?branch=master)
+
+
+
 Overview
 ========
 
