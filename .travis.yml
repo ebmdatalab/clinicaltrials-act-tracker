@@ -1,14 +1,18 @@
 language: python
 python:
   - "3.5"
+services:
+  - postgresql
 env:
   global:
     CLINICALTRIALS_SECRET_KEY: x
     CLINICALTRIALS_DEBUG: "yes"
     CLINICALTRIALS_GOOGLE_TRACKING_ID: x
-    CLINICALTRIALS_DB: x
-    CLINICALTRIALS_DB_NAME: x
-    CLINICALTRIALS_DB_PASS: x
+    CLINICALTRIALS_DB: clinicaltrials
+    CLINICALTRIALS_DB_NAME: postgres
+    CLINICALTRIALS_DB_PASS:
+before_script:
+  - psql -c 'create database clinicaltrials_test;' -U postgres
 script:
   - cd clinicaltrials && coverage run --source='.' manage.py test
 notifications:
