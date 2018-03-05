@@ -213,7 +213,7 @@ class SponsorTrialsStatusTestCase(TestCase):
         )
         trial.compute_metadata()
         self.assertEqual(trial.status, 'reported')
-        self.assertEqual(str(trial.calculated_reporting_date()), '2016-02-01')
+        self.assertEqual(str(trial.calculated_reported_date()), '2016-02-01')
 
     def test_overdue_trial_under_qa(self):
         trial = makeTrial(
