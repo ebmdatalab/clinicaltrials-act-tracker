@@ -71,7 +71,7 @@ def sponsor(request, slug):
 
 
 def trials(request):
-    trials = Trial.objects.all()
+    trials = Trial.objects.visible()
     #f = TrialStatusFilter(request.GET, queryset=sponsor.trials())
     context = {'sponsor': trials,
                'title': "All Applicable Clinical Trials",

@@ -101,7 +101,7 @@ class RankingViewSet(CSVNonPagingViewSet):
 
 
 class TrialViewSet(CSVNonPagingViewSet):
-    queryset = Trial.objects.select_related('sponsor').all()
+    queryset = Trial.objects.visible().select_related('sponsor').all()
     serializer_class = TrialSerializer
     ordering_fields = ['status', 'sponsor__name', 'registry_id',
                        'title', 'completion_date', 'days_late']

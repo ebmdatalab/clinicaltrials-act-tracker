@@ -102,12 +102,15 @@ def run_bg(cmd, before=None, sockname="dtach"):
 def update(environment):
     # This currently assumes a workflow where data is first deployed
     # to staging, then reviewed, then copied to live.  Longer term we
-    # may miss out the moderation step and scrape directly to live
+    # may miss out the moderation step and scrape directly to live.
     if environment == 'staging':
+        # This invocation uses `dtach` to run the load process. The
+        # indirection via bash is to capture any errors
         run_bg(
-            "/var/www/fdaaa_staging/venv/bin/python "
+            "/bin/bash -c '/var/www/fdaaa_staging/venv/bin/python "
             "/var/www/fdaaa_staging/clinicaltrials-act-tracker/load_data.py "
-            ">> /mnt/volume-lon1-01/data_load.stdout 2>&1",
+            "&& rm -f /mnt/volume-lon1-01/data_load.stderr "
+            ">> /mnt/volume-lon1-01/data_load.out' 2>&1",
             before=". /etc/profile.d/fdaaa_staging.sh")
 
     else:
