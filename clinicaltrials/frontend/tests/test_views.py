@@ -65,6 +65,7 @@ class FrontendTestCase(TestCase):
         self.assertEqual(context['trial'], self.due_trial)
         self.assertEqual(context['status_desc'], 'An overdue trial ')
         self.assertEqual(context['title'], str(self.due_trial))
+        self.assertEqual(str(context['due_date']), "2016-12-31 00:00:00")
 
 
     def test_sitemap(self):

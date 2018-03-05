@@ -1,5 +1,7 @@
 import logging
 import time
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
@@ -90,8 +92,10 @@ def trial(request, registry_id=None):
         status_desc = 'A reported trial '
     else:
         status_desc = 'A trial that was reported late '
+    due_date = trial.completion_date + relativedelta(days=365)
     context = {'trial': trial,
                'status_desc': status_desc,
-               'title': str(trial)}
+               'title': str(trial),
+               'due_date': datetime.combine(due_date, datetime.min.time())}
 
     return render(request, 'trial.html', context=context)
