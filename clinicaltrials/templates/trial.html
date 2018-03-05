@@ -23,8 +23,9 @@
 <p>
     <strong>Think we've made a mistake?</strong>  Before <a href="mailto:hello@ebmdatalab.net">contacting us</a>, review the criteria in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">our paper</a>. In particular, bear in mind the following:
     <ul>
-      <li>Reporting in a journal is not enough. The rules state that the trial must be reported on ClinicalTrials.gov</li>
-      <li>Terminated trials are required to report results. Only withdrawn trials (which never recruited a single patient) are not
+      <li>We can only rely on the structured data that sponsors put into the registry: they may enter incorrect or incomplete data.</li>
+      <li>Reporting in a journal is not enough. The FDAAA rules state that the trial must be reported on ClinicalTrials.gov.</li>
+      <li>Terminated trials are required to report results. Only withdrawn trials (which never recruited a single patient) are not.
       </li>
     </ul>
 </p>
@@ -34,10 +35,10 @@
 <table class="table table-striped">
   <tr>
     <th>
-      Registry ID
+      Full entry on ClinicalTrials.gov
     </th>
     <td>
-      <a href="{{ trial.publication_url }}">{{ trial.registry_id  }}</a>
+      <a href="{{ trial.publication_url }}">{{ trial.registry_id }}</a>
     </td>
   </tr>
   <tr>
@@ -50,7 +51,7 @@
   </tr>
   <tr>
     <th>
-     Status
+     Results Status
     </th>
     <td>
       {{ trial.status }}
@@ -62,9 +63,9 @@
     </th>
     <td>
       {% if trial.is_pact %}
-        This is a probable Applicable Clinical Trial
+        This is what FDAAA officially calls an "Applicable Clinical Trial"
       {% else %}
-        This is an Applicable Clinical Trial
+        This is what FDAAA officially calls a "probable Applicable Clinical Trial"
       {% endif %}
     </td>
   </tr>
@@ -97,7 +98,7 @@
       Actual reporting date
     </th>
     <td>
-      {{ trial.reported_date }}
+      {{ trial.calculated_reported_date }}
     </td>
   </tr>
   <tr>

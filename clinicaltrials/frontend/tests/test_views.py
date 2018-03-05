@@ -63,8 +63,7 @@ class FrontendTestCase(TestCase):
         response = client.get("/trial/{}/".format(self.due_trial.registry_id))
         context = response.context
         self.assertEqual(context['trial'], self.due_trial)
-        self.assertEqual(context['status_desc'], 'An overdue trial ')
-        self.assertEqual(context['title'], str(self.due_trial))
+        self.assertEqual(context['title'], "id_1: An overdue trial by Sponsor 1")
         self.assertEqual(str(context['due_date']), "2016-12-31 00:00:00")
 
 

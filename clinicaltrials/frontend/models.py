@@ -127,6 +127,14 @@ class Trial(models.Model):
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
 
+    def calculated_reported_date(self):
+        if self.reported_date:
+            return self.reported_date
+        qa = self.trialqa_set.first()
+        if qa:
+            return qa.submitted_to_regulator
+        return None
+
     class Meta:
         ordering = ('completion_date', 'start_date', 'id')
 

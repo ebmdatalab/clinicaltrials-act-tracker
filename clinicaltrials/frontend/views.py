@@ -85,16 +85,15 @@ def trials(request):
 def trial(request, registry_id=None):
     trial = get_object_or_404(Trial, registry_id=registry_id)
     if trial.status == Trial.STATUS_OVERDUE:
-        status_desc ='An overdue trial '
+        status_desc ='An overdue trial'
     elif trial.status == Trial.STATUS_ONGOING:
-        status_desc = 'An ongoing trial '
+        status_desc = 'An ongoing trial'
     elif trial.status == Trial.STATUS_REPORTED:
-        status_desc = 'A reported trial '
+        status_desc = 'A reported trial'
     else:
-        status_desc = 'A trial that was reported late '
+        status_desc = 'A trial that was reported late'
     due_date = trial.completion_date + relativedelta(days=365)
     context = {'trial': trial,
-               'status_desc': status_desc,
                'title': "{}: {} by {}".format(trial.registry_id, status_desc, trial.sponsor),
                'due_date': datetime.combine(due_date, datetime.min.time())}
 
