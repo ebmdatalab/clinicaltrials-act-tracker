@@ -2,7 +2,7 @@
 {% load humanize %}
 {% block content %}
 <div class="row trial" id="summary-cards" style="opacity: 1">
-  <div class="{{ trial.status }} card col-sm-6 col-sm-offset-3">
+  <div class="{{ trial.status }} card col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
     <div class="content" id="{{ trial.status }}-container">
       <div class="big-text">
       {% if trial.status == 'ongoing' %}
@@ -122,6 +122,10 @@
   $(document).ready(function() {
     waitForEl('html.wf-active', resizeCards);
   });
+  $(window).resize(function() {
+    resizeCards();
+  });
+
 </script>
 
 {% endblock%}
