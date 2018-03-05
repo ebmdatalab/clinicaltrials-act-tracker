@@ -31,13 +31,14 @@ def pip_install():
     with prefix('source venv/bin/activate'):
         run('pip install -q -r clinicaltrials-act-tracker/requirements.txt')
 
-def update_from_git():
+def update_from_git(branch='master'):
     # clone or update code
     if not exists('clinicaltrials-act-tracker/.git'):
         run("git clone -q git@github.com:ebmdatalab/clinicaltrials-act-tracker.git")
     else:
         with cd("clinicaltrials-act-tracker"):
             run("git pull -q")
+            run("git checkout {}".format(branch))
 
 
 def setup_nginx():
@@ -82,7 +83,7 @@ def deploy(environment, branch='master'):
     with cd(env.path):
         with prefix("source /etc/profile.d/%s.sh" % env.app):
             venv_init()
-            update_from_git()
+            update_from_git(branch)
             pip_install()
             setup_django()
             setup_nginx()
