@@ -1,0 +1,83 @@
+{% extends "_base.html" %}
+{% block content %}
+
+<h2>
+  {{ status_desc }} by {{ trial.sponsor }}</h2>
+
+
+<table class="table table-striped">
+  <tr>
+    <th>
+      Registry ID
+    </th>
+    <td>
+      <a href="{{ trial.publication_url }}">{{ trial.registry_id  }}</a>
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Title
+    </th>
+    <td>
+      {{ trial.title }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+     Status
+    </th>
+    <td>
+      {{ trial.status }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      ACT or pACT?
+    </th>
+    <td>
+      {{ trial.is_pact }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Start date
+    </th>
+    <td>
+      {{ trial.start_date }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Completion date
+    </th>
+    <td>
+      {{ trial.completion_date }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Reported date
+    </th>
+    <td>
+      {{ trial.reported_date }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Date last checked at ClinicalTrials.gov
+    </th>
+    <td>
+      {{ trial.updated_date }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Days late
+    </th>
+    <td>
+      {{ trial.days_late }}
+    </td>
+  </tr>
+</table>
+
+{% endblock%}

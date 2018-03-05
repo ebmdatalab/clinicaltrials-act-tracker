@@ -41,6 +41,7 @@ urlpatterns = [
     path('api/performance/', views.performance, name='performance'),
     path('api/', include(router.urls)),
     path('trials/', views.trials, name='views.trials'),
+    path('trial/<str:registry_id>/', views.trial, name='views.trial'),
     path('sponsor/<slug:slug>/', views.sponsor, name='views.sponsor'),
     path('api/', include('rest_framework.urls')),
     path('about/', TemplateView.as_view(template_name="about.html"), name='views.about'),

@@ -58,6 +58,15 @@ class FrontendTestCase(TestCase):
             context['status_choices'],
             [('overdue', 'Overdue'), ('reported', 'Reported')])
 
+    def test_trial(self):
+        client = Client()
+        response = client.get("/trial/{}/".format(self.due_trial.registry_id))
+        context = response.context
+        self.assertEqual(context['trial'], self.due_trial)
+        self.assertEqual(context['status_desc'], 'An overdue trial ')
+        self.assertEqual(context['title'], str(self.due_trial))
+
+
     def test_sitemap(self):
         client = Client()
         response = client.get('/sitemap.xml')

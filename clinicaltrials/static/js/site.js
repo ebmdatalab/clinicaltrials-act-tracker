@@ -271,7 +271,7 @@ function trialsTable(sponsor_slug) {
       },
       {'data': 'registry_id', 'name': 'registry_id',
        'render': function(data, type, full, meta) {
-         return '<a target="_blank" href="'+full['publication_url']+'">'+
+         return '<a href="/trial/'+full['registry_id']+'">'+
            full['registry_id']+'</a>';
        },
       },
