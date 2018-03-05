@@ -95,7 +95,7 @@ def trial(request, registry_id=None):
     due_date = trial.completion_date + relativedelta(days=365)
     context = {'trial': trial,
                'status_desc': status_desc,
-               'title': str(trial),
+               'title': "{}: {} by {}".format(trial.registry_id, status_desc, trial.sponsor),
                'due_date': datetime.combine(due_date, datetime.min.time())}
 
     return render(request, 'trial.html', context=context)

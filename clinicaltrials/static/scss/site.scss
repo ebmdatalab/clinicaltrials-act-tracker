@@ -662,16 +662,20 @@ button:focus {
   background-color: $teal-dark;
 }
 
-.percentage {
+.percentage, .ongoing {
   background-color: $teal-light;
 }
 
-.fines {
+.fines, .reported-late {
   background-color: $orange;
 }
 
-.claimed-fines {
+.claimed-fines, .overdue {
   background-color: $red;
+}x
+
+.reported {
+  background-color: $green-mid;
 }
 
 .big-text {
@@ -793,8 +797,14 @@ h1, h2 {
   color: $teal-dark;
 }
 
-#summary-cards .big-text{
+#summary-cards .big-text {
   white-space: nowrap;
+}
+
+#summary-cards.trial .big-text {
+  white-space: inherit;
+  line-height: 1em;
+  opacity: 1;
 }
 
 #summary-cards .category {

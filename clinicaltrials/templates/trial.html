@@ -1,40 +1,32 @@
 {% extends "_base.html" %}
 {% load humanize %}
 {% block content %}
+<div class="row trial" id="summary-cards" style="opacity: 1">
+  <div class="{{ trial.status }} card big-text col-sm-6 col-sm-offset-3">
+    <div class="content">
+      {% if trial.status == 'ongoing' %}
+        This trial is ongoing. It must report results {{ due_date|naturaltime}}.
+      {% elif trial.status == 'overdue' %}
+        This trial is overdue. It was due to report {{ due_date|naturaltime}}.
+      {% elif trial.status == 'reported' %}
+       This trial has reported on time, in line with the regulations.
+      {% elif trial.status == 'reported-late' %}
+       This trial has reported, although it was {{ trial.days_late }} days late in doing so.
+      {% endif %}
+    </div>
+  </div>
+</div>
 
-<h2>{{ status_desc }} by {{ trial.sponsor }}</h2>
-
-  {% if trial.status == 'ongoing' %}
-    <p>
-     This trial is ongoing. It must report results <strong>{{ due_date|naturaltime}}</strong>.
-    </p>
-  {% elif trial.status == 'overdue' %}
-
-    <p>
-      This trial is <strong>overdue</strong>. It was due to report <strong>{{ due_date|naturaltime}}</strong>.
-    </p>
-    <p>
-      <strong>Think we've made a mistake?</strong>  Before <a href="mailto:hello@ebmdatalab.net">contacting us</a>, review the criteria in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">our paper</a>. In particular, bear in mind the following:
-      <ul>
-        <li>Reporting in a journal is not enough. The rules state that the trial must be reported on ClinicalTrials.gov</li>
-        <li>Terminated trials are required to report results. Only withdrawn trials (which never recruited a single patient) are not
-        </li>
-      </ul>
-    </p>
-
-  {% elif trial.status == 'reported' %}
-
-    <p>
-     This trial has reported on time, in line with the regulations.
-    </p>
-
-  {% elif trial.status == 'reported-late' %}
-
-    <p>
-     This trial has reported, although it was <strong>{{ trials.days_late }} days late</strong> in doing so.
-    </p>
-
-  {% endif %}
+{% if trial.status == 'overdue' %}
+<p>
+    <strong>Think we've made a mistake?</strong>  Before <a href="mailto:hello@ebmdatalab.net">contacting us</a>, review the criteria in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">our paper</a>. In particular, bear in mind the following:
+    <ul>
+      <li>Reporting in a journal is not enough. The rules state that the trial must be reported on ClinicalTrials.gov</li>
+      <li>Terminated trials are required to report results. Only withdrawn trials (which never recruited a single patient) are not
+      </li>
+    </ul>
+</p>
+{% endif %}
 
 <h3>Full data</h3>
 <table class="table table-striped">
@@ -51,7 +43,7 @@
       Title
     </th>
     <td>
-      {{ trial.title }}
+      <strong>{{ trial.title }}</strong>
     </td>
   </tr>
   <tr>
