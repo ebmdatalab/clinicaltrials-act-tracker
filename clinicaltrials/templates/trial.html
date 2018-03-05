@@ -2,8 +2,9 @@
 {% load humanize %}
 {% block content %}
 <div class="row trial" id="summary-cards" style="opacity: 1">
-  <div class="{{ trial.status }} card big-text col-sm-6 col-sm-offset-3">
-    <div class="content">
+  <div class="{{ trial.status }} card col-sm-6 col-sm-offset-3">
+    <div class="content" id="{{ trial.status }}-container">
+      <div class="big-text">
       {% if trial.status == 'ongoing' %}
         This trial is ongoing. It must report results {{ due_date|naturaltime}}.
       {% elif trial.status == 'overdue' %}
@@ -13,6 +14,7 @@
       {% elif trial.status == 'reported-late' %}
        This trial has reported, although it was {{ trial.days_late }} days late in doing so.
       {% endif %}
+      </div>
     </div>
   </div>
 </div>
@@ -115,5 +117,10 @@
     </td>
   </tr>
 </table>
+<script>
+  $(document).ready(function() {
+    waitForEl('html.wf-active', resizeCards);
+  });
+</script>
 
 {% endblock%}

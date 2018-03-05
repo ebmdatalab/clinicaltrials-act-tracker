@@ -672,7 +672,7 @@ button:focus {
 
 .claimed-fines, .overdue {
   background-color: $red;
-}x
+}
 
 .reported {
   background-color: $green-mid;
@@ -801,7 +801,7 @@ h1, h2 {
   white-space: nowrap;
 }
 
-#summary-cards.trial .big-text {
+#summary-cards.trial {
   white-space: inherit;
   line-height: 1em;
   opacity: 1;
