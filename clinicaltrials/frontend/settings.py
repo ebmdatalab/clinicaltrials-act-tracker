@@ -28,7 +28,7 @@ SECRET_KEY = common.utils.get_env_setting('CLINICALTRIALS_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 CLINICALTRIALS_DEBUG = common.utils.get_env_setting('CLINICALTRIALS_DEBUG')
-assert CLINICALTRIALS_DEBUG in ['yes', 'no']
+assert CLINICALTRIALS_DEBUG in ['yes', 'no'], "CLINICALTRIALS_DEBUG was '{}'".format(CLINICALTRIALS_DEBUG)
 DEBUG = CLINICALTRIALS_DEBUG == 'yes'
 
 ALLOWED_HOSTS = [
