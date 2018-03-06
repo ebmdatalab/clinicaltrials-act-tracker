@@ -37,8 +37,8 @@ def update_from_git(branch='master'):
         run("git clone -q git@github.com:ebmdatalab/clinicaltrials-act-tracker.git")
     else:
         with cd("clinicaltrials-act-tracker"):
-            run("git pull -q")
-            run("git checkout {}".format(branch))
+            run("git fetch --all")
+            run("git reset --hard origin/{}".format(branch))
 
 
 def setup_nginx():
