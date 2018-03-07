@@ -25,32 +25,40 @@ from frontend.models import Sponsor
 from frontend.models import Trial
 
 
+def get_performance(trials_queryset):
+    due = trials_queryset.due().count()
+    reported = trials_queryset.reported().count()
+    days_late = trials_queryset.aggregate(
+        days_late=Sum('finable_days_late'))['days_late']
+    fines_str = '$0'
+    if days_late:
+        fines_str = "${:,}".format(days_late * settings.FINE_PER_DAY)
+    latest_date = Ranking.objects.latest('date').date
+    overdue_today = trials_queryset.overdue().filter(
+        updated_date=latest_date).count()
+    late_today = trials_queryset.reported_late().filter(
+        updated_date=latest_date).count()
+    on_time_today = trials_queryset.reported_on_time().filter(
+        updated_date=latest_date).count()
+    return {
+        'due': due,
+        'reported': reported,
+        'days_late': days_late,
+        'fines_str': fines_str,
+        'overdue_today': overdue_today,
+        'late_today': late_today,
+        'on_time_today': on_time_today
+    }
+
+
 @api_view()
 @permission_classes((permissions.AllowAny,))
 def performance(request):
     queryset = Trial.objects.all()
     if 'sponsor' in request.GET:
         queryset = queryset.filter(sponsor__slug=request.GET['sponsor'])
-    due = queryset.due().count()
-    reported = queryset.reported().count()
-    days_late = queryset.aggregate(
-        days_late=Sum('finable_days_late'))['days_late']
-    fines_str = '$0'
-    if days_late:
-        fines_str = "${:,}".format(days_late * settings.FINE_PER_DAY)
-    latest_date = Ranking.objects.latest('date').date
-    due_today = queryset.due().filter(
-        updated_date=latest_date).count()
-    late_today = queryset.reported_late().filter(
-        updated_date=latest_date).count()
-    return Response({
-        'due': due,
-        'reported': reported,
-        'days_late': days_late,
-        'fines_str': fines_str,
-        'due_today': due_today,
-        'late_today': late_today
-    })
+    d = get_performance(queryset)
+    return Response(d)
 
 
 #############################################################################

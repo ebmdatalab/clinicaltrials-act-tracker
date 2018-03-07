@@ -78,6 +78,9 @@ class TrialQuerySet(models.QuerySet):
     def reported(self):
         return self.visible().filter(status__in=['reported', 'reported-late'])
 
+    def reported_on_time(self):
+        return self.visible().filter(status='reported')
+
     def reported_late(self):
         return self.visible().filter(status='reported-late')
 
@@ -118,7 +121,6 @@ class Trial(models.Model):
         max_length=20, choices=STATUS_CHOICES, default=STATUS_ONGOING)
     completion_date = models.DateField(null=True, blank=True)
     no_longer_on_website = models.BooleanField(default=False)
-
     first_seen_date = models.DateField(default=date.today)
     updated_date = models.DateField(default=date.today)
     reported_date = models.DateField(null=True, blank=True)

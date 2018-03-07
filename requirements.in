@@ -19,3 +19,4 @@ lxml
 coverage
 coveralls
 mistune
+python-twitter

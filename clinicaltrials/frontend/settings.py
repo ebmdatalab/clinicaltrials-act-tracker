@@ -244,3 +244,8 @@ FINE_PER_DAY = 11569
 
 BQ_PROJECT = 'clinicaltrials'
 BQ_HSCIC_DATASET = ''
+
+# Twitter
+
+TWITTER_CONSUMER_SECRET = common.utils.get_env_setting('TWITTER_CONSUMER_SECRET')
+TWITTER_ACCESS_TOKEN_SECRET = common.utils.get_env_setting('TWITTER_ACCESS_TOKEN_SECRET')

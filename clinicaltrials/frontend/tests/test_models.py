@@ -197,8 +197,26 @@ class SponsorTrialsStatusTestCase(TestCase):
             reported_date= '2016-12-01')
         self.assertEqual(trial.status, 'reported')
         self.assertEqual(
+            list(self.sponsor.trial_set.reported_on_time()),
+            [trial])
+        self.assertEqual(
             list(self.sponsor.trial_set.reported_late()),
             [])
+
+    def test_trial_reported_late(self):
+        trial = makeTrial(
+            self.sponsor,
+            has_results=True,
+            results_due=True,
+            completion_date='2016-01-01',
+            reported_date= '2017-12-01')
+        self.assertEqual(trial.status, 'reported-late')
+        self.assertEqual(
+            list(self.sponsor.trial_set.reported_on_time()),
+            [])
+        self.assertEqual(
+            list(self.sponsor.trial_set.reported_late()),
+            [trial])
 
     def test_reported_trial_under_qa(self):
         trial = makeTrial(
