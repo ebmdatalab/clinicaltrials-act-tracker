@@ -32,6 +32,7 @@ httplib2==0.10.3          # via google-api-python-client, oauth2client
 idna==2.6                 # via requests
 libsass==0.13.7           # via django-libsass
 lxml==4.1.1
+mistune==0.8.3
 monotonic==1.4            # via tenacity
 oauth2client==4.1.2       # via google-api-python-client
 protobuf==3.5.1           # via google-cloud-core, googleapis-common-protos

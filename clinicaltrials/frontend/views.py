@@ -2,6 +2,9 @@ import logging
 import time
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+import os
+
+import mistune
 
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
@@ -9,6 +12,8 @@ from django.conf import settings
 from django.db.models import Sum
 from django.db.models import F
 from django.http import HttpResponse
+from django.http import Http404
+from django.template import Template, Context
 
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
@@ -93,8 +98,33 @@ def trial(request, registry_id=None):
     else:
         status_desc = 'A trial that was reported late'
     due_date = trial.completion_date + relativedelta(days=365)
+    annotation = _get_full_markdown_path("trials/{}".format(registry_id))
+    if os.path.exists(annotation):
+        with open(annotation, 'r') as f:
+            annotation_html = mistune.markdown(f.read()).split('<hr>')[0]
+            annotation_html += "<p><a href='/page/trials/{}'>Read more...</a></p>".format(registry_id)
+    else:
+        annotation_html = ""
     context = {'trial': trial,
                'title': "{}: {} by {}".format(trial.registry_id, status_desc, trial.sponsor),
-               'due_date': datetime.combine(due_date, datetime.min.time())}
-
+               'due_date': datetime.combine(due_date, datetime.min.time()),
+               'annotation_html': annotation_html}
     return render(request, 'trial.html', context=context)
+
+
+def _get_full_markdown_path(path):
+    return os.path.join(settings.PROJECT_ROOT, 'pages', path) + ".md"
+
+def static_markdown(request, path):
+    full_path = _get_full_markdown_path(path)
+    title = full_path.split("/")[-1].replace(".md", "").replace("_", " ").title()
+    try:
+        with open(full_path, 'r') as f:
+            content = "{% extends '_base.html' %}{% block content %}" \
+                      + mistune.markdown(f.read()) \
+                      + "{% endblock %}"
+            t = Template(content)
+            html = t.render(Context({'title': title}))
+            return HttpResponse(html)
+    except OSError:
+        raise Http404

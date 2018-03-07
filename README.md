@@ -42,6 +42,11 @@ loaded into a staging database / website.
 A separate command copies new data from staging to production
 (following moderation).
 
+Static Pages
+============
+
+There is a simple system to allow non-technical users to generate pages using markdown. It is documented [here](../clinicaltrials/frontend/pages/readme.md)
+
 Development
 ===========
 

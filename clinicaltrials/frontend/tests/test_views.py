@@ -1,9 +1,11 @@
 import csv
 import io
+import os
 from datetime import date
 from unittest.mock import patch
 from unittest.mock import Mock
 
+from django.conf import settings
 from django.test import TestCase
 from django.test import Client
 
@@ -65,6 +67,36 @@ class FrontendTestCase(TestCase):
         self.assertEqual(context['trial'], self.due_trial)
         self.assertEqual(context['title'], "id_1: An overdue trial by Sponsor 1")
         self.assertEqual(str(context['due_date']), "2016-12-31 00:00:00")
+        self.assertEqual(context['annotation_html'], "")
+
+    @patch('frontend.views._get_full_markdown_path')
+    def test_trial_annotation(self, mock_path):
+        test_page = os.path.join(
+            settings.BASE_DIR,
+            'frontend/tests/fixtures/static_page.md')
+        mock_path.return_value = test_page
+        client = Client()
+        response = client.get("/trial/{}/".format(self.due_trial.registry_id))
+        context = response.context
+        self.assertIn("<em>toots</em>", context['annotation_html'])
+        self.assertIn("Read more", context['annotation_html'])
+        self.assertNotIn("below the fold", context['annotation_html'])
+
+    def test_static_markdown_404(self):
+        client = Client()
+        response = client.get("/pages/a/b/c")
+        self.assertEqual(response.status_code, 404)
+
+    @patch('frontend.views._get_full_markdown_path')
+    def test_static_markdown(self, mock_path):
+        test_page = os.path.join(
+            settings.BASE_DIR,
+            'frontend/tests/fixtures/static_page.md')
+        mock_path.return_value = test_page
+        client = Client()
+        content = client.get("/pages/a/b/c").content
+        self.assertIn(b"<em>toots</em>", content)
+        self.assertIn(b"<title>Static Page</title>", content)
 
 
     def test_sitemap(self):

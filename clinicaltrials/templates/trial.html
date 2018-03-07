@@ -118,6 +118,9 @@
     </td>
   </tr>
 </table>
+{% if annotation_html %}
+  {{ annotation_html | safe }}
+{% endif %}
 <script>
   $(document).ready(function() {
     waitForEl('html.wf-active', resizeCards);

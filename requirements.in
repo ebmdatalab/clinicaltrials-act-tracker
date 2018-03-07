@@ -18,3 +18,4 @@ xmltodict
 lxml
 coverage
 coveralls
+mistune
