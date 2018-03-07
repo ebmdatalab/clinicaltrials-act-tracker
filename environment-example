@@ -1,0 +1,10 @@
+export CLINICALTRIALS_SECRET_KEY=asd # random longish string for sessions
+export CLINICALTRIALS_DEBUG=yes # yes or no
+export CLINICALTRIALS_GOOGLE_TRACKING_ID=asd # optional Analytics id, e.g. UA-nnnnnnnn-n
+export CLINICALTRIALS_DB=clinicaltrials
+export CLINICALTRIALS_DB_NAME=root
+export CLINICALTRIALS_DB_PASS=root
+export GOOGLE_APPLICATION_CREDENTIALS=/home/foo/Code/openprescribing/google-credentials.json
+export SLACK_GENERAL_POST_KEY=https://hooks.slack.com/services/T1234
+export TWITTER_CONSUMER_SECRET=asd
+export TWITTER_ACCESS_TOKEN_SECRET=qwerty
