@@ -38,11 +38,18 @@ def performance(request):
     fines_str = '$0'
     if days_late:
         fines_str = "${:,}".format(days_late * settings.FINE_PER_DAY)
+    latest_date = Ranking.objects.latest('date').date
+    due_today = queryset.due().filter(
+        updated_date=latest_date).count()
+    late_today = queryset.reported_late().filter(
+        updated_date=latest_date).count()
     return Response({
         'due': due,
         'reported': reported,
         'days_late': days_late,
-        'fines_str': fines_str
+        'fines_str': fines_str,
+        'due_today': due_today,
+        'late_today': late_today
     })
 
 

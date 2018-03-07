@@ -249,6 +249,8 @@ class ApiResultsTestCase(TestCase):
                 'due': 2,
                 'reported': 1,
                 'days_late': 1,
+                'due_today': 0,
+                'late_today': 0,
                 'fines_str': '$11,569'}
         )
         response = client.get('/api/performance/', {'sponsor': 'XYZ'}, format='json').json()
@@ -257,6 +259,15 @@ class ApiResultsTestCase(TestCase):
             {
                 'due': 0,
                 'reported': 0,
+                'due_today': 0,
+                'late_today': 0,
                 'days_late': None,
                 'fines_str': '$0'}
         )
+
+    def test_performance_results_overdue_counts(self):
+        self.due_trial.updated_date = self.mock_today
+        self.due_trial.save()
+        client = APIClient()
+        response = client.get('/api/performance/', format='json').json()
+        self.assertEqual(response['due_today'], 1)
