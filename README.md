@@ -45,7 +45,7 @@ A separate command copies new data from staging to production
 Static Pages
 ============
 
-There is a simple system to allow non-technical users to generate pages using markdown. It is documented [here](../clinicaltrials/frontend/pages/readme.md)
+There is a simple system to allow non-technical users to generate pages using markdown. It is documented [here](../master/clinicaltrials/frontend/pages/readme.md)
 
 Development
 ===========
