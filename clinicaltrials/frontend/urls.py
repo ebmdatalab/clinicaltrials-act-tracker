@@ -9,6 +9,7 @@ from django.views.generic import TemplateView
 from rest_framework import routers
 
 from frontend.models import Sponsor
+from frontend.models import Trial
 from frontend import views
 
 from .custom_rest_views import TrialViewSet
@@ -52,6 +53,9 @@ urlpatterns = [
              'static': StaticViewSitemap,
              'sponsor': GenericSitemap(
                  {'queryset': Sponsor.objects.all(),
+                  'date_field': 'updated_date'}, priority=0.5),
+             'trial': GenericSitemap(
+                 {'queryset': Trial.objects.all(),
                   'date_field': 'updated_date'}, priority=0.5),
          }},
          name='django.contrib.sitemaps.views.sitemap'),
