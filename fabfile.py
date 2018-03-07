@@ -119,3 +119,5 @@ def update(environment):
 
         if do_run.lower() == 'y':
             run("su -c '/usr/bin/pg_dump --clean -t frontend_trial -t frontend_sponsor -t frontend_ranking -t frontend_trialqa clinicaltrials_staging | psql clinicaltrials' postgres")
+            with prefix('source venv/bin/activate'):
+                run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py tweet_today --settings=frontend.settings')
