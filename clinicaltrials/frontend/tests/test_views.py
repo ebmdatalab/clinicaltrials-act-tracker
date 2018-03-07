@@ -84,7 +84,7 @@ class FrontendTestCase(TestCase):
 
     def test_static_markdown_404(self):
         client = Client()
-        response = client.get("/page/a/b/c")
+        response = client.get("/pages/a/b/c")
         self.assertEqual(response.status_code, 404)
 
     @patch('frontend.views._get_full_markdown_path')
@@ -94,7 +94,7 @@ class FrontendTestCase(TestCase):
             'frontend/tests/fixtures/static_page.md')
         mock_path.return_value = test_page
         client = Client()
-        content = client.get("/page/a/b/c").content
+        content = client.get("/pages/a/b/c").content
         self.assertIn(b"<em>toots</em>", content)
         self.assertIn(b"<title>Static Page</title>", content)
 

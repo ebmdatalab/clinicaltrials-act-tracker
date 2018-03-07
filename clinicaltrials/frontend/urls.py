@@ -46,7 +46,7 @@ urlpatterns = [
     path('api/', include('rest_framework.urls')),
     path('about/', TemplateView.as_view(template_name="about.html"), name='views.about'),
     path('fund/', TemplateView.as_view(template_name="fund.html"), name='views.fund'),
-    path('page/<path:path>', views.static_markdown, name='views.static_markdown'),
+    path('pages/<path:path>', views.static_markdown, name='views.static_markdown'),
     path('sitemap.xml', sitemap,
          {'sitemaps': {
              'static': StaticViewSitemap,
