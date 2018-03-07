@@ -1,0 +1,42 @@
+{% extends "_base.html" %}
+{% block content %}
+
+<p class="introtext">
+  FDAAA 2007 is a law that requires certain clinical trials to report results. After a long wait, it effectively comes into force from Feb 2018. The FDA are not publicly tracking compliance. So we are, here.
+</p>
+
+{% include '_summary_card.html' %}
+
+<div id="hidden-filter">
+{% for k, v in status_choices %}
+  <input class="status_filter" id="filter-{{k}}" type="checkbox" name="status" value="{{ k }}" data-toggle="toggle">
+      {{ v }}
+{% endfor %}
+</div>
+
+<div id="results">
+  <table id="trials_table" class="table" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Sponsor</th>
+        <th>Trial ID</th>
+        <th>Title</th>
+        <th class="text-nowrap">Completion date</th>
+        <th class="text-nowrap">Days overdue</th
+                                              </tr>
+    </thead>
+  </table>
+  <a id="download" href="#" class="btn btn-default"><span class="ti-download" aria-hidden="true"></span> Download this data</a>
+</div>
+<script>
+  $(document).ready(function() {
+    // only overdue/late trials, sort by completion date, descending
+    trialsTable('', ['overdue', 'reported-late'], 4, 'desc');
+    showPerformance();
+  });
+</script>
+
+
+
+{% endblock%}

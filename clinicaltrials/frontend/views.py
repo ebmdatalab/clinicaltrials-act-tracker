@@ -46,14 +46,21 @@ def performance(request):
     })
 
 
-#############################################################################
-# Index page
+def latest_overdue(request):
+    context = {
+        'title': 'Who’s sharing their clinical trial results?',
+        'status_choices': Trial.objects.status_choices()
+    }
+    return render(request, "latest.html", context=context)
 
-def index(request):
+#############################################################################
+# Rankings page
+
+def rankings(request):
     context = {
         'title': "Who’s sharing their clinical trial results?"
     }
-    return render(request, "index.html", context=context)
+    return render(request, "rankings.html", context=context)
 
 
 #############################################################################

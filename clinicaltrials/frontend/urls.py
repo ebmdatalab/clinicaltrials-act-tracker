@@ -27,7 +27,8 @@ class StaticViewSitemap(Sitemap):
     changefreq = 'daily'
 
     def items(self):
-        return ['index',
+        return ['views.latest_overdue',
+                'views.rankings',
                 'views.trials',
                 'views.about',
                 'views.fund',
@@ -37,8 +38,9 @@ class StaticViewSitemap(Sitemap):
         return reverse(item)
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('api/performance/', views.performance, name='performance'),
+    path('', views.latest_overdue, name='views.latest_overdue'),
+    path('rankings/', views.rankings, name='views.rankings'),
+    path('api/performance/', views.performance, name='views.performance'),
     path('api/', include(router.urls)),
     path('trials/', views.trials, name='views.trials'),
     path('trial/<str:registry_id>/', views.trial, name='views.trial'),
