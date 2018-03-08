@@ -93,7 +93,7 @@ def sponsor(request, slug):
     if len(status_choices) == 1:
         status_choices = []  # don't show options where there's only one choice
     context = {'sponsor': sponsor,
-               'title': "All Applicable Clinical Trials at {}".format(sponsor),
+               'title': "All individual trials at {}".format(sponsor),
                'status_choices': status_choices,
                'fine': fine
     }
@@ -104,7 +104,7 @@ def trials(request):
     trials = Trial.objects.visible()
     #f = TrialStatusFilter(request.GET, queryset=sponsor.trials())
     context = {'sponsor': trials,
-               'title': "All Applicable Clinical Trials",
+               'title': "All individual Trials",
                'status_choices': Trial.objects.status_choices()}
     return render(request, 'trials.html', context=context)
 

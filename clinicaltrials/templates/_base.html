@@ -65,18 +65,14 @@
                 <div class="collapse navbar-collapse" id="navbar" aria-expanded="false">
                     <ul class="nav navbar-nav navbar-right">
                         <li>
-                            <a href="/">
-                              <p class="navbutton{% if request.path == '/' %} selected{% endif %}">Latest overdue trials</p>
+                        <li>
+                            <a href="/trials/">
+                                <p class="navbutton{% if request.path == '/trials/' %} selected{% endif %}">Single trials</p>
                             </a>
                         </li>
                         <li>
                             <a href="/rankings/">
                               <p class="navbutton{% if request.path == '/rankings/' %} selected{% endif %}">Ranked sponsors</p>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/trials/">
-                                <p class="navbutton{% if request.path == '/trials/' %} selected{% endif %}">All trials</p>
                             </a>
                         </li>
                         <li>
