@@ -32,9 +32,6 @@ class FrontendTestCase(TestCase):
             reported_date=date(2016,12,1))
         set_current_rankings()
 
-        client = APIClient()
-        response = client.get('/api/trials/', format='json').json()
-
     def test_index(self):
         client = Client()
         response = client.get('/')
@@ -239,6 +236,27 @@ class ApiResultsTestCase(TestCase):
         response = client.get('/api/rankings/', {'percentage__lte': 49}, format='json').json()
         self.assertEqual(response['recordsFiltered'], 0)
 
+class ApiPerformanceResultsTestCase(TestCase):
+    maxDiff = 6000
+    @patch('frontend.trial_computer.date')
+    def setUp(self, datetime_mock):
+        self.mock_today = date(2017,1,31)
+        datetime_mock.today = Mock(return_value=self.mock_today)
+        self.sponsor = Sponsor.objects.create(
+            name="Sponsor 1",
+            updated_date=self.mock_today)
+        self.due_trial = makeTrial(
+            self.sponsor,
+            results_due=True,
+            has_results=False,
+            updated_date=self.mock_today)
+        self.reported_trial = makeTrial(
+            self.sponsor,
+            results_due=True,
+            has_results=True,
+            reported_date=date(2016,12,1),
+            updated_date=self.mock_today)
+        set_current_rankings()
 
     def test_performance_results(self):
         client = APIClient()
@@ -249,6 +267,9 @@ class ApiResultsTestCase(TestCase):
                 'due': 2,
                 'reported': 1,
                 'days_late': 1,
+                'overdue_today': 1,
+                'late_today': 0,
+                'on_time_today': 1,
                 'fines_str': '$11,569'}
         )
         response = client.get('/api/performance/', {'sponsor': 'XYZ'}, format='json').json()
@@ -257,6 +278,18 @@ class ApiResultsTestCase(TestCase):
             {
                 'due': 0,
                 'reported': 0,
+                'overdue_today': 0,
+                'late_today': 0,
                 'days_late': None,
+                'on_time_today': 0,
                 'fines_str': '$0'}
         )
+    @patch('frontend.models.date')
+    def test_performance_results_overdue_counts(self, mock_date):
+        mock_date.today.return_value = self.mock_today
+        mock_date.today = self.mock_today
+        client = APIClient()
+        response = client.get('/api/performance/', format='json').json()
+        self.assertEqual(response['due'], 2)
+        self.assertEqual(response['overdue_today'], 1)
+        self.assertEqual(response['on_time_today'], 1)

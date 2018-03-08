@@ -21,3 +21,4 @@ coverage
 slackbot
 coveralls
 mistune
+python-twitter

@@ -25,6 +25,7 @@ djangorestframework-csv==2.1.0
 djangorestframework==3.7.7
 docopt==0.6.2             # via coveralls
 fabric3==1.14.post1
+future==0.16.0            # via python-twitter
 google-api-python-client==1.6.2
 google-auth==1.4.1        # via google-cloud-bigquery, google-cloud-core, google-cloud-storage
 google-cloud-bigquery==0.26.0
@@ -40,6 +41,7 @@ lxml==4.1.1
 mistune==0.8.3
 monotonic==1.4            # via tenacity
 oauth2client==4.1.2       # via google-api-python-client
+oauthlib==2.0.6           # via requests-oauthlib
 paramiko==2.4.0           # via fabric3
 protobuf==3.5.2           # via google-cloud-core, googleapis-common-protos
 psycopg2-binary==2.7.4
@@ -48,9 +50,11 @@ pyasn1==0.4.2             # via oauth2client, paramiko, pyasn1-modules, rsa
 pycparser==2.18           # via cffi
 pynacl==1.2.1             # via paramiko
 python-dateutil==2.6.1    # via dateparser
+python-twitter==3.4
 pytz==2018.3              # via dateparser, django, tzlocal
 rcssmin==1.0.6            # via django-compressor
 regex==2018.2.21          # via dateparser
+requests-oauthlib==0.8.0  # via python-twitter
 requests==2.18.4
 rjsmin==1.0.12            # via django-compressor
 rsa==3.4.2                # via google-auth, oauth2client

@@ -58,9 +58,9 @@ def update_from_git(branch):
     # clone or update code
     if not exists('clinicaltrials-act-tracker/.git'):
         run("git clone -q git@github.com:ebmdatalab/clinicaltrials-act-tracker.git")
-    else:
-        with cd("clinicaltrials-act-tracker"):
-            run("git pull -q")
+    with cd("clinicaltrials-act-tracker"):
+        run("git fetch --all")
+        run("git reset --hard origin/{}".format(branch))
 
 def setup_nginx():
     sudo_script('setup_nginx.sh %s %s' % (env.path, env.app))
