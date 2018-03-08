@@ -54,7 +54,7 @@ def pip_install():
         run('pip install --upgrade pip setuptools')
         run('pip install -q -r clinicaltrials-act-tracker/requirements.txt')
 
-def update_from_git():
+def update_from_git(branch):
     # clone or update code
     if not exists('clinicaltrials-act-tracker/.git'):
         run("git clone -q git@github.com:ebmdatalab/clinicaltrials-act-tracker.git")
@@ -98,7 +98,7 @@ def deploy(environment, branch='master'):
     with cd(env.path):
         with prefix("source /etc/profile.d/%s.sh" % env.app):
             venv_init()
-            update_from_git()
+            update_from_git(branch)
             setup_ebmbot()
             pip_install()
             setup_django()
