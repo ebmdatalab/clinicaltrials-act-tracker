@@ -115,3 +115,19 @@ The target server requires `gcloud` client
 libraries
 [to be installed](https://cloud.google.com/storage/docs/gsutil_install#deb),
 along with `dtach` (`apt-get install dtach`).
+
+
+EBMBot
+======
+
+This is a Python [slackbot](https://github.com/lins05/slackbot). To start it:
+
+    python ebmbot_runner.py
+
+On the live server, it's managed by `supervisord`.
+
+The bot does things like deployment by executing fabric tasks. In turn, this requires two things:
+
+* The user it runs as must have passwordless ssh access to the live server, from the live server
+* The user must have passwordless `sudo` access to the scripts in `deploy/fabric_scripts/`. We accomplish this via membership of a group called `fabric`.
+* Fabric commands that require root must use a modified `sudo` method (specifically, `run("sudo <cmd>")` rather than `sudo(<cmd>)`.  See `sudo_script()` in `fabfile.py` for more.
