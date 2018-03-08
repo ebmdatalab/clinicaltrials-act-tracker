@@ -924,6 +924,12 @@ table.prelaunch td {
   border-radius: 12px;
 }
 
+.tweetbutton {
+  background-color: white;
+  color: $teal-dark;
+  font-size: 1.2em;
+}
+
 .navbutton.selected {
   background-color: $teal-dark;
 }
