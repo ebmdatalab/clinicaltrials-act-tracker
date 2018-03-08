@@ -121,8 +121,8 @@ class CommandsTestCase(TestCase):
         # Import empty file
         sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq_empty.csv')
         opts = {'input_csv': sample_csv}
-
         call_command('process_data', *args, **opts)
 
         # There should be no Trials visible
-        self.assertEqual(Trial.objects.count(), 0)
+        self.assertEqual(Trial.objects.count(), 6)
+        self.assertEqual(Trial.objects.visible().count(), 0)

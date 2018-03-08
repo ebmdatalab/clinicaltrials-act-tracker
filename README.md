@@ -1,5 +1,11 @@
 # ClinicalTrials.gov ACT Tracker
 
+[![Build Status](https://travis-ci.org/ebmdatalab/clinicaltrials-act-tracker.svg?branch=master)](https://travis-ci.org/ebmdatalab/clinicaltrials-act-tracker)
+
+[![Coverage Status](https://coveralls.io/repos/github/ebmdatalab/clinicaltrials-act-tracker/badge.svg?branch=master)](https://coveralls.io/github/ebmdatalab/clinicaltrials-act-tracker?branch=master)
+
+
+
 Overview
 ========
 
@@ -35,6 +41,11 @@ loaded into a staging database / website.
 
 A separate command copies new data from staging to production
 (following moderation).
+
+Static Pages
+============
+
+There is a simple system to allow non-technical users to generate pages using markdown. It is documented [here](../master/clinicaltrials/frontend/pages/readme.md)
 
 Development
 ===========

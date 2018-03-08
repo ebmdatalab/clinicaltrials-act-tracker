@@ -19,3 +19,5 @@ xmltodict
 lxml
 coverage
 slackbot
+coveralls
+mistune

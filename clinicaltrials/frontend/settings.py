@@ -28,7 +28,7 @@ SECRET_KEY = common.utils.get_env_setting('CLINICALTRIALS_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 CLINICALTRIALS_DEBUG = common.utils.get_env_setting('CLINICALTRIALS_DEBUG')
-assert CLINICALTRIALS_DEBUG in ['yes', 'no']
+assert CLINICALTRIALS_DEBUG in ['yes', 'no'], "CLINICALTRIALS_DEBUG was '{}'".format(CLINICALTRIALS_DEBUG)
 DEBUG = CLINICALTRIALS_DEBUG == 'yes'
 
 ALLOWED_HOSTS = [
@@ -236,7 +236,14 @@ STATIC_URL = '/static/'
 
 LOGIN_REDIRECT_URL = '/'
 
-NEXT_PLANNED_UPDATE = '2018-03-01'
+NEXT_PLANNED_UPDATE = '2018-03-07'
+
+# Default to next weekday if the previous constant is today or earlier
+if NEXT_PLANNED_UPDATE <= datetime.date.today().strftime("%Y-%m-%d"):
+    today = datetime.date.today()
+    if today.isoweekday() in set((6, 7)):
+        today += datetime.timedelta(days=today.isoweekday() % 5)
+        NEXT_PLANNED_UPDATE = today.strftime("%Y-%m-%d")
 
 # Fine for each day a trial is late
 # https://www.gpo.gov/fdsys/pkg/FR-2017-02-03/pdf/2017-02300.pdf

@@ -1,0 +1,134 @@
+{% extends "_base.html" %}
+{% load humanize %}
+{% block content %}
+<div class="row trial" id="summary-cards" style="opacity: 1">
+  <div class="{{ trial.status }} card col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+    <div class="content" id="{{ trial.status }}-container">
+      <div class="big-text">
+      {% if trial.status == 'ongoing' %}
+        This trial is ongoing. It must report results {{ due_date|naturaltime}}.
+      {% elif trial.status == 'overdue' %}
+        This trial is overdue. It was due to report {{ due_date|naturaltime}}.
+      {% elif trial.status == 'reported' %}
+       This trial has reported on time, in line with the regulations.
+      {% elif trial.status == 'reported-late' %}
+       This trial has reported, although it was {{ trial.days_late }} days late in doing so.
+      {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if trial.status == 'overdue' %}
+<p>
+    <strong>Think we've made a mistake?</strong>  Before <a href="mailto:hello@ebmdatalab.net">contacting us</a>, review the criteria in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">our paper</a>. In particular, bear in mind the following:
+    <ul>
+      <li>We can only rely on the structured data that sponsors put into the registry: they may enter incorrect or incomplete data.</li>
+      <li>Reporting in a journal is not enough. The FDAAA rules state that the trial must be reported on ClinicalTrials.gov.</li>
+      <li>Terminated trials are required to report results. Only withdrawn trials (which never recruited a single patient) are not.
+      </li>
+    </ul>
+</p>
+{% endif %}
+
+<h3>Full data</h3>
+<table class="table table-striped">
+  <tr>
+    <th>
+      Full entry on ClinicalTrials.gov
+    </th>
+    <td>
+      <a href="{{ trial.publication_url }}">{{ trial.registry_id }}</a>
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Title
+    </th>
+    <td>
+      <strong>{{ trial.title }}</strong>
+    </td>
+  </tr>
+  <tr>
+    <th>
+     Results Status
+    </th>
+    <td>
+      {{ trial.status }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      <abbr title="Applicable Clinical Trial">ACT</abbr> or <abbr title="probable Applicable Clinical Trial">pACT</abbr>?
+    </th>
+    <td>
+      {% if trial.is_pact %}
+        This is what FDAAA officially calls a "probable Applicable Clinical Trial"
+      {% else %}
+        This is what FDAAA officially calls an "Applicable Clinical Trial"
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Start date
+    </th>
+    <td>
+      {{ trial.start_date }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Completion date
+    </th>
+    <td>
+      {{ trial.completion_date }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Required reporting date
+    </th>
+    <td>
+      {{ due_date }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Actual reporting date
+    </th>
+    <td>
+      {{ trial.calculated_reported_date }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Date last checked at ClinicalTrials.gov
+    </th>
+    <td>
+      {{ trial.updated_date }}
+    </td>
+  </tr>
+  <tr>
+    <th>
+      Days late
+    </th>
+    <td>
+      {{ trial.days_late }}
+    </td>
+  </tr>
+</table>
+{% if annotation_html %}
+  {{ annotation_html | safe }}
+{% endif %}
+<script>
+  $(document).ready(function() {
+    waitForEl('html.wf-active', resizeCards);
+  });
+  $(window).resize(function() {
+    resizeCards();
+  });
+
+</script>
+
+{% endblock%}

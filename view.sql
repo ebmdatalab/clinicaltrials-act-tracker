@@ -113,7 +113,7 @@ FROM
 
 website_data AS (
  SELECT
-  nct_id,
+  full_data_extract.nct_id,
   CASE
     WHEN study_type = 'Interventional'
     AND (fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes')
@@ -131,7 +131,13 @@ website_data AS (
     AND (available_completion_date >= '2017-01-18')
     AND (start_date < '2017-01-18')
     AND study_status <> 'Withdrawn'
-    AND ((fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes') OR (fda_reg_drug is null AND fda_reg_device is null))  -- for trials which were pACTs and the sponsor subsequently updated
+    AND (
+          (fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes')
+        OR
+          (is_fda_regulated IS NOT FALSE
+            AND fda_reg_drug IS NULL
+            AND fda_reg_device IS NULL)
+        )  -- for trials which were pACTs and the sponsor subsequently updated. See #92.
     AND (regexp_contains(location, concat("\\b", "United States", "\\b"))
     OR regexp_contains(location, concat("\\b", "American Samoa", "\\b"))
     OR regexp_contains(location, concat("\\b", "Guam", "\\b"))
@@ -146,6 +152,7 @@ website_data AS (
   phase,
   start_date,
   available_completion_date,
+  case when is_fda_regulated IS NOT FALSE then 1 else 0 end as legacy_fda_regulated,
   case when primary_completion_date is not null then 1 else 0 end as primary_completion_date_used,
   has_results,
   results_submitted_date,
@@ -175,7 +182,13 @@ website_data AS (
     AND (available_completion_date >= '2017-01-18')
     AND (start_date < '2017-01-18')
     AND (study_status <> 'Withdrawn')
-    AND ((fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes') OR (fda_reg_drug is null AND fda_reg_device is null))  -- for trials which were pACTs and the sponsor subsequently updated
+    AND (
+          (fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes')
+        OR
+          (is_fda_regulated IS NOT FALSE
+            AND fda_reg_drug IS NULL
+            AND fda_reg_device IS NULL)
+        )  -- for trials which were pACTs and the sponsor subsequently updated. See #92
     AND (regexp_contains(location, concat("\\b", "United States", "\\b"))
     OR regexp_contains(location, concat("\\b", "American Samoa", "\\b"))
     OR regexp_contains(location, concat("\\b", "Guam", "\\b"))
@@ -200,7 +213,12 @@ website_data AS (
   intervention,
   intervention_mesh
 FROM
-  full_data_extract)
+  full_data_extract
+LEFT JOIN
+  ebmdatalab.clinicaltrials.jan17_fda_regulation_snapshot
+ON
+  jan17_fda_regulation_snapshot.nct_id = full_data_extract.nct_id
+)
 SELECT * FROM website_data
 WHERE
   included_pact_flag = 1 OR act_flag = 1
