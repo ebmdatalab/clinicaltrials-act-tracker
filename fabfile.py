@@ -65,6 +65,9 @@ def update_from_git(branch):
 def setup_nginx():
     sudo_script('setup_nginx.sh %s %s' % (env.path, env.app))
 
+def setup_cron():
+    sudo_script('setup_cron.sh %s' % (env.path))
+
 def setup_ebmbot():
     sudo_script('setup_ebmbot.sh %s' % env.app)
 
@@ -100,6 +103,7 @@ def deploy(environment, branch='master'):
             venv_init()
             update_from_git(branch)
             setup_ebmbot()
+            setup_cron()
             pip_install()
             setup_django()
             setup_nginx()
