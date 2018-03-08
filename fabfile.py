@@ -61,7 +61,6 @@ def update_from_git():
     else:
         with cd("clinicaltrials-act-tracker"):
             run("git pull -q")
-            run("git checkout slackbot")
 
 def setup_nginx():
     sudo_script('setup_nginx.sh %s %s' % (env.path, env.app))
@@ -120,7 +119,7 @@ def update(environment):
     # to staging, then reviewed, then copied to live.  Longer term we
     # may miss out the moderation step and scrape directly to live.
     env = setup(environment)
-    if environment == 'test':
+    if environment == 'staging':
         sudo_script('kickoff_background_data_load.sh %s' % env.app)
     elif environment == 'live':
         sudo_script('copy_staging_to_live.sh')
