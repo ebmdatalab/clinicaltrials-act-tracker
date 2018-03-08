@@ -4,6 +4,7 @@ export CLINICALTRIALS_GOOGLE_TRACKING_ID=asd # optional Analytics id, e.g. UA-nn
 export CLINICALTRIALS_DB=clinicaltrials
 export CLINICALTRIALS_DB_NAME=root
 export CLINICALTRIALS_DB_PASS=root
-export GOOGLE_APPLICATION_CREDENTIALS=/home/seb/Code/openprescribing/google-credentials.json
-export SLACK_GENERAL_POST_KEY=https://hooks.slack.com/services/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
-
+export GOOGLE_APPLICATION_CREDENTIALS=/home/foo/Code/openprescribing/google-credentials.json
+export SLACK_GENERAL_POST_KEY=https://hooks.slack.com/services/T1234
+export TWITTER_CONSUMER_SECRET=asd
+export TWITTER_ACCESS_TOKEN_SECRET=qwerty

@@ -78,6 +78,9 @@ class TrialQuerySet(models.QuerySet):
     def reported(self):
         return self.visible().filter(status__in=['reported', 'reported-late'])
 
+    def reported_on_time(self):
+        return self.visible().filter(status='reported')
+
     def reported_late(self):
         return self.visible().filter(status='reported-late')
 
@@ -118,7 +121,6 @@ class Trial(models.Model):
         max_length=20, choices=STATUS_CHOICES, default=STATUS_ONGOING)
     completion_date = models.DateField(null=True, blank=True)
     no_longer_on_website = models.BooleanField(default=False)
-
     first_seen_date = models.DateField(default=date.today)
     updated_date = models.DateField(default=date.today)
     reported_date = models.DateField(null=True, blank=True)
@@ -126,6 +128,9 @@ class Trial(models.Model):
 
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
+
+    def get_absolute_url(self):
+        return reverse('views.trial', args=[self.registry_id])
 
     def calculated_reported_date(self):
         if self.reported_date:

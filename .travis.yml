@@ -11,6 +11,8 @@ env:
     CLINICALTRIALS_DB: clinicaltrials
     CLINICALTRIALS_DB_NAME: postgres
     CLINICALTRIALS_DB_PASS:
+    TWITTER_CONSUMER_SECRET: x
+    TWITTER_ACCESS_TOKEN_SECRET: x
 before_script:
   - psql -c 'create database clinicaltrials_test;' -U postgres
 script:
