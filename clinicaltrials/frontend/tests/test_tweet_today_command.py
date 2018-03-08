@@ -53,7 +53,8 @@ class TweetTodayTestCase(TestCase):
         api.PostUpdate.assert_called_with(
             'Since our last update, 1 trial became overdue, and 3 trials '
             'reported late. 1 trial reported its results on time. 80% of '
-            'all due trials have reported their results.')
+            'all due trials have reported their results.  '
+            'https://fdaaa.trialstracker.net/')
 
     @patch('frontend.management.commands.tweet_today.twitter')
     def test_single_variable(self, twitter_mock):
@@ -72,7 +73,8 @@ class TweetTodayTestCase(TestCase):
         call_command('tweet_today', stdout=out)
         api.PostUpdate.assert_called_with(
             'Since our last update, 1 trial became overdue. 0% of all due '
-            'trials have reported their results.')
+            'trials have reported their results.  '
+            'https://fdaaa.trialstracker.net/')
 
     @patch('frontend.management.commands.tweet_today.twitter')
     @patch('frontend.views.Ranking')
