@@ -42,6 +42,7 @@ class Command(BaseCommand):
             percentage = round(data['reported'] / data['due'] * 100)
             message += ("{}% of all due trials "
                         "have reported their results.".format(percentage))
+            message += "  https://fdaaa.trialstracker.net/"
             api = twitter.Api(
                 consumer_key='XRKI13gzUVhUukZfjavgNYrWq',
                 consumer_secret=settings.TWITTER_CONSUMER_SECRET,
