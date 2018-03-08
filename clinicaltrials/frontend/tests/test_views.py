@@ -37,6 +37,11 @@ class FrontendTestCase(TestCase):
         response = client.get('/')
         self.assertEqual(response.status_code, 200)
 
+    def test_rankings(self):
+        client = Client()
+        response = client.get('/rankings/')
+        self.assertEqual(response.status_code, 200)
+
     def test_sponsor(self):
         client = Client()
         response = client.get('/sponsor/sponsor-1/')

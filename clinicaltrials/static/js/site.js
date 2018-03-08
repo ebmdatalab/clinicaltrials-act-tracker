@@ -209,15 +209,25 @@ function getTrialParams() {
   return params;
 }
 
-function trialsTable(sponsor_slug) {
+function trialsTable(sponsor_slug, statusFilter, sortCol, sortOrder) {
   var url = '/api/trials/';
   var params = getTrialParams();
   var columnDefs = [];
+  if (typeof statusFilter !== 'undefined') {
+    params['status'] = statusFilter;
+  }
   if(typeof sponsor_slug !== 'undefined' && sponsor_slug !== '') {
     params['sponsor'] = sponsor_slug;
     columnDefs = [{className: 'sponsor-col', targets: [1]}];
   }
   setFormValues(params);
+  if (typeof sortCol === 'undefined') {
+    sortCol = 4; // completion date
+  }
+  if (typeof sortOrder === 'undefined') {
+    sortOrder = 'asc';
+  }
+
   var table = $('#trials_table').DataTable( {
     'initComplete': function(settings, json) {
       $('#results').fadeTo(500, 1);
@@ -245,7 +255,7 @@ function trialsTable(sponsor_slug) {
     },
     'serverSide': true,
     'pageLength': 100,
-    "order": [[ 3, 'asc' ]],
+    "order": [[ sortCol, sortOrder ]],
     'columns': [
       {'data': 'status', 'name': 'status',
        'render': function(data, type, full, meta) {
