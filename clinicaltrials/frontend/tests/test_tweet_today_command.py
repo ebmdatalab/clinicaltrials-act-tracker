@@ -71,7 +71,7 @@ class TweetTodayTestCase(TestCase):
         out = StringIO()
         call_command('tweet_today', stdout=out)
         api.PostUpdate.assert_called_with(
-            'Since our last update, 1 trial became overdue. 0% of all due'
+            'Since our last update, 1 trial became overdue. 0% of all due '
             'trials have reported their results.')
 
     @patch('frontend.management.commands.tweet_today.twitter')
