@@ -140,7 +140,16 @@
         <h2>How do you calculate what fines a sponsor could receive?</h2>
         <p>The FDA can fine (per 333(f)(3)(B) in table <a href="https://www.gpo.gov/fdsys/pkg/FR-2017-02-03/pdf/2017-02300.pdf">here</a>) non-reporting sponsors up to ${{ FINE_PER_DAY|intcomma }} a day following a 30 day notice period. We calculate the maximum possible fine assuming the sponsor was notified the day after they failed to meet their submission deadline. So each day after 1 year plus 30 days since trial completion without submitted results is another ${{ FINE_PER_DAY|intcomma }}. You can read more on this in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/02/20/266452.full.pdf">our paper</a>.</p>
 
-        <h2>When was the data last updated?</h2>
+          <h2>How can I cite this work?</h2>
+          <p>Please cite the website as:</p>
+
+            <li>FDAAA TrialsTracker. EBM DataLab. 2018. Available from: <a href="https://fdaaa.trialstracker.net/">https://fdaaa.trialstracker.net/</a></li>
+
+            <p> For citations regarding our methods, please cite our preprint paper: </p>
+
+            <li> DeVito NJ, Bacon S, Goldacre B. FDAAA TrialsTracker: A live informatics tool to monitor compliance with FDA requirements to report clinical trial results. bioRxiv. 2018; <a href="https://doi.org/10.1101/266452">https://doi.org/10.1101/266452</a></li>.
+          
+          <h2>When was the data last updated?</h2>
         <p>
           The current data was taken from ClinicalTrials.gov on {{ LATEST_DATE|date:"j F Y" }}. Our next update of the data is planned for {{ NEXT_PLANNED_UPDATE|date:"j F Y" }}.
         </p>
