@@ -240,10 +240,10 @@ NEXT_PLANNED_UPDATE = '2018-03-07'
 
 # Default to next weekday if the previous constant is today or earlier
 if NEXT_PLANNED_UPDATE <= datetime.date.today().strftime("%Y-%m-%d"):
-    today = datetime.date.today()
-    if today.isoweekday() in set((6, 7)):
-        today += datetime.timedelta(days=today.isoweekday() % 5)
-        NEXT_PLANNED_UPDATE = today.strftime("%Y-%m-%d")
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    if tomorrow.isoweekday() in set((6, 7)):
+        tomorrow += datetime.timedelta(days=tomorrow.isoweekday() % 5)
+    NEXT_PLANNED_UPDATE = tomorrow.strftime("%Y-%m-%d")
 
 # Fine for each day a trial is late
 # https://www.gpo.gov/fdsys/pkg/FR-2017-02-03/pdf/2017-02300.pdf
