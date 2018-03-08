@@ -129,6 +129,9 @@ class Trial(models.Model):
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
 
+    def get_absolute_url(self):
+        return reverse('views.trial', args=[self.registry_id])
+
     def calculated_reported_date(self):
         if self.reported_date:
             return self.reported_date
