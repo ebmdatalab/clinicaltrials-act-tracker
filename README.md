@@ -122,10 +122,12 @@ existing data!) with:
 
     fab update:live
 
-The target server requires `gcloud` client
-libraries
-[to be installed](https://cloud.google.com/storage/docs/gsutil_install#deb),
-along with `dtach` (`apt-get install dtach`).
+The target server
+requires
+[`gcloud` client libraries](https://cloud.google.com/storage/docs/gsutil_install#deb) and
+`dtach` (`apt-get install dtach`) to be installed by any users who
+might run fabric scripts, e.g. you (the developer) and the `ebmbot`
+user (see below)
 
 
 EBMBot
