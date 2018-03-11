@@ -15,6 +15,7 @@ import datetime
 import tempfile
 import shutil
 import requests
+import contextlib
 import re
 from google.cloud.exceptions import NotFound
 from xml.parsers.expat import ExpatError
@@ -122,11 +123,9 @@ def convert_and_download():
     tmp_client = Client('tmp_eu')
     table_name = 'current_raw_json'
     tmp_table = tmp_client.dataset.table("clincialtrials_tmp_{}".format(gen_job_name()))
-    try:
+    with contextlib.suppress(NotFound):
         table = client.get_table(table_name)
         table.gcbq_table.delete()
-    except NotFound:
-        pass
 
     table = client.create_storage_backed_table(
         table_name,
@@ -141,7 +140,7 @@ def convert_and_download():
         job.write_disposition = 'WRITE_TRUNCATE'
         job.begin()
 
-        # The call to .run() might return before results are actually ready.
+        # The call to .run_async_query() might return before results are actually ready.
         # See https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query#timeoutMs
         wait_for_job(job)
     t1_exporter = TableExporter(tmp_table, STORAGE_PREFIX + 'test_table-')
@@ -153,10 +152,8 @@ def convert_and_download():
 
 
 if __name__ == '__main__':
-    try:
+    with contextlib.suppress(OSError):
         os.remove("/tmp/clinical_trials.csv")
-    except OSError:
-        pass
     try:
         download_and_extract()
         convert_to_json()
