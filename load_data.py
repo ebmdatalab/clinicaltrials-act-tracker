@@ -12,7 +12,10 @@ import subprocess
 import json
 import glob
 import datetime
+import tempfile
+import shutil
 import requests
+import re
 from google.cloud.exceptions import NotFound
 from xml.parsers.expat import ExpatError
 
@@ -28,12 +31,6 @@ def raw_json_name():
     return "raw_clincialtrials_json_{}.csv".format(date)
 
 
-def run(cmd):
-    completed = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if completed.returncode > 0:
-        raise RuntimeError(completed.stderr)
-
-
 def postprocessor(path, key, value):
     """Convert key names to something bigquery compatible
     """
@@ -43,19 +40,29 @@ def postprocessor(path, key, value):
 
 
 def download_and_extract():
+    """Clean up from past runs, then download into a temp location and move the
+    result into place.
+    """
     logging.info("Downloading. This takes at least 30 mins on a fast connection!")
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
+
     # download and extract
-    wget_command = "wget -O {}data.zip {}".format(WORKING_DIR, url)
-    run("rm -rf {}*".format(WORKING_DIR))
-    run("%s %s" % (wget_command, url))
-    run("unzip -o -d {} {}data.zip".format(WORKING_DIR, WORKING_DIR))
+    container = tempfile.mkdtemp(prefix=STORAGE_PREFIX.rstrip(os.sep), dir=WORKING_VOLUME)
+    try:
+        data_file = os.path.join(container, "data.zip")
+        subprocess.check_call(["wget", "-q", "-O", data_file, url])
+        # Can't "wget|unzip" in a pipe because zipfiles have index at end of file.
+        with contextlib.suppress(OSError):
+            shutil.rmtree(WORKING_DIR)
+        subprocess.check_call(["unzip", "-q", "-o", "-d", WORKING_DIR, data_file])
+    finally:
+        shutil.rmtree(container)
 
 
 def upload_to_cloud():
     # XXX we should periodically delete old ones of these
     logging.info("Uploading to cloud")
-    run("gsutil cp {}{}  gs://ebmdatalab/{}".format(WORKING_DIR, raw_json_name(), STORAGE_PREFIX))
+    subprocess.check_call(["gsutil", "cp", "{}{}".format(WORKING_DIR, raw_json_name()), "gs://ebmdatalab/{}".format(STORAGE_PREFIX)])
 
 
 def notify_slack(message):
@@ -155,7 +162,11 @@ if __name__ == '__main__':
         convert_to_json()
         upload_to_cloud()
         convert_and_download()
-        run(". /etc/profile.d/fdaaa_staging.sh &&  /var/www/fdaaa_staging/venv/bin/python /var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=frontend.settings")
+        env = os.environ.copy()
+        with open("/etc/profile.d/fdaaa_staging.sh") as e:
+            for k, v in re.findall(r"^export ([A-Z][A-Z0-9_]*)=(\S*)", e.read(), re.MULTILINE):
+                env[k] = v
+        subprocess.check_call(["/var/www/fdaaa_staging/venv/bin/python", "/var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py", "process_data", "--input-csv=/tmp/clinical_trials.csv", "--settings=frontend.settings"], env=env)
         notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.
 
     If this looks good, a dev should run the following on smallweb1:
