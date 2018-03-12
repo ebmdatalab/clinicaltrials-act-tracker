@@ -19,7 +19,7 @@ class Command(BaseCommand):
     help = '''Send a tweet about latest stats to @FDAAAtracker'''
 
     def handle(self, *args, **options):
-        data = get_performance(Trial.objects.all())
+        data = get_performance()
         if data['overdue_today'] \
            or data['late_today'] \
            or data['on_time_today']:

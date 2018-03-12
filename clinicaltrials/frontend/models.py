@@ -175,7 +175,10 @@ class Ranking(models.Model):
     days_late = models.IntegerField(null=True, blank=True)
     finable_days_late = models.IntegerField(null=True, blank=True)
     total = models.IntegerField()
+    overdue = models.IntegerField()
     reported = models.IntegerField()
+    reported_late = models.IntegerField()
+    reported_on_time = models.IntegerField()
     percentage = models.IntegerField(null=True)
 
     def __str__(self):

@@ -164,13 +164,7 @@ if __name__ == '__main__':
             for k, v in re.findall(r"^export ([A-Z][A-Z0-9_]*)=(\S*)", e.read(), re.MULTILINE):
                 env[k] = v
         subprocess.check_call(["/var/www/fdaaa_staging/venv/bin/python", "/var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py", "process_data", "--input-csv=/tmp/clinical_trials.csv", "--settings=frontend.settings"], env=env)
-        notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.
-
-    If this looks good, a dev should run the following on smallweb1:
-
-    ```. /etc/profile.d/fdaaa.sh &&  /var/www/fdaaa/venv/bin/python /var/www/fdaaa/clinicaltrials-act-tracker/clinicaltrials/manage.py process_data --input-csv=/tmp/clinical_trials.csv --settings=frontend.settings
-    ```
-    """)
+        notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.  If this looks good, tell ebmbot to 'update fdaaa staging'""")
     except:
         notify_slack("Error in FDAAA import: {}".format(traceback.format_exc()))
         raise
