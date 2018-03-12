@@ -67,6 +67,12 @@ def set_current_rankings():
                 sponsor=sponsor).count()
             reported = Trial.objects.reported().filter(
                     sponsor=sponsor).count()
+            reported_late = Trial.objects.reported_late().filter(
+                    sponsor=sponsor).count()
+            reported_on_time = Trial.objects.reported_on_time().filter(
+                    sponsor=sponsor).count()
+            overdue = Trial.objects.overdue().filter(
+                    sponsor=sponsor).count()
             total = sponsor.trial_set.visible().count()
             days_late = sponsor.trial_set.visible().aggregate(
                 total_days_late=Sum('days_late'))['total_days_late']
@@ -78,6 +84,9 @@ def set_current_rankings():
                 'total': total,
                 'date': sponsor.updated_date,
                 'days_late': days_late,
+                'overdue': overdue,
+                'reported_late': reported_late,
+                'reported_on_time': reported_on_time,
                 'finable_days_late': finable_days_late
             }
             ranking = sponsor.rankings.filter(
