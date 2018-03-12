@@ -263,7 +263,7 @@ website_data AS (
   --This checks to see if a certificate of delay or an extension was applied for after the trial was otherwise due to report results (w/o 30 day buffer) which is not allowed per the Final Rule
   --We only care about this for pACTs/ACTs
   CASE
-    WHEN certificate_date > (DATE_ADD(DATE_ADD(available_completion_date, INTERVAL 1 YEAR), INTERVAL 30 DAY)) THEN 1
+    WHEN certificate_date > (DATE_ADD(available_completion_date, INTERVAL 1 YEAR)) THEN 1
     ELSE 0
   END AS late_cert,
   
