@@ -42,6 +42,13 @@ loaded into a staging database / website.
 A separate command copies new data from staging to production
 (following moderation).
 
+Much complex logic has been expressed in SQL, which makes it hard to read
+and test.  This is a legacy of splitting the development between
+academics with the domain expertise (and who could use SQL to
+prototype) and software engineers.  Now the project has been running
+for a while and new development interations are less frequent, a useful
+project would be as much of this logic to Python.
+
 Static Pages
 ============
 
