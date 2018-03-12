@@ -21,16 +21,23 @@ class TweetTodayTestCase(TestCase):
     def setUp(self, datetime_mock):
         self.mock_today = date(2017, 1, 31)
         datetime_mock.today = Mock(return_value=self.mock_today)
-
-    @patch('frontend.management.commands.tweet_today.twitter')
-    def test_all_variables(self, twitter_mock):
         self.sponsor = Sponsor.objects.create(
             name="Sponsor 1",
             updated_date=self.mock_today)
+        set_current_rankings()
+
+    @patch('frontend.management.commands.tweet_today.twitter')
+    def test_all_variables(self, twitter_mock):
         self.due_trial = makeTrial(
             self.sponsor,
             results_due=True,
             has_results=False,
+            updated_date=self.mock_today)
+        self.invisible_trial = makeTrial(
+            self.sponsor,
+            results_due=True,
+            has_results=False,
+            no_longer_on_website=True,
             updated_date=self.mock_today)
         self.reported_trial = makeTrial(
             self.sponsor,
@@ -58,9 +65,6 @@ class TweetTodayTestCase(TestCase):
 
     @patch('frontend.management.commands.tweet_today.twitter')
     def test_single_variable(self, twitter_mock):
-        self.sponsor = Sponsor.objects.create(
-            name="Sponsor 1",
-            updated_date=self.mock_today)
         self.due_trial = makeTrial(
             self.sponsor,
             results_due=True,
@@ -77,11 +81,10 @@ class TweetTodayTestCase(TestCase):
             'https://fdaaa.trialstracker.net/')
 
     @patch('frontend.management.commands.tweet_today.twitter')
-    @patch('frontend.views.Ranking')
+    @patch('frontend.views.current_and_prev')
     def test_noop(self, ranking_mock, twitter_mock):
         api = MagicMock(twitter.api.Api, name='api')
-        latest = ranking_mock.objects.latest.return_value
-        latest.date = date(2016, 12, 1)
+        ranking_mock.return_value = (0, 0)
         twitter_mock.Api.return_value = api
         out = StringIO()
         call_command('tweet_today', stdout=out)

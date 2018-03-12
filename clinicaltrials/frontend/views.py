@@ -25,39 +25,58 @@ from frontend.models import Sponsor
 from frontend.models import Trial
 
 
-def get_performance(trials_queryset):
-    due = trials_queryset.due().count()
-    reported = trials_queryset.reported().count()
-    days_late = trials_queryset.aggregate(
-        days_late=Sum('finable_days_late'))['days_late']
+def current_and_prev(field_name, date, prev_date):
+    current = Ranking.objects.filter(date=date).aggregate(Sum(field_name))[field_name + '__sum']
+    if prev_date:
+        prev = Ranking.objects.filter(date=prev_date).aggregate(Sum(field_name))[field_name + '__sum']
+    else:
+        prev = 0
+    return (current, prev)
+
+
+def get_performance(sponsor_slug=None, date=None):
+    """Get a dictionary of top-line performance metrics.
+    """
+    if sponsor_slug is None:
+        queryset = Ranking.objects.all()
+    else:
+        queryset = Ranking.objects.filter(sponsor__slug=sponsor_slug)
+    if date is None:
+        date = queryset.latest('date').date
+    prev_ranking = queryset.order_by('-date')\
+                               .filter(date__lt=date)\
+                               .distinct('date')\
+                               .only('date')\
+                               .first()
+    if prev_ranking:
+        prev_date = prev_ranking.date
+    else:
+        prev_date = None
+    due, _ = current_and_prev('due', date, prev_date)
+    reported, _ = current_and_prev('reported', date, prev_date)
+    days_late, _ = current_and_prev('finable_days_late', date, prev_date)
+    late, late_prev = current_and_prev('reported_late', date, prev_date)
+    overdue, overdue_prev = current_and_prev('overdue', date, prev_date)
+    on_time, on_time_prev = current_and_prev('reported_on_time', date, prev_date)
     fines_str = '$0'
     if days_late:
         fines_str = "${:,}".format(days_late * settings.FINE_PER_DAY)
-    latest_date = Ranking.objects.latest('date').date
-    overdue_today = trials_queryset.overdue().filter(
-        updated_date=latest_date).count()
-    late_today = trials_queryset.reported_late().filter(
-        updated_date=latest_date).count()
-    on_time_today = trials_queryset.reported_on_time().filter(
-        updated_date=latest_date).count()
     return {
         'due': due,
         'reported': reported,
         'days_late': days_late,
         'fines_str': fines_str,
-        'overdue_today': overdue_today,
-        'late_today': late_today,
-        'on_time_today': on_time_today
+        'overdue_today': overdue - overdue_prev,
+        'late_today': late - late_prev,
+        'on_time_today': on_time - on_time_prev
     }
 
 
 @api_view()
 @permission_classes((permissions.AllowAny,))
 def performance(request):
-    queryset = Trial.objects.all()
-    if 'sponsor' in request.GET:
-        queryset = queryset.filter(sponsor__slug=request.GET['sponsor'])
-    d = get_performance(queryset)
+    queryset = Ranking.objects.all()
+    d = get_performance(request.GET.get('sponsor', None))
     return Response(d)
 
 
