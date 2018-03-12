@@ -20,12 +20,13 @@ import re
 from google.cloud.exceptions import NotFound
 from xml.parsers.expat import ExpatError
 
+from django.core.management.base import BaseCommand
+from django.conf import settings
+
 
 STORAGE_PREFIX = 'clinicaltrials/'
 WORKING_VOLUME = '/mnt/volume-lon1-01/'   # location with at least 10GB space
 WORKING_DIR = WORKING_VOLUME + STORAGE_PREFIX
-
-logging.basicConfig(filename='{}data_load.log'.format(WORKING_VOLUME), level=logging.DEBUG)
 
 def raw_json_name():
     date = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -39,6 +40,8 @@ def postprocessor(path, key, value):
         key = key[1:]
     return key, value
 
+def wget_file(target, url):
+    subprocess.check_call(["wget", "-q", "-O", target, url])
 
 def download_and_extract():
     """Clean up from past runs, then download into a temp location and move the
@@ -51,11 +54,12 @@ def download_and_extract():
     container = tempfile.mkdtemp(prefix=STORAGE_PREFIX.rstrip(os.sep), dir=WORKING_VOLUME)
     try:
         data_file = os.path.join(container, "data.zip")
-        subprocess.check_call(["wget", "-q", "-O", data_file, url])
+        wget_file(data_file, url)
         # Can't "wget|unzip" in a pipe because zipfiles have index at end of file.
         with contextlib.suppress(OSError):
             shutil.rmtree(WORKING_DIR)
         subprocess.check_call(["unzip", "-q", "-o", "-d", WORKING_DIR, data_file])
+        print("unzip -q -o -d {} {}".format(WORKING_DIR, data_file))
     finally:
         shutil.rmtree(container)
 
@@ -63,7 +67,12 @@ def download_and_extract():
 def upload_to_cloud():
     # XXX we should periodically delete old ones of these
     logging.info("Uploading to cloud")
-    subprocess.check_call(["gsutil", "cp", "{}{}".format(WORKING_DIR, raw_json_name()), "gs://ebmdatalab/{}".format(STORAGE_PREFIX)])
+    subprocess.check_call([
+        "gsutil",
+        "cp",
+        "{}{}".format(WORKING_DIR, raw_json_name()),
+        "gs://ebmdatalab/{}".format(STORAGE_PREFIX)
+    ])
 
 
 def notify_slack(message):
@@ -121,7 +130,7 @@ def convert_and_download():
     ]
     client = Client('clinicaltrials')
     tmp_client = Client('tmp_eu')
-    table_name = 'current_raw_json'
+    table_name = settings.PROCESSING_STORAGE_TABLE_NAME
     tmp_table = tmp_client.dataset.table("clincialtrials_tmp_{}".format(gen_job_name()))
     with contextlib.suppress(NotFound):
         table = client.get_table(table_name)
@@ -132,7 +141,8 @@ def convert_and_download():
         schema,
         storage_path
     )
-    sql_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'view.sql')
+    sql_path = os.path.join(
+        settings.BASE_DIR, 'frontend/view.sql')
     with open(sql_path, 'r') as sql_file:
         job = table.gcbq_client.run_async_query(gen_job_name(), sql_file.read())
         job.destination = tmp_table
@@ -151,20 +161,41 @@ def convert_and_download():
         t1_exporter.download_from_storage_and_unzip(f)
 
 
-if __name__ == '__main__':
-    with contextlib.suppress(OSError):
-        os.remove("/tmp/clinical_trials.csv")
-    try:
-        download_and_extract()
-        convert_to_json()
-        upload_to_cloud()
-        convert_and_download()
-        env = os.environ.copy()
-        with open("/etc/profile.d/fdaaa_staging.sh") as e:
-            for k, v in re.findall(r"^export ([A-Z][A-Z0-9_]*)=(\S*)", e.read(), re.MULTILINE):
-                env[k] = v
-        subprocess.check_call(["/var/www/fdaaa_staging/venv/bin/python", "/var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py", "process_data", "--input-csv=/tmp/clinical_trials.csv", "--settings=frontend.settings"], env=env)
-        notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.  If this looks good, tell ebmbot to 'update fdaaa staging'""")
-    except:
-        notify_slack("Error in FDAAA import: {}".format(traceback.format_exc()))
-        raise
+def get_env(path):
+    env = os.environ.copy()
+    with open(path) as e:
+        for k, v in re.findall(r"^export ([A-Z][A-Z0-9_]*)=(\S*)", e.read(), re.MULTILINE):
+            env[k] = v
+    return env
+
+def process_data():
+    # XXX no need to do this: we can call the command via python
+    # rather than the shell, now we are a command too.
+    subprocess.check_call(
+        [
+            "{}python".format(settings.PROCESSING_VENV_BIN),
+            "{}/manage.py".format(settings.BASE_DIR),
+            "process_data",
+            "--input-csv=/tmp/clinical_trials.csv",
+            "--settings=frontend.settings"
+        ],
+        env=get_env(settings.PROCESSING_ENV_PATH))
+    notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.  If this looks good, tell ebmbot to 'update fdaaa staging'""")
+
+
+class Command(BaseCommand):
+    help = '''Generate a CSV that can be consumed by the `process_data` command, and run that command
+    '''
+
+    def handle(self, *args, **options):
+        with contextlib.suppress(OSError):
+            os.remove("/tmp/clinical_trials.csv")
+        try:
+            download_and_extract()
+            convert_to_json()
+            upload_to_cloud()
+            convert_and_download()
+            process_data()
+        except:
+            notify_slack("Error in FDAAA import: {}".format(traceback.format_exc()))
+            raise
