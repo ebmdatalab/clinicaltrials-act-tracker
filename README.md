@@ -54,14 +54,14 @@ Install these Python development packages before you begin. For
 example, on a Debian-based system:
 
 ```
-apt install python3 python3-venv
+apt install python3
 ```
 
 Using Python 3, create and enter a virtualenv, as [described
 here](https://docs.djangoproject.com/en/1.10/intro/contributing/).
 For example:
 
-    python3.5 -m venv venv
+    python3 -m venv venv
     . venv/bin/activate
 
 Install required Python packages.
