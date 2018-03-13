@@ -13,8 +13,10 @@ env:
     CLINICALTRIALS_DB_PASS:
     TWITTER_CONSUMER_SECRET: x
     TWITTER_ACCESS_TOKEN_SECRET: x
+    GOOGLE_APPLICATION_CREDENTIALS: $TRAVIS_BUILD_DIR/clinicaltrials-act-tracker/google-credentials.json
 before_script:
   - psql -c 'create database clinicaltrials_test;' -U postgres
+  - openssl aes-256-cbc -K $encrypted_ef2af4a5c304_key -iv $encrypted_ef2af4a5c304_iv -in google-credentials.json.enc -out google-credentials.json -d
 script:
   - cd clinicaltrials && coverage run --source='.' manage.py test
 notifications:
