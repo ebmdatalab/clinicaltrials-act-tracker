@@ -281,7 +281,7 @@ website_data AS (
 FROM
   full_data_extract
 LEFT JOIN
-  ebmdatalab.clinicaltrials.jan17_fda_regulation_snapshot
+  ebmdatalab.clinicaltrials.jan17_fda_regulation_snapshot --This joins in the now deprecated field "is_fda_regulated" from a historical dataset (from January 5, 2017) via https://aact.ctti-clinicaltrials.org/snapshots to use as an exclusionary criteria for pACTs. This field was removed on January 11, 2017 and replaced with the new "fda_regulated_drug" and "fda_regulated_device" fields.
 ON
   jan17_fda_regulation_snapshot.nct_id = full_data_extract.nct_id
 )
