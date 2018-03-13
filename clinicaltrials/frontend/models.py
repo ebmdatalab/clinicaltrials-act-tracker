@@ -9,7 +9,6 @@ from django.db.models import F
 from django.db.models import Q
 from django.db.models import Sum
 from django.utils.text import slugify
-from django.utils.dateparse import parse_date
 from django.urls import reverse
 
 from frontend.trial_computer import compute_metadata
@@ -131,6 +130,12 @@ class Trial(models.Model):
 
     def get_absolute_url(self):
         return reverse('views.trial', args=[self.registry_id])
+
+    def calculated_due_date(self):
+        if self.has_exemption:
+            return self.completion_date + relativedelta(years=3)
+        return self.completion_date + relativedelta(days=365)
+
 
     def calculated_reported_date(self):
         if self.reported_date:
