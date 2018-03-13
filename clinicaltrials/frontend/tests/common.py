@@ -20,6 +20,7 @@ def makeTrial(sponsor, **kw):
     defaults.update(kw)
     trial = Trial.objects.create(**defaults)
     trial.compute_metadata()
+    trial.refresh_from_db()
     return trial
 
 

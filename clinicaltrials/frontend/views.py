@@ -138,7 +138,7 @@ def trial(request, registry_id=None):
         status_desc = 'A reported trial'
     else:
         status_desc = 'A trial that was reported late'
-    due_date = trial.completion_date + relativedelta(days=365)
+    due_date = trial.calculated_due_date()
     annotation = _get_full_markdown_path("trials/{}".format(registry_id))
     if os.path.exists(annotation):
         with open(annotation, 'r') as f:

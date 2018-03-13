@@ -6,7 +6,12 @@
     <div class="content" id="{{ trial.status }}-container">
       <div class="big-text">
       {% if trial.status == 'ongoing' %}
-        This trial is ongoing. It must report results {{ due_date|naturaltime}}.
+        {% if trial.has_exemption %}
+          This trial is completed, but has been granted a delay in reporting its results.
+          It must report results {{ due_date|naturaltime }}.
+        {% else %}
+          This trial is ongoing. It must report results {{ due_date|naturaltime}}.
+        {% endif %}
       {% elif trial.status == 'overdue' %}
         This trial is overdue. It was due to report {{ due_date|naturaltime}}.
       {% elif trial.status == 'reported' %}
