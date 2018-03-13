@@ -129,7 +129,7 @@ SELECT TRIM(json_EXTRACT(json,
   json_EXTRACT(json,
     "$.clinical_study.intervention_browse") AS intervention_mesh
 FROM
-   ebmdatalab.clinicaltrials.current_raw_json),
+   ebmdatalab.clinicaltrials.{table_name}),
 
 website_data AS (
  SELECT

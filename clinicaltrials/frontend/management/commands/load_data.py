@@ -144,7 +144,8 @@ def convert_and_download():
     sql_path = os.path.join(
         settings.BASE_DIR, 'frontend/view.sql')
     with open(sql_path, 'r') as sql_file:
-        job = table.gcbq_client.run_async_query(gen_job_name(), sql_file.read())
+        job = table.gcbq_client.run_async_query(
+            gen_job_name(), sql_file.read().format(table_name=table_name))
         job.destination = tmp_table
         job.use_legacy_sql = False
         job.write_disposition = 'WRITE_TRUNCATE'

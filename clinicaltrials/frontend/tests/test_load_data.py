@@ -39,7 +39,10 @@ class LoadTestCase(TestCase):
         args = []
         opts = {}
         call_command('load_data', *args, **opts)
-        with open('/tmp/clinical_trials.csv') as f:
-            results = sorted(list(csv.reader(f)))
-            self.assertEqual(len(results), 3)
-            self.assertEqual(results[1][0], 'NCT03456076')
+        expected_csv = os.path.join(
+            settings.BASE_DIR, 'frontend/tests/fixtures/expected_trials_data.csv')
+        with open('/tmp/clinical_trials.csv') as output_file:
+            with open(expected_csv) as expected_file:
+                results = sorted(list(csv.reader(output_file)))
+                expected = sorted(list(csv.reader(expected_file)))
+                self.assertEqual(results, expected)
