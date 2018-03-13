@@ -3,6 +3,7 @@ import logging
 import traceback
 
 from bigquery import Client
+from bigquery import StorageClient
 from bigquery import TableExporter
 from bigquery import wait_for_job
 from bigquery import gen_job_name
@@ -67,12 +68,11 @@ def download_and_extract():
 def upload_to_cloud():
     # XXX we should periodically delete old ones of these
     logging.info("Uploading to cloud")
-    subprocess.check_call([
-        "gsutil",
-        "cp",
-        "{}{}".format(WORKING_DIR, raw_json_name()),
-        "gs://ebmdatalab/{}".format(STORAGE_PREFIX)
-    ])
+    client = StorageClient()
+    bucket = client.get_bucket()
+    blob = bucket.blob("{}{}".format(STORAGE_PREFIX, raw_json_name()))
+    with open(os.path.join(WORKING_DIR, raw_json_name()), 'rb') as f:
+        blob.upload_from_file(f)
 
 
 def notify_slack(message):

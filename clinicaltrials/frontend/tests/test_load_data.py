@@ -40,6 +40,6 @@ class LoadTestCase(TestCase):
         opts = {}
         call_command('load_data', *args, **opts)
         with open('/tmp/clinical_trials.csv') as f:
-            results = list(csv.DictReader(f))
-            self.assertEqual(len(results), 2)
-            self.assertEqual(results[0]['nct_id'], 'NCT03456063')
+            results = sorted(list(csv.reader(f)))
+            self.assertEqual(len(results), 3)
+            self.assertEqual(results[1][0], 'NCT03456076')
