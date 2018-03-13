@@ -13,7 +13,7 @@ env:
     CLINICALTRIALS_DB_PASS:
     TWITTER_CONSUMER_SECRET: x
     TWITTER_ACCESS_TOKEN_SECRET: x
-    GOOGLE_APPLICATION_CREDENTIALS: "$TRAVIS_BUILD_DIR/clinicaltrials-act-tracker/google-credentials.json"
+    GOOGLE_APPLICATION_CREDENTIALS: "$TRAVIS_BUILD_DIR/google-credentials.json"
 before_script:
 - psql -c 'create database clinicaltrials_test;' -U postgres
 script:
