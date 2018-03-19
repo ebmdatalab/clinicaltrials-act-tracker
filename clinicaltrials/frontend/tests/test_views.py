@@ -246,9 +246,6 @@ class ApiPerformanceResultsTestCase(TestCase):
     maxDiff = 6000
     def _makeRankingsForDate(self, target_date):
         with patch('frontend.trial_computer.date') as datetime_mock:
-            # Because we use this to simulate more than one import,
-            # and an import assumes we've dropped trials:
-            Trial.objects.all().delete()
             self.mock_today = target_date
             datetime_mock.today = Mock(return_value=self.mock_today)
             self.sponsor, _ = Sponsor.objects.get_or_create(
@@ -258,11 +255,13 @@ class ApiPerformanceResultsTestCase(TestCase):
             self.sponsor.save()
             self.due_trial = makeTrial(
                 self.sponsor,
+                registry_id='due trial',
                 results_due=True,
                 has_results=False,
                 updated_date=self.mock_today)
             self.reported_trial = makeTrial(
                 self.sponsor,
+                registry_id='reported trial',
                 results_due=True,
                 has_results=True,
                 reported_date=date(2016,12,1),
@@ -323,3 +322,15 @@ class ApiPerformanceResultsTestCase(TestCase):
         self.assertEqual(response['due'], 2)
         self.assertEqual(response['overdue_today'], 0)
         self.assertEqual(response['on_time_today'], 0)
+
+    @patch('frontend.models.date')
+    def test_performance_results_overdue_counts_reverting(self, mock_date):
+        mock_date.today.return_value = self.mock_today
+        mock_date.today = self.mock_today
+        client = APIClient()
+
+        self.due_trial.previous_status = Trial.STATUS_OVERDUE
+        self.due_trial.save()
+        response = client.get('/api/performance/', format='json').json()
+        self.assertEqual(response['due'], 2)
+        self.assertEqual(response['overdue_today'], 0)

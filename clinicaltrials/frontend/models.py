@@ -118,6 +118,9 @@ class Trial(models.Model):
     finable_days_late = models.IntegerField(default=None, null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default=STATUS_ONGOING)
+    previous_status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default=STATUS_ONGOING,
+        null=True, blank=True)
     completion_date = models.DateField(null=True, blank=True)
     no_longer_on_website = models.BooleanField(default=False)
     first_seen_date = models.DateField(default=date.today)

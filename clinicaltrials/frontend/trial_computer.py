@@ -44,7 +44,7 @@ def compute_metadata(trial):
             trial.finable_days_late = None
     else:
         trial.finable_days_late = None
-
+    trial.previous_status = trial.status
     trial.status = get_status(trial)
     trial.save()
 

@@ -81,10 +81,8 @@ class TweetTodayTestCase(TestCase):
             'https://fdaaa.trialstracker.net/')
 
     @patch('frontend.management.commands.tweet_today.twitter')
-    @patch('frontend.views.current_and_prev')
-    def test_noop(self, ranking_mock, twitter_mock):
+    def test_noop(self, twitter_mock):
         api = MagicMock(twitter.api.Api, name='api')
-        ranking_mock.return_value = (0, 0)
         twitter_mock.Api.return_value = api
         out = StringIO()
         call_command('tweet_today', stdout=out)
