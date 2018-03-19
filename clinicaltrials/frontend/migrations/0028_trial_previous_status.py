@@ -3,6 +3,14 @@
 from django.db import migrations, models
 
 
+def set_previous_status(apps, schema_editor):
+    Trial = apps.get_model("frontend", "Trial")
+    Trial.objects.all().update(previous_status=models.F('status'))
+
+def noop(*args):
+    return
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -15,4 +23,5 @@ class Migration(migrations.Migration):
             name='previous_status',
             field=models.CharField(blank=True, choices=[('overdue', 'Overdue'), ('ongoing', 'Ongoing'), ('reported', 'Reported'), ('reported-late', 'Reported (late)')], default='ongoing', max_length=20, null=True),
         ),
+        migrations.RunPython(set_previous_status, noop)
     ]
