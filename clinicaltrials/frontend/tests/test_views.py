@@ -242,25 +242,28 @@ class ApiResultsTestCase(TestCase):
         response = client.get('/api/rankings/', {'percentage__lte': 49}, format='json').json()
         self.assertEqual(response['recordsFiltered'], 0)
 
+def _make_sponsor_with_date(num, updated_date):
+    sponsor, _ = Sponsor.objects.get_or_create(name="Sponsor {}".format(num))
+    sponsor.updated_date = updated_date
+    sponsor.save()
+    return sponsor
+
 class ApiPerformanceResultsTestCase(TestCase):
     maxDiff = 6000
     def _makeRankingsForDate(self, target_date):
         with patch('frontend.trial_computer.date') as datetime_mock:
             self.mock_today = target_date
             datetime_mock.today = Mock(return_value=self.mock_today)
-            self.sponsor, _ = Sponsor.objects.get_or_create(
-                slug="sponsor-1",
-                name="Sponsor 1")
-            self.sponsor.updated_date = self.mock_today
-            self.sponsor.save()
+            self.sponsor1 = _make_sponsor_with_date(1, self.mock_today)
+            self.sponsor2 = _make_sponsor_with_date(2, self.mock_today)
             self.due_trial = makeTrial(
-                self.sponsor,
+                self.sponsor1,
                 registry_id='due trial',
                 results_due=True,
                 has_results=False,
                 updated_date=self.mock_today)
             self.reported_trial = makeTrial(
-                self.sponsor,
+                self.sponsor2,
                 registry_id='reported trial',
                 results_due=True,
                 has_results=True,
@@ -283,6 +286,22 @@ class ApiPerformanceResultsTestCase(TestCase):
                 'overdue_today': 1,
                 'late_today': 0,
                 'on_time_today': 1,
+                'fines_str': '$11,569'}
+        )
+
+    def test_performance_single_sponsor(self):
+        client = APIClient()
+        response = client.get(
+            "/api/performance/?sponsor={}".format(self.sponsor1.slug), format='json').json()
+        self.assertEqual(
+            response,
+            {
+                'due': 1,
+                'reported': 0,
+                'days_late': 1,
+                'overdue_today': 1,
+                'late_today': 0,
+                'on_time_today': 0,
                 'fines_str': '$11,569'}
         )
 
