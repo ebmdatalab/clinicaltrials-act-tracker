@@ -18,6 +18,8 @@
        This trial has reported on time, in line with the regulations.
       {% elif trial.status == 'reported-late' %}
        This trial has reported, although it was {{ trial.days_late }} days late in doing so.
+      {% elif trial.status == 'no-longer-act' %}
+       This trial was previously reported as an Applicable Clinical Trial, but is no longer.
       {% endif %}
       </div>
     </div>
