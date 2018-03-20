@@ -39,12 +39,6 @@ def get_performance(sponsor_slug=None, date=None):
     due = queryset.due().count()
     reported = queryset.reported().count()
     days_late = queryset.aggregate(Sum('finable_days_late'))['finable_days_late__sum']
-    overdue_today = queryset.filter(status=Trial.STATUS_OVERDUE).exclude(
-        previous_status=Trial.STATUS_OVERDUE).count()
-    late_today = queryset.filter(status=Trial.STATUS_REPORTED_LATE).exclude(
-        previous_status=Trial.STATUS_REPORTED_LATE).count()
-    on_time_today = queryset.filter(status=Trial.STATUS_REPORTED).exclude(
-        previous_status=Trial.STATUS_REPORTED).count()
     fines_str = '$0'
     if days_late:
         fines_str = "${:,}".format(days_late * settings.FINE_PER_DAY)
@@ -53,9 +47,9 @@ def get_performance(sponsor_slug=None, date=None):
         'reported': reported,
         'days_late': days_late,
         'fines_str': fines_str,
-        'overdue_today': overdue_today,
-        'late_today': late_today,
-        'on_time_today': on_time_today
+        'overdue_today': queryset.overdue_today().count(),
+        'late_today': queryset.late_today().count(),
+        'on_time_today': queryset.on_time_today().count()
     }
 
 
