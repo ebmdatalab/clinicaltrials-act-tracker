@@ -128,13 +128,7 @@ class Command(BaseCommand):
                     sponsor = Sponsor.objects.create(
                         name=row['sponsor'])
                 sponsor.updated_date = today
-                existing_sponsor = sponsor.is_industry_sponsor
-                is_industry_sponsor = row['sponsor_type'] == 'Industry'
-                if existing_sponsor is None:
-                    sponsor.is_industry_sponsor = is_industry_sponsor
-                else:
-                    assert (is_industry_sponsor == existing_sponsor), \
-                        "Inconsistent sponsor types for {}".format(sponsor)
+                sponsor.is_industry_sponsor = row['sponsor_type'] == 'Industry'
                 sponsor.save()
 
                 # Create / update Trial
