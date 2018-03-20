@@ -89,6 +89,21 @@ class TrialQuerySet(models.QuerySet):
     def reported_early(self):
         return self.reported().filter(reported_date__lt=F('completion_date'))
 
+    def overdue_today(self):
+        return self.visible() \
+                   .filter(status=Trial.STATUS_OVERDUE) \
+                   .exclude(previous_status=Trial.STATUS_OVERDUE)
+
+    def late_today(self):
+        return self.visible() \
+                   .filter(status=Trial.STATUS_REPORTED_LATE) \
+                   .exclude(previous_status=Trial.STATUS_REPORTED_LATE)
+
+    def on_time_today(self):
+        return self.visible() \
+                   .filter(status=Trial.STATUS_REPORTED) \
+                   .exclude(previous_status=Trial.STATUS_REPORTED)
+
 
 class Trial(models.Model):
     FINES_GRACE_PERIOD = 30
