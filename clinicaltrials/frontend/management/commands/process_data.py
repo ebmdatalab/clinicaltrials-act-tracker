@@ -5,6 +5,7 @@ from django.db import transaction
 from django.db.models import Sum
 from django.db import connection
 from django.core.management.base import BaseCommand
+from django.utils.text import slugify
 
 from frontend.models import Trial
 from frontend.models import TrialQA
@@ -121,8 +122,11 @@ class Command(BaseCommand):
             today = date.today()
             for row in csv.DictReader(f):
                 # Create / update sponsor
-                sponsor, created = Sponsor.objects.get_or_create(
-                    name=row['sponsor'])
+                try:
+                    sponsor = Sponsor.objects.get(pk=slugify(row['sponsor']))
+                except Sponsor.DoesNotExist:
+                    sponsor = Sponsor.objects.create(
+                        name=row['sponsor'])
                 sponsor.updated_date = today
                 existing_sponsor = sponsor.is_industry_sponsor
                 is_industry_sponsor = row['sponsor_type'] == 'Industry'
