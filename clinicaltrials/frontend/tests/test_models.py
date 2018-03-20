@@ -106,7 +106,7 @@ class SponsorTrialsTestCase(TestCase):
     def test_zombie_sponsor(self):
         self.assertEqual(len(self.sponsor.trial_set.visible()), 3)
         due = self.due_trial
-        due.no_longer_on_website = True
+        due.status = Trial.STATUS_NO_LONGER_ACT
         due.save()
         self.assertEqual(len(self.sponsor.trial_set.visible()), 2)
 
