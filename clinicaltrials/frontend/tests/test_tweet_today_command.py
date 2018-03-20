@@ -10,6 +10,7 @@ from django.test import TestCase
 
 from frontend.management.commands.process_data import set_current_rankings
 from frontend.models import Sponsor
+from frontend.models import Trial
 from frontend.tests.common import makeTrial
 
 import twitter
@@ -33,11 +34,19 @@ class TweetTodayTestCase(TestCase):
             results_due=True,
             has_results=False,
             updated_date=self.mock_today)
-        self.invisible_trial = makeTrial(
+        self.invisible_ongoing_trial = makeTrial(
             self.sponsor,
             results_due=True,
             has_results=False,
-            no_longer_on_website=True,
+            previous_status=Trial.STATUS_ONGOING,
+            status=Trial.STATUS_NO_LONGER_ACT,
+            updated_date=self.mock_today)
+        self.invisible_overdue_trial = makeTrial(
+            self.sponsor,
+            results_due=True,
+            has_results=False,
+            previous_status=Trial.STATUS_OVERDUE,
+            status=Trial.STATUS_NO_LONGER_ACT,
             updated_date=self.mock_today)
         self.reported_trial = makeTrial(
             self.sponsor,

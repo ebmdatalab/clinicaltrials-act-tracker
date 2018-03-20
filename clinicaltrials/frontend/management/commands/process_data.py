@@ -136,7 +136,6 @@ class Command(BaseCommand):
                     'registry_id': row['nct_id'],
                     'publication_url': row['url'],
                     'title': row['title'],
-                    'no_longer_on_website': False,
                     'has_exemption': truthy(row['has_certificate']),
                     'has_results': truthy(row['has_results']),
                     'results_due': truthy(row['results_due']),
@@ -157,7 +156,8 @@ class Command(BaseCommand):
                     Trial.objects.create(**d)
 
         # Mark zombie trials
-        Trial.objects.filter(updated_date__lt=today).update(no_longer_on_website=True)
+        Trial.objects.filter(updated_date__lt=today).update(
+            status=Trial.STATUS_NO_LONGER_ACT)
 
         # Now scrape trials that might be in QA (these would be
         # flagged as having no results, but if in QA we consider
@@ -168,7 +168,7 @@ class Command(BaseCommand):
 
         # Next, compute days_late and status for each trial
         print("Computing trial metadata")
-        for trial in Trial.objects.all():
+        for trial in Trial.objects.exclude(status=Trial.STATUS_NO_LONGER_ACT):
             trial.compute_metadata()
 
         # This should only happen after Trial statuses have been set

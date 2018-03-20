@@ -62,8 +62,8 @@ class TrialManager(models.Manager):
 
 class TrialQuerySet(models.QuerySet):
     def visible(self):
-        return self.filter(
-            no_longer_on_website=False).prefetch_related('trialqa_set')
+        return self.exclude(
+            status=Trial.STATUS_NO_LONGER_ACT).prefetch_related('trialqa_set')
 
     def due(self):
         return self.visible().filter(status__in=['overdue', 'reported', 'reported-late'])
@@ -115,6 +115,7 @@ class Trial(models.Model):
     STATUS_OVERDUE = 'overdue'
     STATUS_ONGOING = 'ongoing'
     STATUS_REPORTED = 'reported'
+    STATUS_NO_LONGER_ACT = 'no-longer-act'
     STATUS_REPORTED_LATE = 'reported-late'
     STATUS_CHOICES = (
         (STATUS_OVERDUE, 'Overdue'),
@@ -142,7 +143,7 @@ class Trial(models.Model):
         max_length=20, choices=STATUS_CHOICES, default=STATUS_ONGOING,
         null=True, blank=True)
     completion_date = models.DateField(null=True, blank=True)
-    no_longer_on_website = models.BooleanField(default=False)
+    #no_longer_on_website = models.BooleanField(default=False)  # XXX delete following migration 0029
     first_seen_date = models.DateField(default=date.today)
     updated_date = models.DateField(default=date.today)
     reported_date = models.DateField(null=True, blank=True)
