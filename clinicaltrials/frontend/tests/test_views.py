@@ -126,6 +126,8 @@ class ApiResultsTestCase(TestCase):
             self.sponsor,
             results_due=True,
             has_results=True,
+            # The following has the effect of setting `previous_status` to overdue
+            status=Trial.STATUS_OVERDUE,
             reported_date=date(2016,12,1))
         set_current_rankings()
 
@@ -178,6 +180,18 @@ class ApiResultsTestCase(TestCase):
 
         response = client.get('/api/trials/', {'search[value]': 'Trial'}, format='json').json()
         self.assertEqual(response['recordsFiltered'], 2)
+
+    def test_trial_today_filters(self):
+        client = APIClient()
+        response = client.get('/api/trials/', {'is_overdue_today': True}, format='json').json()
+        self.assertEqual(response['recordsFiltered'], 1)
+        self.assertEqual(response['results'][0]['title'], self.due_trial.title)
+        response = client.get('/api/trials/', {'is_no_longer_overdue_today': True}, format='json').json()
+        self.assertEqual(response['recordsFiltered'], 1)
+        self.assertEqual(response['results'][0]['title'], self.reported_trial.title)
+        response = client.get('/api/trials/', {'is_no_longer_overdue_today': False}, format='json').json()
+        self.assertEqual(response['recordsFiltered'], 2)
+
 
     def test_trial_ordering(self):
         client = APIClient()
