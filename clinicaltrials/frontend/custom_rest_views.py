@@ -101,12 +101,22 @@ class RankingViewSet(CSVNonPagingViewSet):
 
 
 class TrialViewSet(CSVNonPagingViewSet):
-    queryset = Trial.objects.visible().select_related('sponsor').all()
     serializer_class = TrialSerializer
     ordering_fields = ['status', 'sponsor__name', 'registry_id',
                        'title', 'completion_date', 'days_late']
     filter_class = TrialStatusFilter
     search_fields = ('title', 'sponsor__name',)
+
+    def get_queryset(self):
+        """By default, don't show Trials that are no longer ACTs.
+
+        The exception is when using the one filter that does is
+        interested in such Trials.
+
+        """
+        if 'is_no_longer_overdue_today' in self.request.GET:
+            return Trial.objects.select_related('sponsor').all()
+        return Trial.objects.visible().select_related('sponsor').all()
 
 
 class SponsorViewSet(CSVNonPagingViewSet):

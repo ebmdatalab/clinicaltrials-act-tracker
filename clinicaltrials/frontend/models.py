@@ -95,8 +95,7 @@ class TrialQuerySet(models.QuerySet):
                    .exclude(previous_status=Trial.STATUS_OVERDUE)
 
     def no_longer_overdue_today(self):
-        return self.visible() \
-                   .filter(previous_status=Trial.STATUS_OVERDUE) \
+        return self.filter(previous_status=Trial.STATUS_OVERDUE) \
                    .exclude(status=Trial.STATUS_OVERDUE)
 
     def late_today(self):
