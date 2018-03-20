@@ -20,8 +20,10 @@ class TrialStatusFilter(FilterSet):
         label='Trial status',
         choices=Trial.STATUS_CHOICES,
         widget=QueryArrayWidget)
-    is_overdue_today = BooleanFilter(method='filter_today')
-    is_no_longer_overdue_today = BooleanFilter(method='filter_today')
+    is_overdue_today = BooleanFilter(
+        label='Is overdue today', method='filter_today')
+    is_no_longer_overdue_today = BooleanFilter(
+        label='Is no longer overdue today'. method='filter_today')
 
     def filter_today(self, queryset, name, value):
         if value is True:
