@@ -5,6 +5,7 @@ views (q.v.)
 from django_filters import AllValuesFilter
 from django_filters import MultipleChoiceFilter
 from django_filters import BooleanFilter
+from django_filters import ChoiceFilter
 from django_filters import RangeFilter
 from django_filters import FilterSet
 from django_filters import OrderingFilter
@@ -16,17 +17,25 @@ from frontend.models import Trial
 
 
 class TrialStatusFilter(FilterSet):
+    TODAY_CHOICES = (
+        ('2', 'Yes'),
+        ('', 'Unknown')
+    )
     status = MultipleChoiceFilter(
         label='Trial status',
         choices=Trial.STATUS_CHOICES,
         widget=QueryArrayWidget)
-    is_overdue_today = BooleanFilter(
-        label='Is overdue today', method='filter_today')
-    is_no_longer_overdue_today = BooleanFilter(
-        label='Is no longer overdue today', method='filter_today')
+    is_overdue_today = ChoiceFilter(
+        label='Is overdue today',
+        method='filter_today',
+        choices=TODAY_CHOICES)
+    is_no_longer_overdue_today = ChoiceFilter(
+        label='Is no longer overdue today',
+        method='filter_today',
+        choices=TODAY_CHOICES)
 
     def filter_today(self, queryset, name, value):
-        if value is True:
+        if str(value) == '2':  # A truthy value per django-rest-api/django-filters
             if name == 'is_overdue_today':
                 queryset = queryset.overdue_today()
             elif name == 'is_no_longer_overdue_today':

@@ -113,7 +113,7 @@ class ApiResultsTestCase(TestCase):
     maxDiff = 6000
     @patch('frontend.trial_computer.date')
     def setUp(self, datetime_mock):
-        self.mock_today = date(2017,1,31)
+        self.mock_today = date(2017, 1, 31)
         datetime_mock.today = Mock(return_value=self.mock_today)
         self.sponsor = Sponsor.objects.create(
             name="Sponsor 1",
@@ -121,7 +121,8 @@ class ApiResultsTestCase(TestCase):
         self.due_trial = makeTrial(
             self.sponsor,
             results_due=True,
-            has_results=False)
+            has_results=False,
+            updated_date=self.mock_today)
         self.reported_trial = makeTrial(
             self.sponsor,
             results_due=True,
@@ -129,13 +130,22 @@ class ApiResultsTestCase(TestCase):
             # The following has the effect of setting
             # `previous_status` to `overdue` and status to `reported`
             status=Trial.STATUS_OVERDUE,
-            reported_date=date(2016, 12, 1))
+            reported_date=date(2016, 12, 1),
+            updated_date=self.mock_today)
         self.due_but_no_longer_act_trial = makeTrial(
             self.sponsor,
             results_due=True,
             has_results=False,
             previous_status=Trial.STATUS_OVERDUE,
-            status=Trial.STATUS_NO_LONGER_ACT)
+            status=Trial.STATUS_NO_LONGER_ACT,
+            updated_date=self.mock_today)
+        self.old_no_longer_act_trial = makeTrial(
+            self.sponsor,
+            results_due=True,
+            has_results=False,
+            previous_status=Trial.STATUS_OVERDUE,
+            status=Trial.STATUS_NO_LONGER_ACT,
+            updated_date=date(2016, 1, 1))
         set_current_rankings()
 
     def test_trial_csv(self):
@@ -190,14 +200,13 @@ class ApiResultsTestCase(TestCase):
 
     def test_trial_today_filters(self):
         client = APIClient()
-        response = client.get('/api/trials/', {'is_overdue_today': True}, format='json').json()
+        response = client.get('/api/trials/', {'is_overdue_today': '2'}, format='json').json()
         self.assertEqual(response['recordsFiltered'], 1)
         self.assertEqual(response['results'][0]['title'], self.due_trial.title)
-        response = client.get('/api/trials/', {'is_no_longer_overdue_today': True}, format='json').json()
-        self.assertEqual(response['recordsFiltered'], 1)
-        self.assertEqual(response['results'][0]['title'], self.reported_trial.title)
-        response = client.get('/api/trials/', {'is_no_longer_overdue_today': False}, format='json').json()
+
+        response = client.get('/api/trials/', {'is_no_longer_overdue_today': '2'}, format='json').json()
         self.assertEqual(response['recordsFiltered'], 2)
+        self.assertEqual(response['results'][0]['title'], self.reported_trial.title)
 
 
     def test_trial_ordering(self):
@@ -220,7 +229,7 @@ class ApiResultsTestCase(TestCase):
         self.assertEqual(
             response['results'][0],
             {'name': 'Sponsor 1',
-             'num_trials': 3,
+             'num_trials': 2,
              'slug': 'sponsor-1',
              'is_industry_sponsor': None,
              'updated_date': self.mock_today.strftime('%Y-%m-%d')}

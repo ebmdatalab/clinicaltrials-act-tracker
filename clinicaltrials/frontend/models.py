@@ -95,8 +95,15 @@ class TrialQuerySet(models.QuerySet):
                    .exclude(previous_status=Trial.STATUS_OVERDUE)
 
     def no_longer_overdue_today(self):
-        return self.visible() \
-                   .filter(previous_status=Trial.STATUS_OVERDUE) \
+        # All trials except no-longer-overdue trials are updated every
+        # import run, so comparing previous and current states to
+        # detect current changes Just Works.  However, once a trial
+        # becomes no-longer-overdue, we stop updating it. Therefore,
+        # this query has to search non-current trials and filter by
+        # date, explicitly.
+        today = Ranking.objects.latest('date').date
+        return self.filter(previous_status=Trial.STATUS_OVERDUE) \
+                   .filter(updated_date=today) \
                    .exclude(status=Trial.STATUS_OVERDUE)
 
     def late_today(self):
