@@ -9,7 +9,7 @@ See also custom_rest_backends.py
 
 """
 from django.db.models import Count
-
+from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework import viewsets
@@ -120,7 +120,10 @@ class TrialViewSet(CSVNonPagingViewSet):
 
 
 class SponsorViewSet(CSVNonPagingViewSet):
-    queryset = Sponsor.objects.annotate(num_trials=Count('trial'))
+    queryset = Sponsor.objects.annotate(
+        num_trials=Count(
+            'trial',
+            filter=~Q(trial__status=Trial.STATUS_NO_LONGER_ACT)))
     serializer_class = SponsorSerializer
     filter_class = SponsorFilter
     search_fields = ('name',)

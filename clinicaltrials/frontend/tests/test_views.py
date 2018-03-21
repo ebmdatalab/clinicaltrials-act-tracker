@@ -113,7 +113,7 @@ class ApiResultsTestCase(TestCase):
     maxDiff = 6000
     @patch('frontend.trial_computer.date')
     def setUp(self, datetime_mock):
-        self.mock_today = date(2017,1,31)
+        self.mock_today = date(2017, 1, 31)
         datetime_mock.today = Mock(return_value=self.mock_today)
         self.sponsor = Sponsor.objects.create(
             name="Sponsor 1",
@@ -121,7 +121,8 @@ class ApiResultsTestCase(TestCase):
         self.due_trial = makeTrial(
             self.sponsor,
             results_due=True,
-            has_results=False)
+            has_results=False,
+            updated_date=self.mock_today)
         self.reported_trial = makeTrial(
             self.sponsor,
             results_due=True,
@@ -129,13 +130,22 @@ class ApiResultsTestCase(TestCase):
             # The following has the effect of setting
             # `previous_status` to `overdue` and status to `reported`
             status=Trial.STATUS_OVERDUE,
-            reported_date=date(2016, 12, 1))
+            reported_date=date(2016, 12, 1),
+            updated_date=self.mock_today)
         self.due_but_no_longer_act_trial = makeTrial(
             self.sponsor,
             results_due=True,
             has_results=False,
             previous_status=Trial.STATUS_OVERDUE,
-            status=Trial.STATUS_NO_LONGER_ACT)
+            status=Trial.STATUS_NO_LONGER_ACT,
+            updated_date=self.mock_today)
+        self.old_no_longer_act_trial = makeTrial(
+            self.sponsor,
+            results_due=True,
+            has_results=False,
+            previous_status=Trial.STATUS_OVERDUE,
+            status=Trial.STATUS_NO_LONGER_ACT,
+            updated_date=date(2016, 1, 1))
         set_current_rankings()
 
     def test_trial_csv(self):
@@ -219,7 +229,7 @@ class ApiResultsTestCase(TestCase):
         self.assertEqual(
             response['results'][0],
             {'name': 'Sponsor 1',
-             'num_trials': 3,
+             'num_trials': 2,
              'slug': 'sponsor-1',
              'is_industry_sponsor': None,
              'updated_date': self.mock_today.strftime('%Y-%m-%d')}
