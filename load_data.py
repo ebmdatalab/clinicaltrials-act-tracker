@@ -164,7 +164,7 @@ if __name__ == '__main__':
             for k, v in re.findall(r"^export ([A-Z][A-Z0-9_]*)=(\S*)", e.read(), re.MULTILINE):
                 env[k] = v
         subprocess.check_call(["/var/www/fdaaa_staging/venv/bin/python", "/var/www/fdaaa_staging/clinicaltrials-act-tracker/clinicaltrials/manage.py", "process_data", "--input-csv=/tmp/clinical_trials.csv", "--settings=frontend.settings"], env=env)
-        notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.  If this looks good, tell ebmbot to 'update fdaaa staging'""")
+        notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.  Freshly overdue at https://staging-fdaaa.ebmdatalab.net/api/trials/?is_overdue_today=2&is_no_longer_overdue_today=1, freshly no-longer-overdue at https://staging-fdaaa.ebmdatalab.net/api/trials/?is_overdue_today=1&is_no_longer_overdue_today=2. If this looks good, tell ebmbot to 'update fdaaa staging'""")
     except:
         notify_slack("Error in FDAAA import: {}".format(traceback.format_exc()))
         raise
