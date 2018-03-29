@@ -111,12 +111,6 @@ def deploy(environment, branch='master'):
             restart_gunicorn()
             reload_nginx()
 
-@task
-def frob(environment):
-    """A task for testing bot interaction
-    """
-    print("frob %s" % environment)
-    run("uname -a")
 
 @task
 def update(environment):
@@ -128,3 +122,12 @@ def update(environment):
         sudo_script('kickoff_background_data_load.sh %s' % env.app)
     elif environment == 'live':
         sudo_script('copy_staging_to_live.sh')
+
+
+@task
+def send_tweet(environment):
+    env = setup(environment)
+    with cd(env.path):
+        with prefix("source /etc/profile.d/%s.sh" % env.app):
+            with prefix('source venv/bin/activate'):
+                run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py tweet_today --settings=frontend.settings')
