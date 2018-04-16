@@ -49,6 +49,19 @@ prototype) and software engineers.  Now the project has been running
 for a while and new development interations are less frequent, a useful
 project would be as much of this logic to Python.
 
+Similarly, the only reason step (1) exists is to create a CSV which
+can be imported to the database.  That CSV is useful in its own right
+for QA by our academics, but the XML and JSON artefacts are just
+intermediate formats that could legitimately be dropped in a
+refactored solution (and the CSV could be generated directly from the
+database).
+
+The historic reason for the XML -> JSON route is because BigQuery
+includes a number of useful JSON functions which can be manipulated by
+people competent in SQL. At the time of writing, there
+is [an open issue](https://github.com/ebmdatalab/clinicaltrials-act-tracker/issues/121) with
+some ideas about refactoring this process.
+
 Static Pages
 ============
 
