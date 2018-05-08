@@ -27,6 +27,11 @@ TRIM(json_EXTRACT(json,
               "$.clinical_study.start_date")), INTERVAL 1 MONTH), INTERVAL 1 DAY)))
   END AS start_date,
   CASE
+   WHEN (REGEXP_CONTAINS(JSON_EXTRACT_SCALAR(json, "$.clinical_study.start_date.text"),
+      r"\d,") OR REGEXP_CONTAINS(JSON_EXTRACT_SCALAR(json, "$.clinical_study.start_date"),
+      r"\d,") OR (JSON_EXTRACT_SCALAR(json, "$.clinical_study.start_date.text") is null AND JSON_EXTRACT_SCALAR(json, "$.clinical_study.start_date") is null))
+      then 0 else 1 end as defaulted_sd_flag,    
+  CASE
     WHEN json_EXTRACT(json,  "$.clinical_study.primary_completion_date.text") IS NULL THEN 
     (CASE
     WHEN json_EXTRACT(json,  "$.clinical_study.completion_date.text") IS NOT NULL THEN (IF(REGEXP_CONTAINS(JSON_EXTRACT_SCALAR(json,  "$.clinical_study.completion_date.text"), r"\d,"),  PARSE_DATE("%B %e, %Y",  JSON_EXTRACT_SCALAR(json,  "$.clinical_study.completion_date.text")),  DATE_SUB(DATE_ADD(PARSE_DATE("%B %Y",  JSON_EXTRACT_SCALAR(json,  "$.clinical_study.completion_date.text")), INTERVAL 1 MONTH), INTERVAL 1 DAY)))
@@ -220,6 +225,7 @@ website_data AS (
   
 /*Key Dates and Date Info*/
   start_date,
+  defaulted_sd_flag, --If 1, tells you SD did not have a date and was defaulted to the end of the month
   available_completion_date, --PCD if available, if not available, uses completion date
   used_primary_completion_date, --IF 1, tells you that "available_completion-date" used PCD
   defaulted_pcd_flag, --If 1, tells you PCD did not have a date and was defaulted to the end of the month
