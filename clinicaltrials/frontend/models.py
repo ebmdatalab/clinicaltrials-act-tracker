@@ -198,6 +198,8 @@ class TrialQA(models.Model):
     """
     trial = models.ForeignKey(Trial, on_delete=models.CASCADE)
     submitted_to_regulator = models.DateField()
+    cancelled_by_sponsor = models.DateField(null=True, blank=True)
+    cancellation_date_inferred = models.NullBooleanField()
     returned_to_sponsor = models.DateField(null=True, blank=True)
 
 

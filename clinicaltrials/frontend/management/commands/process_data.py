@@ -1,5 +1,8 @@
+from datetime import date
+from lxml.etree import tostring
 import csv
 import datetime
+import re
 
 from django.db import transaction
 from django.db.models import Sum
@@ -27,7 +30,40 @@ def set_qa_metadata(trial):
             if len(row.xpath(".//td")) == 0:
                 continue
             else:
-                submitted = row.xpath(".//td[1]")[0].text.strip()
+                # if Cancelled, loop over submitted dates. See #146
+                # for a description of cancellations
+                cancelled = re.findall(
+                    r"\n\s+([^<>]*)<br/>.*?cancell?ed.* - (.*?)\)<br/>",
+                    tostring(row).decode('utf8'),
+                    re.I|re.DOTALL)
+                for submitted_date, cancelled_date in cancelled:
+                    submitted_date = dateparser.parse(submitted_date)
+                    if "unknown" in cancelled_date.lower():
+                        cancelled_date = date.today()
+                        cancellation_date_inferred = True
+                    else:
+                        cancelled_date = dateparser.parse(cancelled_date)
+                        cancellation_date_inferred = False
+                    qa, _ = TrialQA.objects.get_or_create(
+                        submitted_to_regulator=submitted_date,
+                        trial=trial)
+                    qa.cancelled_by_sponsor=cancelled_date
+                    qa.cancellation_date_inferred=cancellation_date_inferred
+                    qa.save()
+
+                # Take the date on the last line, to cater for cases
+                # where there are many dates (specifically,
+                # cancellation; but given this was added to the output
+                # unexpectedly, and similar additions may come in the
+                # future, defaulting to the most recent date is the
+                # most conservative approach)
+                submitted = [
+                    x.strip()
+                    for x in row.xpath(".//td[1]")[0].text_content().split("\n")
+                    if x.strip()][-1]
+                if re.findall(r"cancell?ed", submitted, re.I):
+                    # The last event was a cancellation; no further submissions
+                    continue
                 submitted = submitted and dateparser.parse(submitted) or None
                 returned = row.xpath(".//td[2]")[0].text.strip()
                 returned = returned and dateparser.parse(returned) or None
@@ -67,13 +103,13 @@ def set_current_rankings():
             due = Trial.objects.due().filter(
                 sponsor=sponsor).count()
             reported = Trial.objects.reported().filter(
-                    sponsor=sponsor).count()
+                sponsor=sponsor).count()
             reported_late = Trial.objects.reported_late().filter(
-                    sponsor=sponsor).count()
+                sponsor=sponsor).count()
             reported_on_time = Trial.objects.reported_on_time().filter(
-                    sponsor=sponsor).count()
+                sponsor=sponsor).count()
             overdue = Trial.objects.overdue().filter(
-                    sponsor=sponsor).count()
+                sponsor=sponsor).count()
             total = sponsor.trial_set.visible().count()
             days_late = sponsor.trial_set.visible().aggregate(
                 total_days_late=Sum('days_late'))['total_days_late']
