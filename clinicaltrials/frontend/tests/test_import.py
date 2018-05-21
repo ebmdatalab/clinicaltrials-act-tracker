@@ -169,6 +169,35 @@ class CommandsTestCase(TestCase):
         self.assertEqual(qa[1].cancelled_by_sponsor, None)
         self.assertEqual(qa[1].returned_to_sponsor, None)
 
-        # XXX what happens to old data what was not correct?
-        # Currently it will just have the submission date
-        # But our code
+        overdueinqa_cancelled_with_dates = Trial.objects.get(
+            registry_id='overdueinqa_cancelled_with_dates')
+        qa = overdueinqa_cancelled_with_dates.trialqa_set.all()
+        self.assertEqual(len(qa), 2)
+        self.assertEqual(qa[0].submitted_to_regulator, date(2018, 5, 4))
+        self.assertEqual(qa[0].cancelled_by_sponsor, date(2018, 5, 15))
+        self.assertEqual(qa[0].cancellation_date_inferred, False)
+        self.assertEqual(qa[1].submitted_to_regulator, date(2018, 5, 15))
+        self.assertEqual(qa[1].cancelled_by_sponsor, date(2018, 5, 16))
+        self.assertEqual(qa[1].cancellation_date_inferred, False)
+
+        qa = Trial.objects.get(
+            registry_id='overdueinqa_manycancelled').trialqa_set.all()
+        self.assertEqual(len(qa), 5)
+        self.assertEqual(qa[0].submitted_to_regulator, date(2017, 9, 25))
+        self.assertEqual(qa[0].cancelled_by_sponsor, date(2018, 1, 1))
+        self.assertEqual(qa[0].cancellation_date_inferred, True)
+        self.assertEqual(qa[3].submitted_to_regulator, date(2018, 4, 12))
+        self.assertEqual(qa[3].cancelled_by_sponsor, date(2018, 5, 14))
+        self.assertEqual(qa[3].cancellation_date_inferred, False)
+        self.assertEqual(qa[4].submitted_to_regulator, date(2018, 5, 14))
+        self.assertEqual(qa[4].cancelled_by_sponsor, None)
+
+        qa = Trial.objects.get(
+            registry_id='overdueinqa_cancelled_after_returned').trialqa_set.all()
+        self.assertEqual(len(qa), 3)
+        self.assertEqual(qa[0].submitted_to_regulator, date(2017, 4, 25))
+        self.assertEqual(qa[0].cancelled_by_sponsor, None)
+        self.assertEqual(qa[0].returned_to_sponsor, date(2017, 8, 8))
+        self.assertEqual(qa[1].submitted_to_regulator, date(2017, 10, 2))
+        self.assertEqual(qa[1].cancelled_by_sponsor, date(2018, 5, 17))
+        self.assertEqual(qa[2].submitted_to_regulator, date(2018, 5, 17))

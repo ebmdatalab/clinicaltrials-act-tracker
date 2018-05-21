@@ -33,7 +33,7 @@ def set_qa_metadata(trial):
                 # if Cancelled, loop over submitted dates. See #146
                 # for a description of cancellations
                 cancelled = re.findall(
-                    r"\n\s+([^<>]*)<br/>.*?cancell?ed.* - (.*?)\)<br/>",
+                    r"\n\s+([^<>]*)<br/>.*?cancell?ed.*? (?:-|on) (.*?)\)<br/>",
                     tostring(row).decode('utf8'),
                     re.I|re.DOTALL)
                 for submitted_date, cancelled_date in cancelled:
