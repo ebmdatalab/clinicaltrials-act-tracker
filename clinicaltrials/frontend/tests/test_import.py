@@ -18,20 +18,21 @@ class DummyResponse(object):
         self.text = str(content)
 
 def dummy_ccgov_results(url):
-    sample_results = os.path.join(
-        settings.BASE_DIR, 'frontend/tests/fixtures/results_with_qa.html')
-    if url.endswith('overdueinqa'):
-        with open(sample_results, 'r') as dummy_response:
+    fixture_id = url.split('/')[-1]
+    fixture_path = os.path.join(
+        settings.BASE_DIR,
+        'frontend/tests/fixtures/{}.html'.format(fixture_id))
+    if os.path.exists(fixture_path):
+        with open(fixture_path, 'r') as dummy_response:
             return DummyResponse(dummy_response.read())
     return DummyResponse('<html></html>')
 
 
 class CommandsTestCase(TestCase):
-
     @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
     @mock.patch('frontend.trial_computer.date')
     def test_import(self, datetime_mock):
-        " Test my custom command."
+        "Does a simple import create expected rankings and sponsors?"
         datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
 
         args = []
@@ -74,9 +75,10 @@ class CommandsTestCase(TestCase):
     @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
     @mock.patch('frontend.trial_computer.date')
     @mock.patch('frontend.management.commands.process_data.date')
-
     def test_second_import(self, mock_date_1, mock_date_2):
-        ""
+        """Does importing the same data twice on subsequent days affect
+        individual trials as expected?
+        """
         mock_date_1.today = mock.Mock(return_value=date(2018,1,1))
         mock_date_2.today = mock.Mock(return_value=date(2018,1,1))
 
@@ -106,7 +108,8 @@ class CommandsTestCase(TestCase):
     @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
     @mock.patch('frontend.models.date')
     def test_second_import_with_disappeared_trials(self, datetime_mock):
-        " Test my custom command."
+        """Is the disappearance of a trial from the CSV reflected in our
+        database?"""
         datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
 
         args = []
@@ -115,7 +118,6 @@ class CommandsTestCase(TestCase):
         call_command('process_data', *args, **opts)
 
         # Pretend the previous import took place ages ago
-
         Trial.objects.all().update(updated_date=date(2017,1,1))
 
         # Import empty file
@@ -126,3 +128,76 @@ class CommandsTestCase(TestCase):
         # There should be no Trials visible
         self.assertEqual(Trial.objects.count(), 6)
         self.assertEqual(Trial.objects.visible().count(), 0)
+
+
+    @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
+    @mock.patch('frontend.trial_computer.date')
+    @mock.patch('frontend.management.commands.process_data.date')
+    def test_qa(self, date_mock, datetime_mock):
+        "Does a simple import create expected rankings and sponsors?"
+        date_mock.today = mock.Mock(return_value=date(2018,1,1))
+        datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
+
+        args = []
+        sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq_qa.csv')
+        opts = {'input_csv': sample_csv}
+        call_command('process_data', *args, **opts)
+
+        overdueinqa = Trial.objects.get(registry_id='overdueinqa')
+        qa = overdueinqa.trialqa_set.all()
+        self.assertEqual(len(qa), 3)
+        self.assertEqual(qa[0].returned_to_sponsor, date(2017, 12, 11))
+        self.assertEqual(qa[2].returned_to_sponsor, None)
+
+        overdueinqa_cancelled = Trial.objects.get(registry_id='overdueinqa_cancelled')
+        qa = overdueinqa_cancelled.trialqa_set.all()
+        self.assertEqual(len(qa), 1)
+        self.assertEqual(qa[0].submitted_to_regulator, date(2017, 10, 19))
+        self.assertEqual(qa[0].cancelled_by_sponsor, date(2018, 1, 1))
+        self.assertEqual(qa[0].cancellation_date_inferred, True)
+        self.assertEqual(qa[0].returned_to_sponsor, None)
+
+        overdueinqa_uncancelled = Trial.objects.get(registry_id='overdueinqa_uncancelled')
+        qa = overdueinqa_uncancelled.trialqa_set.all()
+        self.assertEqual(len(qa), 2)
+
+        self.assertEqual(qa[0].submitted_to_regulator, date(2018, 3, 29))
+        self.assertEqual(qa[0].cancelled_by_sponsor, date(2018, 1, 1))
+        self.assertEqual(qa[0].cancellation_date_inferred, True)
+        self.assertEqual(qa[0].returned_to_sponsor, None)
+        self.assertEqual(qa[1].submitted_to_regulator, date(2018, 5, 10))
+        self.assertEqual(qa[1].cancelled_by_sponsor, None)
+        self.assertEqual(qa[1].returned_to_sponsor, None)
+
+        overdueinqa_cancelled_with_dates = Trial.objects.get(
+            registry_id='overdueinqa_cancelled_with_dates')
+        qa = overdueinqa_cancelled_with_dates.trialqa_set.all()
+        self.assertEqual(len(qa), 2)
+        self.assertEqual(qa[0].submitted_to_regulator, date(2018, 5, 4))
+        self.assertEqual(qa[0].cancelled_by_sponsor, date(2018, 5, 15))
+        self.assertEqual(qa[0].cancellation_date_inferred, False)
+        self.assertEqual(qa[1].submitted_to_regulator, date(2018, 5, 15))
+        self.assertEqual(qa[1].cancelled_by_sponsor, date(2018, 5, 16))
+        self.assertEqual(qa[1].cancellation_date_inferred, False)
+
+        qa = Trial.objects.get(
+            registry_id='overdueinqa_manycancelled').trialqa_set.all()
+        self.assertEqual(len(qa), 5)
+        self.assertEqual(qa[0].submitted_to_regulator, date(2017, 9, 25))
+        self.assertEqual(qa[0].cancelled_by_sponsor, date(2018, 1, 1))
+        self.assertEqual(qa[0].cancellation_date_inferred, True)
+        self.assertEqual(qa[3].submitted_to_regulator, date(2018, 4, 12))
+        self.assertEqual(qa[3].cancelled_by_sponsor, date(2018, 5, 14))
+        self.assertEqual(qa[3].cancellation_date_inferred, False)
+        self.assertEqual(qa[4].submitted_to_regulator, date(2018, 5, 14))
+        self.assertEqual(qa[4].cancelled_by_sponsor, None)
+
+        qa = Trial.objects.get(
+            registry_id='overdueinqa_cancelled_after_returned').trialqa_set.all()
+        self.assertEqual(len(qa), 3)
+        self.assertEqual(qa[0].submitted_to_regulator, date(2017, 4, 25))
+        self.assertEqual(qa[0].cancelled_by_sponsor, None)
+        self.assertEqual(qa[0].returned_to_sponsor, date(2017, 8, 8))
+        self.assertEqual(qa[1].submitted_to_regulator, date(2017, 10, 2))
+        self.assertEqual(qa[1].cancelled_by_sponsor, date(2018, 5, 17))
+        self.assertEqual(qa[2].submitted_to_regulator, date(2018, 5, 17))
