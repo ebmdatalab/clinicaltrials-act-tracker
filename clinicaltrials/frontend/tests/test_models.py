@@ -106,7 +106,7 @@ class SponsorTrialsTestCase(TestCase):
     def test_zombie_sponsor(self):
         self.assertEqual(len(self.sponsor.trial_set.visible()), 3)
         due = self.due_trial
-        due.no_longer_on_website = True
+        due.status = Trial.STATUS_NO_LONGER_ACT
         due.save()
         self.assertEqual(len(self.sponsor.trial_set.visible()), 2)
 
@@ -187,6 +187,17 @@ class SponsorTrialsStatusTestCase(TestCase):
             results_due=False,
             completion_date='2016-01-01')
         self.assertEqual(trial.status, 'ongoing')
+        self.assertEqual(trial.calculated_due_date(), date(2016, 12, 31))
+
+    def test_trial_with_certificate_ongoing(self):
+        trial = makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=False,
+            has_exemption=True,
+            completion_date='2016-01-01')
+        self.assertEqual(trial.status, 'ongoing')
+        self.assertEqual(trial.calculated_due_date(), date(2019, 1, 1))
 
     def test_trial_not_reported_late(self):
         trial = makeTrial(

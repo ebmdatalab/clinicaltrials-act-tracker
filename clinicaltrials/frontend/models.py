@@ -9,7 +9,6 @@ from django.db.models import F
 from django.db.models import Q
 from django.db.models import Sum
 from django.utils.text import slugify
-from django.utils.dateparse import parse_date
 from django.urls import reverse
 
 from frontend.trial_computer import compute_metadata
@@ -63,8 +62,8 @@ class TrialManager(models.Manager):
 
 class TrialQuerySet(models.QuerySet):
     def visible(self):
-        return self.filter(
-            no_longer_on_website=False).prefetch_related('trialqa_set')
+        return self.exclude(
+            status=Trial.STATUS_NO_LONGER_ACT).prefetch_related('trialqa_set')
 
     def due(self):
         return self.visible().filter(status__in=['overdue', 'reported', 'reported-late'])
@@ -90,12 +89,40 @@ class TrialQuerySet(models.QuerySet):
     def reported_early(self):
         return self.reported().filter(reported_date__lt=F('completion_date'))
 
+    def overdue_today(self):
+        return self.visible() \
+                   .filter(status=Trial.STATUS_OVERDUE) \
+                   .exclude(previous_status=Trial.STATUS_OVERDUE)
+
+    def no_longer_overdue_today(self):
+        # All trials except no-longer-overdue trials are updated every
+        # import run, so comparing previous and current states to
+        # detect current changes Just Works.  However, once a trial
+        # becomes no-longer-overdue, we stop updating it. Therefore,
+        # this query has to search non-current trials and filter by
+        # date, explicitly.
+        today = Ranking.objects.latest('date').date
+        return self.filter(previous_status=Trial.STATUS_OVERDUE) \
+                   .filter(updated_date=today) \
+                   .exclude(status=Trial.STATUS_OVERDUE)
+
+    def late_today(self):
+        return self.visible() \
+                   .filter(status=Trial.STATUS_REPORTED_LATE) \
+                   .exclude(previous_status=Trial.STATUS_REPORTED_LATE)
+
+    def on_time_today(self):
+        return self.visible() \
+                   .filter(status=Trial.STATUS_REPORTED) \
+                   .exclude(previous_status=Trial.STATUS_REPORTED)
+
 
 class Trial(models.Model):
     FINES_GRACE_PERIOD = 30
     STATUS_OVERDUE = 'overdue'
     STATUS_ONGOING = 'ongoing'
     STATUS_REPORTED = 'reported'
+    STATUS_NO_LONGER_ACT = 'no-longer-act'
     STATUS_REPORTED_LATE = 'reported-late'
     STATUS_CHOICES = (
         (STATUS_OVERDUE, 'Overdue'),
@@ -119,8 +146,11 @@ class Trial(models.Model):
     finable_days_late = models.IntegerField(default=None, null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default=STATUS_ONGOING)
+    previous_status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default=STATUS_ONGOING,
+        null=True, blank=True)
     completion_date = models.DateField(null=True, blank=True)
-    no_longer_on_website = models.BooleanField(default=False)
+    #no_longer_on_website = models.BooleanField(default=False)  # XXX delete following migration 0029
     first_seen_date = models.DateField(default=date.today)
     updated_date = models.DateField(default=date.today)
     reported_date = models.DateField(null=True, blank=True)
@@ -131,6 +161,12 @@ class Trial(models.Model):
 
     def get_absolute_url(self):
         return reverse('views.trial', args=[self.registry_id])
+
+    def calculated_due_date(self):
+        if self.has_exemption:
+            return self.completion_date + relativedelta(years=3)
+        return self.completion_date + relativedelta(days=365)
+
 
     def calculated_reported_date(self):
         if self.reported_date:

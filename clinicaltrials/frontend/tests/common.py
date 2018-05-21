@@ -8,7 +8,6 @@ from frontend.management.commands.process_data import set_current_rankings
 
 def makeTrial(sponsor, **kw):
     trial_counter = Trial.objects.count() + 1
-    tomorrow = date.today() + timedelta(days=1)
     defaults = {
         'sponsor': sponsor,
         'start_date': date(2015, 1, 1),
@@ -18,8 +17,14 @@ def makeTrial(sponsor, **kw):
         'title': 'Trial {}'.format(trial_counter)
     }
     defaults.update(kw)
-    trial = Trial.objects.create(**defaults)
+    trial = Trial.objects.filter(registry_id=defaults['registry_id'])
+    if trial.count():
+        trial.update(**defaults)
+        trial = trial.first()
+    else:
+        trial = Trial.objects.create(**defaults)
     trial.compute_metadata()
+    trial.refresh_from_db()
     return trial
 
 

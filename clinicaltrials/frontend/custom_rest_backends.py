@@ -13,6 +13,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 
 from frontend.models import Ranking
+from frontend.models import Trial
 
 
 class DataTablesPagination(LimitOffsetPagination):
@@ -30,7 +31,7 @@ class DataTablesPagination(LimitOffsetPagination):
     offset_query_param = 'start'
 
     def paginate_queryset(self, queryset, request, view=None):
-        self.total = queryset.model.objects.count()
+        self.total = queryset.count()
         return super().paginate_queryset(queryset, request, view=view)
 
     def get_paginated_response(self, data):

@@ -5,6 +5,7 @@ from django.db import transaction
 from django.db.models import Sum
 from django.db import connection
 from django.core.management.base import BaseCommand
+from django.utils.text import slugify
 
 from frontend.models import Trial
 from frontend.models import TrialQA
@@ -121,16 +122,13 @@ class Command(BaseCommand):
             today = date.today()
             for row in csv.DictReader(f):
                 # Create / update sponsor
-                sponsor, created = Sponsor.objects.get_or_create(
-                    name=row['sponsor'])
+                try:
+                    sponsor = Sponsor.objects.get(pk=slugify(row['sponsor']))
+                except Sponsor.DoesNotExist:
+                    sponsor = Sponsor.objects.create(
+                        name=row['sponsor'])
                 sponsor.updated_date = today
-                existing_sponsor = sponsor.is_industry_sponsor
-                is_industry_sponsor = row['sponsor_type'] == 'Industry'
-                if existing_sponsor is None:
-                    sponsor.is_industry_sponsor = is_industry_sponsor
-                else:
-                    assert (is_industry_sponsor == existing_sponsor), \
-                        "Inconsistent sponsor types for {}".format(sponsor)
+                sponsor.is_industry_sponsor = row['sponsor_type'] == 'Industry'
                 sponsor.save()
 
                 # Create / update Trial
@@ -138,7 +136,6 @@ class Command(BaseCommand):
                     'registry_id': row['nct_id'],
                     'publication_url': row['url'],
                     'title': row['title'],
-                    'no_longer_on_website': False,
                     'has_exemption': truthy(row['has_certificate']),
                     'has_results': truthy(row['has_results']),
                     'results_due': truthy(row['results_due']),
@@ -159,7 +156,8 @@ class Command(BaseCommand):
                     Trial.objects.create(**d)
 
         # Mark zombie trials
-        Trial.objects.filter(updated_date__lt=today).update(no_longer_on_website=True)
+        Trial.objects.filter(updated_date__lt=today).update(
+            status=Trial.STATUS_NO_LONGER_ACT)
 
         # Now scrape trials that might be in QA (these would be
         # flagged as having no results, but if in QA we consider
@@ -170,7 +168,7 @@ class Command(BaseCommand):
 
         # Next, compute days_late and status for each trial
         print("Computing trial metadata")
-        for trial in Trial.objects.all():
+        for trial in Trial.objects.exclude(status=Trial.STATUS_NO_LONGER_ACT):
             trial.compute_metadata()
 
         # This should only happen after Trial statuses have been set

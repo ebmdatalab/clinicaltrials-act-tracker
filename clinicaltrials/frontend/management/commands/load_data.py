@@ -29,6 +29,8 @@ STORAGE_PREFIX = 'clinicaltrials/'
 WORKING_VOLUME = '/mnt/volume-lon1-01/'   # location with at least 10GB space
 WORKING_DIR = WORKING_VOLUME + STORAGE_PREFIX
 
+logging.basicConfig(filename='{}data_load.log'.format(WORKING_VOLUME), level=logging.DEBUG)
+
 def raw_json_name():
     date = datetime.datetime.now().strftime('%Y-%m-%d')
     return "raw_clincialtrials_json_{}.csv".format(date)
@@ -60,7 +62,6 @@ def download_and_extract():
         with contextlib.suppress(OSError):
             shutil.rmtree(WORKING_DIR)
         subprocess.check_call(["unzip", "-q", "-o", "-d", WORKING_DIR, data_file])
-        print("unzip -q -o -d {} {}".format(WORKING_DIR, data_file))
     finally:
         shutil.rmtree(container)
 

@@ -3,9 +3,8 @@ from slackbot.bot import listen_to
 import re
 from fabric.tasks import execute
 
-
 from fabfile import update
-from fabfile import frob
+from fabfile import send_tweet
 
 
 @respond_to('deploy fdaaa', re.IGNORECASE)
@@ -21,7 +20,7 @@ def update_fdaaa_staging(message):
     execute(update, environment='staging')
 
 
-@respond_to('frob', re.IGNORECASE)
-def do_frob(message):
-    execute(frob, environment='staging')
-    message.reply("Done.")
+@respond_to('tweet fdaaa', re.IGNORECASE)
+def send_tweet(message):
+    execute(send_tweet, environment='live')
+    message.reply("Tweet sent: https://twitter.com/FDAAAtracker")

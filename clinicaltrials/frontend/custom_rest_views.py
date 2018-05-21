@@ -9,7 +9,7 @@ See also custom_rest_backends.py
 
 """
 from django.db.models import Count
-
+from django.db.models import Q
 
 from rest_framework import serializers
 from rest_framework import viewsets
@@ -101,16 +101,29 @@ class RankingViewSet(CSVNonPagingViewSet):
 
 
 class TrialViewSet(CSVNonPagingViewSet):
-    queryset = Trial.objects.visible().select_related('sponsor').all()
     serializer_class = TrialSerializer
     ordering_fields = ['status', 'sponsor__name', 'registry_id',
                        'title', 'completion_date', 'days_late']
     filter_class = TrialStatusFilter
     search_fields = ('title', 'sponsor__name',)
 
+    def get_queryset(self):
+        """By default, don't show Trials that are no longer ACTs.
+
+        The exception is when using the one filter that does is
+        interested in such Trials.
+
+        """
+        if 'is_no_longer_overdue_today' in self.request.GET:
+            return Trial.objects.select_related('sponsor').all()
+        return Trial.objects.visible().select_related('sponsor').all()
+
 
 class SponsorViewSet(CSVNonPagingViewSet):
-    queryset = Sponsor.objects.annotate(num_trials=Count('trial'))
+    queryset = Sponsor.objects.annotate(
+        num_trials=Count(
+            'trial',
+            filter=~Q(trial__status=Trial.STATUS_NO_LONGER_ACT)))
     serializer_class = SponsorSerializer
     filter_class = SponsorFilter
     search_fields = ('name',)
