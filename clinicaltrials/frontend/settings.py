@@ -261,3 +261,9 @@ TWITTER_ACCESS_TOKEN_SECRET = common.utils.get_env_setting('TWITTER_ACCESS_TOKEN
 PROCESSING_ENV_PATH = '/etc/profile.d/fdaaa_staging.sh'
 PROCESSING_VENV_BIN = '/var/www/fdaaa_staging/venv/bin/'
 PROCESSING_STORAGE_TABLE_NAME = 'current_raw_json'
+
+# Bucket in GCS to store data
+STORAGE_PREFIX = 'clinicaltrials/'
+WORKING_VOLUME = '/mnt/volume-lon1-01/'   # should have at least 10GB space
+WORKING_DIR = os.path.join(WORKING_VOLUME, STORAGE_PREFIX)
+INTERMEDIATE_CSV_PATH = os.path.join(WORKING_VOLUME, STORAGE_PREFIX, 'clinical_trials.csv')

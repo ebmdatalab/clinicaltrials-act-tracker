@@ -25,12 +25,6 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 
-STORAGE_PREFIX = 'clinicaltrials/'
-WORKING_VOLUME = '/mnt/volume-lon1-01/'   # location with at least 10GB space
-WORKING_DIR = WORKING_VOLUME + STORAGE_PREFIX
-
-logging.basicConfig(filename='{}data_load.log'.format(WORKING_VOLUME), level=logging.DEBUG)
-
 def raw_json_name():
     date = datetime.datetime.now().strftime('%Y-%m-%d')
     return "raw_clincialtrials_json_{}.csv".format(date)
@@ -54,14 +48,15 @@ def download_and_extract():
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
 
     # download and extract
-    container = tempfile.mkdtemp(prefix=STORAGE_PREFIX.rstrip(os.sep), dir=WORKING_VOLUME)
+    container = tempfile.mkdtemp(
+        prefix=settings.STORAGE_PREFIX.rstrip(os.sep), dir=settings.WORKING_VOLUME)
     try:
         data_file = os.path.join(container, "data.zip")
         wget_file(data_file, url)
         # Can't "wget|unzip" in a pipe because zipfiles have index at end of file.
         with contextlib.suppress(OSError):
-            shutil.rmtree(WORKING_DIR)
-        subprocess.check_call(["unzip", "-q", "-o", "-d", WORKING_DIR, data_file])
+            shutil.rmtree(settings.WORKING_DIR)
+        subprocess.check_call(["unzip", "-q", "-o", "-d", settings.WORKING_DIR, data_file])
     finally:
         shutil.rmtree(container)
 
@@ -71,8 +66,8 @@ def upload_to_cloud():
     logging.info("Uploading to cloud")
     client = StorageClient()
     bucket = client.get_bucket()
-    blob = bucket.blob("{}{}".format(STORAGE_PREFIX, raw_json_name()))
-    with open(os.path.join(WORKING_DIR, raw_json_name()), 'rb') as f:
+    blob = bucket.blob("{}{}".format(settings.STORAGE_PREFIX, raw_json_name()))
+    with open(os.path.join(settings.WORKING_DIR, raw_json_name()), 'rb') as f:
         blob.upload_from_file(f)
 
 
@@ -95,11 +90,11 @@ def notify_slack(message):
 
 def convert_to_json():
     logging.info("Converting to JSON...")
-    dpath = WORKING_DIR + 'NCT*/'
+    dpath = os.path.join(settings.WORKING_DIR, 'NCT*/')
     files = [x for x in sorted(glob.glob(dpath + '*.xml'))]
     start = datetime.datetime.now()
     completed = 0
-    with open(WORKING_DIR + raw_json_name(), 'a') as f2:
+    with open(os.path.join(settings.WORKING_DIR, raw_json_name()), 'w') as f2:
         for source in files:
             logging.info("Converting %s", source)
             with open(source, 'rb') as f:
@@ -125,7 +120,7 @@ def convert_to_json():
 
 def convert_and_download():
     logging.info("Executing SQL in cloud and downloading results...")
-    storage_path = STORAGE_PREFIX + raw_json_name()
+    storage_path = os.path.join(settings.STORAGE_PREFIX, raw_json_name())
     schema = [
         {'name': 'json', 'type': 'string'},
     ]
@@ -155,11 +150,12 @@ def convert_and_download():
         # The call to .run_async_query() might return before results are actually ready.
         # See https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query#timeoutMs
         wait_for_job(job)
-    t1_exporter = TableExporter(tmp_table, STORAGE_PREFIX + 'test_table-')
+
+
+    t1_exporter = TableExporter(tmp_table, settings.STORAGE_PREFIX + 'test_table-')
     t1_exporter.export_to_storage()
 
-    #with tempfile.NamedTemporaryFile(mode='r+') as f:
-    with open('/tmp/clinical_trials.csv', 'w') as f:
+    with open(settings.INTERMEDIATE_CSV_PATH, 'w') as f:
         t1_exporter.download_from_storage_and_unzip(f)
 
 
@@ -171,14 +167,13 @@ def get_env(path):
     return env
 
 def process_data():
-    # XXX no need to do this: we can call the command via python
-    # rather than the shell, now we are a command too.
+    # TODO no need to call via shell any more (now we are also a command)
     subprocess.check_call(
         [
             "{}python".format(settings.PROCESSING_VENV_BIN),
             "{}/manage.py".format(settings.BASE_DIR),
             "process_data",
-            "--input-csv=/tmp/clinical_trials.csv",
+            "--input-csv={}".format(settings.INTERMEDIATE_CSV_PATH),
             "--settings=frontend.settings"
         ],
         env=get_env(settings.PROCESSING_ENV_PATH))
@@ -190,8 +185,11 @@ class Command(BaseCommand):
     '''
 
     def handle(self, *args, **options):
+        logging.basicConfig(
+            filename=os.path.join(settings.WORKING_VOLUME, 'data_load.log'),
+            level=logging.DEBUG)
         with contextlib.suppress(OSError):
-            os.remove("/tmp/clinical_trials.csv")
+            os.remove(settings.INTERMEDIATE_CSV_PATH)
         try:
             download_and_extract()
             convert_to_json()
