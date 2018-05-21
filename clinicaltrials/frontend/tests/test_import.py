@@ -29,11 +29,10 @@ def dummy_ccgov_results(url):
 
 
 class CommandsTestCase(TestCase):
-
     @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
     @mock.patch('frontend.trial_computer.date')
     def test_import(self, datetime_mock):
-        " Test my custom command."
+        "Does a simple import create expected rankings and sponsors?"
         datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
 
         args = []
@@ -76,9 +75,10 @@ class CommandsTestCase(TestCase):
     @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
     @mock.patch('frontend.trial_computer.date')
     @mock.patch('frontend.management.commands.process_data.date')
-
     def test_second_import(self, mock_date_1, mock_date_2):
-        ""
+        """Does importing the same data twice on subsequent days affect
+        individual trials as expected?
+        """
         mock_date_1.today = mock.Mock(return_value=date(2018,1,1))
         mock_date_2.today = mock.Mock(return_value=date(2018,1,1))
 
@@ -108,7 +108,8 @@ class CommandsTestCase(TestCase):
     @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
     @mock.patch('frontend.models.date')
     def test_second_import_with_disappeared_trials(self, datetime_mock):
-        " Test my custom command."
+        """Is the disappearance of a trial from the CSV reflected in our
+        database?"""
         datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
 
         args = []
@@ -117,7 +118,6 @@ class CommandsTestCase(TestCase):
         call_command('process_data', *args, **opts)
 
         # Pretend the previous import took place ages ago
-
         Trial.objects.all().update(updated_date=date(2017,1,1))
 
         # Import empty file
