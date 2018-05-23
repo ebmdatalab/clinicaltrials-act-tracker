@@ -66,7 +66,10 @@ def upload_to_cloud():
     logging.info("Uploading to cloud")
     client = StorageClient()
     bucket = client.get_bucket()
-    blob = bucket.blob("{}{}".format(settings.STORAGE_PREFIX, raw_json_name()))
+    blob = bucket.blob(
+        "{}{}".format(settings.STORAGE_PREFIX, raw_json_name()),
+        chunk_size=1024*1024
+    )
     with open(os.path.join(settings.WORKING_DIR, raw_json_name()), 'rb') as f:
         blob.upload_from_file(f)
 
