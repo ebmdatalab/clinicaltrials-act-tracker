@@ -14,4 +14,4 @@ fi
 
 . /etc/profile.d/$profile.sh
 rm -f /mnt/volume-lon1-01/$profile_data_load.stderr
-dtach -n `mktemp -u /tmp/dtach.XXXX` /bin/bash -c "/var/www/$profile/venv/bin/python /var/www/$profile/clinicaltrials-act-tracker/load_data.py > /mnt/volume-lon1-01/$profile_data_load.out 2>&1"
+dtach -n `mktemp -u /tmp/dtach.XXXX` /bin/bash -c "/var/www/$profile/venv/bin/python /var/www/$profile/clinicaltrials-act-tracker/clinicaltrials/manage.py load_data > /mnt/volume-lon1-01/$profile_data_load.out 2>&1"
