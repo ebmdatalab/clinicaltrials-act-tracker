@@ -344,6 +344,89 @@ class SponsorTrialsLatenessTestCase(TestCase):
         trial.compute_metadata()
         self.assertEqual(trial.days_late, 1)
 
+    def test_trial_under_qa_finably_late(self):
+        trial = makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2015-01-01')
+        TrialQA.objects.create(
+            submitted_to_regulator='2017-01-01',
+            returned_to_sponsor=None,
+            trial=trial
+        )
+        trial.compute_metadata()
+        self.assertEqual(trial.days_late, 366)
+        self.assertEqual(trial.finable_days_late, 336)
+
+    @patch('frontend.trial_computer.date')
+    def test_trial_under_qa_finably_late_cancelled(self, datetime_mock):
+        datetime_mock.today = Mock(return_value=date(2018, 3, 1))
+        trial = makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2015-01-01')
+        TrialQA.objects.create(
+            submitted_to_regulator='2017-01-01',
+            cancelled_by_sponsor='2018-01-01',
+            trial=trial
+        )
+        trial.compute_metadata()
+        self.assertEqual(trial.days_late, 790)
+        self.assertEqual(trial.finable_days_late, 336)
+
+    def test_reported_trial_finably_late(self):
+        trial = makeTrial(
+            self.sponsor,
+            has_results=True,
+            results_due=True,
+            completion_date='2015-01-01',
+            reported_date= '2017-01-01')
+        self.assertEqual(trial.days_late, 366)
+        self.assertEqual(trial.finable_days_late, 366 - Trial.FINES_GRACE_PERIOD)
+
+    @patch('frontend.trial_computer.date')
+    def test_trial_under_qa_late_with_cancellation(self, datetime_mock):
+        datetime_mock.today = Mock(return_value=date(2017, 3, 1))
+        trial = makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2016-01-01')
+        TrialQA.objects.create(
+            submitted_to_regulator='2016-02-01',
+            cancelled_by_sponsor='2016-02-02',
+            trial=trial
+        )
+        trial.compute_metadata()
+        self.assertEqual(trial.days_late, 60)
+        self.assertEqual(trial.finable_days_late, None)
+
+    def test_trial_under_qa_late_with_much_correspondence(self):
+        trial = makeTrial(
+            self.sponsor,
+            has_results=False,
+            results_due=True,
+            completion_date='2016-01-01')
+        TrialQA.objects.create(
+            submitted_to_regulator='2016-02-01',
+            returned_to_sponsor='2016-02-02',
+            trial=trial
+        )
+        TrialQA.objects.create(
+            submitted_to_regulator='2016-02-03',
+            cancelled_by_sponsor='2016-02-04',
+            trial=trial
+        )
+        TrialQA.objects.create(
+            submitted_to_regulator='2017-03-01',
+            trial=trial
+        )
+        trial.compute_metadata()
+        self.assertEqual(trial.days_late, 60)
+        self.assertEqual(trial.finable_days_late, None)
+
     @patch('frontend.trial_computer.date')
     def test_unreported_trial_late_within_grace(self, datetime_mock):
         datetime_mock.today = Mock(return_value=date(2017,1,30))

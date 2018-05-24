@@ -124,8 +124,10 @@ class Trial(models.Model):
     STATUS_REPORTED = 'reported'
     STATUS_NO_LONGER_ACT = 'no-longer-act'
     STATUS_REPORTED_LATE = 'reported-late'
+    STATUS_OVERDUE_CANCELLED = 'reported-late'
     STATUS_CHOICES = (
         (STATUS_OVERDUE, 'Overdue'),
+        (STATUS_OVERDUE_CANCELLED, 'Overdue (cancelled)'),
         (STATUS_ONGOING, 'Ongoing'),
         (STATUS_REPORTED, 'Reported'),
         (STATUS_REPORTED_LATE, 'Reported (late)'),
@@ -156,6 +158,9 @@ class Trial(models.Model):
     reported_date = models.DateField(null=True, blank=True)
     objects = TrialManager.from_queryset(TrialQuerySet)()
 
+    class Meta:
+        ordering = ('completion_date', 'start_date', 'id')
+
     def __str__(self):
         return "{}: {}".format(self.registry_id, self.title)
 
@@ -167,7 +172,6 @@ class Trial(models.Model):
             return self.completion_date + relativedelta(years=3)
         return self.completion_date + relativedelta(days=365)
 
-
     def calculated_reported_date(self):
         if self.reported_date:
             return self.reported_date
@@ -175,9 +179,6 @@ class Trial(models.Model):
         if qa:
             return qa.submitted_to_regulator
         return None
-
-    class Meta:
-        ordering = ('completion_date', 'start_date', 'id')
 
     def compute_metadata(self):
         return compute_metadata(self)
@@ -201,6 +202,9 @@ class TrialQA(models.Model):
     cancelled_by_sponsor = models.DateField(null=True, blank=True)
     cancellation_date_inferred = models.NullBooleanField()
     returned_to_sponsor = models.DateField(null=True, blank=True)
+
+    class Meta:
+        ordering = ('submitted_to_regulator',)
 
 
 class Ranking(models.Model):
