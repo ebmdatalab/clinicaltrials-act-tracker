@@ -18,8 +18,8 @@ class DummyResponse(object):
         self.content = content
         self.text = str(content)
 
-def dummy_ccgov_results(url):
-    fixture_id = url.split('/')[-1]
+
+def mock_ccgov_results(fixture_id):
     fixture_path = os.path.join(
         settings.BASE_DIR,
         'frontend/tests/fixtures/{}.html'.format(fixture_id))
@@ -29,8 +29,14 @@ def dummy_ccgov_results(url):
     return DummyResponse('<html></html>')
 
 
+
+def ccgov_results_by_url(url):
+    fixture_id = url.split('/')[-1]
+    return mock_ccgov_results(fixture_id)
+
+
 class CommandsTestCase(TestCase):
-    @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
+    @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
     @mock.patch('frontend.trial_computer.date')
     def test_import(self, datetime_mock):
         "Does a simple import create expected rankings and sponsors?"
@@ -73,7 +79,7 @@ class CommandsTestCase(TestCase):
         self.assertEqual(Ranking.objects.count(), 3)
 
 
-    @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
+    @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
     @mock.patch('frontend.trial_computer.date')
     @mock.patch('frontend.management.commands.process_data.date')
     def test_second_import(self, mock_date_1, mock_date_2):
@@ -106,7 +112,7 @@ class CommandsTestCase(TestCase):
         self.assertEqual(overdue.updated_date, date(2018,1,2))
         self.assertEqual(overdue.first_seen_date, date(2018,1,1))
 
-    @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
+    @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
     @mock.patch('frontend.models.date')
     def test_second_import_with_disappeared_trials(self, datetime_mock):
         """Is the disappearance of a trial from the CSV reflected in our
@@ -131,7 +137,7 @@ class CommandsTestCase(TestCase):
         self.assertEqual(Trial.objects.visible().count(), 0)
 
 
-    @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
+    @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
     @mock.patch('frontend.trial_computer.date')
     def test_qa(self, datetime_mock):
         "Does a simple import create expected rankings and sponsors?"
@@ -200,3 +206,29 @@ class CommandsTestCase(TestCase):
         self.assertEqual(qa[1].submitted_to_regulator, date(2017, 10, 2))
         self.assertEqual(qa[1].cancelled_by_sponsor, date(2018, 5, 17))
         self.assertEqual(qa[2].submitted_to_regulator, date(2018, 5, 17))
+
+
+    @mock.patch('requests.get')
+    @mock.patch('frontend.trial_computer.date')
+    def test_import_twice(self, datetime_mock, requests_mock):
+        "Is importing idempotent?"
+        datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
+        args = []
+        sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/two_months_qa.csv')
+        opts = {'input_csv': sample_csv}
+
+        def month_1_results(arg):
+            return mock_ccgov_results('overdueinqa_month_1')
+        requests_mock.side_effect = month_1_results
+        call_command('process_data', *args, **opts)
+
+        def month_2_results(arg):
+            return mock_ccgov_results('overdueinqa_month_2')
+        requests_mock.side_effect = month_2_results
+        call_command('process_data', *args, **opts)
+
+        qa = Trial.objects.get(
+            registry_id='overdueinqa_two_months').trialqa_set.all()
+        self.assertEqual(len(qa), 1)
+        self.assertEqual(qa[0].submitted_to_regulator, date(2017, 11, 13))
+        self.assertEqual(qa[0].returned_to_sponsor, date(2017, 12, 11))
