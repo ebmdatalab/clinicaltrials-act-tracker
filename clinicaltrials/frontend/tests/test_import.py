@@ -10,6 +10,7 @@ from frontend.models import Ranking
 from frontend.models import Trial
 
 from frontend.trial_computer import qa_start_date
+from frontend.management.commands.process_data import EARLIEST_CANCELLATION_DATE
 
 
 class DummyResponse(object):
@@ -132,10 +133,8 @@ class CommandsTestCase(TestCase):
 
     @mock.patch('requests.get', mock.Mock(side_effect=dummy_ccgov_results))
     @mock.patch('frontend.trial_computer.date')
-    @mock.patch('frontend.management.commands.process_data.date')
-    def test_qa(self, date_mock, datetime_mock):
+    def test_qa(self, datetime_mock):
         "Does a simple import create expected rankings and sponsors?"
-        date_mock.today = mock.Mock(return_value=date(2018,1,1))
         datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
 
         args = []
@@ -153,7 +152,7 @@ class CommandsTestCase(TestCase):
         qa = overdueinqa_cancelled.trialqa_set.all()
         self.assertEqual(len(qa), 1)
         self.assertEqual(qa[0].submitted_to_regulator, date(2017, 10, 19))
-        self.assertEqual(qa[0].cancelled_by_sponsor, date(2018, 1, 1))
+        self.assertEqual(qa[0].cancelled_by_sponsor, EARLIEST_CANCELLATION_DATE)
         self.assertEqual(qa[0].cancellation_date_inferred, True)
         self.assertEqual(qa[0].returned_to_sponsor, None)
 
@@ -162,7 +161,7 @@ class CommandsTestCase(TestCase):
         self.assertEqual(len(qa), 2)
 
         self.assertEqual(qa[0].submitted_to_regulator, date(2018, 3, 29))
-        self.assertEqual(qa[0].cancelled_by_sponsor, date(2018, 1, 1))
+        self.assertEqual(qa[0].cancelled_by_sponsor, EARLIEST_CANCELLATION_DATE)
         self.assertEqual(qa[0].cancellation_date_inferred, True)
         self.assertEqual(qa[0].returned_to_sponsor, None)
         self.assertEqual(qa[1].submitted_to_regulator, date(2018, 5, 10))
@@ -184,7 +183,7 @@ class CommandsTestCase(TestCase):
             registry_id='overdueinqa_manycancelled').trialqa_set.all()
         self.assertEqual(len(qa), 5)
         self.assertEqual(qa[0].submitted_to_regulator, date(2017, 9, 25))
-        self.assertEqual(qa[0].cancelled_by_sponsor, date(2018, 1, 1))
+        self.assertEqual(qa[0].cancelled_by_sponsor, EARLIEST_CANCELLATION_DATE)
         self.assertEqual(qa[0].cancellation_date_inferred, True)
         self.assertEqual(qa[3].submitted_to_regulator, date(2018, 4, 12))
         self.assertEqual(qa[3].cancelled_by_sponsor, date(2018, 5, 14))
