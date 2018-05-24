@@ -46,7 +46,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'clinicaltrials': {
+        'frontend': {
             'handlers': ['applogfile'],
             'level': 'DEBUG',
         },
