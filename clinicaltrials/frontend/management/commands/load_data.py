@@ -25,6 +25,9 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 
+logger = logging.getLogger(__name__)
+
+
 def raw_json_name():
     date = datetime.datetime.now().strftime('%Y-%m-%d')
     return "raw_clincialtrials_json_{}.csv".format(date)
@@ -44,7 +47,7 @@ def download_and_extract():
     """Clean up from past runs, then download into a temp location and move the
     result into place.
     """
-    logging.info("Downloading. This takes at least 30 mins on a fast connection!")
+    logger.info("Downloading. This takes at least 30 mins on a fast connection!")
     url = 'https://clinicaltrials.gov/AllPublicXML.zip'
 
     # download and extract
@@ -63,7 +66,7 @@ def download_and_extract():
 
 def upload_to_cloud():
     # XXX we should periodically delete old ones of these
-    logging.info("Uploading to cloud")
+    logger.info("Uploading to cloud")
     client = StorageClient()
     bucket = client.get_bucket()
     blob = bucket.blob(
@@ -92,14 +95,14 @@ def notify_slack(message):
 
 
 def convert_to_json():
-    logging.info("Converting to JSON...")
+    logger.info("Converting to JSON...")
     dpath = os.path.join(settings.WORKING_DIR, 'NCT*/')
     files = [x for x in sorted(glob.glob(dpath + '*.xml'))]
     start = datetime.datetime.now()
     completed = 0
     with open(os.path.join(settings.WORKING_DIR, raw_json_name()), 'w') as f2:
         for source in files:
-            logging.info("Converting %s", source)
+            logger.info("Converting %s", source)
             with open(source, 'rb') as f:
                 try:
                     f2.write(
@@ -110,19 +113,19 @@ def convert_to_json():
                                 postprocessor=postprocessor)
                         ) + "\n")
                 except ExpatError:
-                    logging.warn("Unable to parse %s", source)
+                    logger.warn("Unable to parse %s", source)
 
         completed += 1
         if completed % 100 == 0:
             elapsed = datetime.datetime.now() - start
             per_file = elapsed.seconds / completed
             remaining = int(per_file * (len(files) - completed) / 60.0)
-            logging.info("%s minutes remaining", remaining)
+            logger.info("%s minutes remaining", remaining)
 
 
 
 def convert_and_download():
-    logging.info("Executing SQL in cloud and downloading results...")
+    logger.info("Executing SQL in cloud and downloading results...")
     storage_path = os.path.join(settings.STORAGE_PREFIX, raw_json_name())
     schema = [
         {'name': 'json', 'type': 'string'},
@@ -188,9 +191,6 @@ class Command(BaseCommand):
     '''
 
     def handle(self, *args, **options):
-        logging.basicConfig(
-            filename=os.path.join(settings.WORKING_VOLUME, 'data_load.log'),
-            level=logging.DEBUG)
         with contextlib.suppress(OSError):
             os.remove(settings.INTERMEDIATE_CSV_PATH)
         try:

@@ -19,6 +19,12 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse'
         }
     },
+    'formatters': {
+        'verbose': {
+            'format': ('%(asctime)s %(levelname)s [%(name)s:%(lineno)s] '
+                       '%(module)s %(process)d %(thread)d %(message)s')
+        }
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
@@ -28,6 +34,7 @@ LOGGING = {
         'applogfile': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
             'filename': os.path.join(PROJECT_ROOT, 'clinicialtrials.log'),
             'maxBytes': 1024*1024*15, # 15MB
             'backupCount': 10,

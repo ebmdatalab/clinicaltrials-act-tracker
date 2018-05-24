@@ -2,6 +2,7 @@ from datetime import date
 from lxml.etree import tostring
 import csv
 import datetime
+import logging
 import re
 
 from django.db import transaction
@@ -20,6 +21,9 @@ from lxml import html
 import dateparser
 
 
+logger = logging.getLogger(__name__)
+
+
 def set_qa_metadata(trial):
     registry_id = trial.registry_id
     url = "https://clinicaltrials.gov/ct2/show/results/{}".format(registry_id)
@@ -36,6 +40,8 @@ def set_qa_metadata(trial):
                     r"\n\s+([^<>]*)<br/>.*?cancell?ed.*? (?:-|on) (.*?)\)<br/>",
                     tostring(row).decode('utf8'),
                     re.I|re.DOTALL)
+                # Oh god, sometimes it's returned and cancelled on the
+                # same day or something
                 for submitted_date, cancelled_date in cancelled:
                     submitted_date = dateparser.parse(submitted_date)
                     if "unknown" in cancelled_date.lower():
@@ -44,8 +50,14 @@ def set_qa_metadata(trial):
                     else:
                         cancelled_date = dateparser.parse(cancelled_date)
                         cancellation_date_inferred = False
+                    logger.info(
+                        "Setting cancellation info for %s: %s -> %s",
+                        trial,
+                        submitted_date,
+                        cancelled_date)
                     qa, _ = TrialQA.objects.get_or_create(
                         submitted_to_regulator=submitted_date,
+                        cancelled_date__isnull=True,
                         trial=trial)
                     qa.cancelled_by_sponsor=cancelled_date
                     qa.cancellation_date_inferred=cancellation_date_inferred
@@ -154,6 +166,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         f = open(options['input_csv'])
+        logger.info("Creating new trials and sponsors from %s", options['input_csv'])
         with transaction.atomic():
             today = date.today()
             for row in csv.DictReader(f):
@@ -192,21 +205,25 @@ class Command(BaseCommand):
                     Trial.objects.create(**d)
 
         # Mark zombie trials
-        Trial.objects.filter(updated_date__lt=today).update(
+        zombies = Trial.objects.filter(updated_date__lt=today)
+        logger.info("Marking %s zombie trials", zombies.count())
+        zombies.update(
             status=Trial.STATUS_NO_LONGER_ACT)
 
         # Now scrape trials that might be in QA (these would be
         # flagged as having no results, but if in QA we consider
         # them submitted until QA finishes)
-        print("Fetching trial QA metadata")
-        for trial in Trial.objects.filter(results_due=True, has_results=False):
+        possible_results = Trial.objects.filter(results_due=True, has_results=False)
+        logger.info("Scraping %s trials for QA metadata", possible_results.count())
+        for trial in possible_results:
             set_qa_metadata(trial)
 
         # Next, compute days_late and status for each trial
-        print("Computing trial metadata")
-        for trial in Trial.objects.exclude(status=Trial.STATUS_NO_LONGER_ACT):
+        needs_metadata = Trial.objects.exclude(status=Trial.STATUS_NO_LONGER_ACT)
+        logger.info("Computing metadata for %s trials", needs_metadata.count())
+        for trial in needs_metadata:
             trial.compute_metadata()
 
         # This should only happen after Trial statuses have been set
-        print("Setting current rankings")
+        logger.info("Setting current rankings")
         set_current_rankings()
