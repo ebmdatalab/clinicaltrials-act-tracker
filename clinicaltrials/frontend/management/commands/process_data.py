@@ -23,6 +23,8 @@ import dateparser
 
 logger = logging.getLogger(__name__)
 
+# The date cc.gov first started recording cancellations
+EARLIEST_CANCELLATION_DATE = date(2018, 7, 5)
 
 def set_qa_metadata(trial):
     registry_id = trial.registry_id
@@ -45,7 +47,7 @@ def set_qa_metadata(trial):
                 for submitted_date, cancelled_date in cancelled:
                     submitted_date = dateparser.parse(submitted_date)
                     if "unknown" in cancelled_date.lower():
-                        cancelled_date = date.today()
+                        cancelled_date = EARLIEST_CANCELLATION_DATE
                         cancellation_date_inferred = True
                     else:
                         cancelled_date = dateparser.parse(cancelled_date)
@@ -55,9 +57,9 @@ def set_qa_metadata(trial):
                         trial,
                         submitted_date,
                         cancelled_date)
+                    # Assumes you can't submit twice on same day
                     qa, _ = TrialQA.objects.get_or_create(
                         submitted_to_regulator=submitted_date,
-                        cancelled_date__isnull=True,
                         trial=trial)
                     qa.cancelled_by_sponsor=cancelled_date
                     qa.cancellation_date_inferred=cancellation_date_inferred
@@ -79,10 +81,12 @@ def set_qa_metadata(trial):
                 submitted = submitted and dateparser.parse(submitted) or None
                 returned = row.xpath(".//td[2]")[0].text.strip()
                 returned = returned and dateparser.parse(returned) or None
-                TrialQA.objects.get_or_create(
+                qa, created = TrialQA.objects.get_or_create(
                     submitted_to_regulator=submitted,
-                    returned_to_sponsor=returned,
                     trial=trial)
+                if returned:
+                    qa.returned_to_sponsor = returned
+                    qa.save()
 
 
 def _compute_ranks():
