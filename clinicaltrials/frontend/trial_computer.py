@@ -86,7 +86,7 @@ def qa_start_dates(trial):
     return original_start_date, cancelled, restart_date
 
 
-def _days_late(effective_reporting_date, completion_date, with_grace_period=False):
+def _days_delta(effective_reporting_date, completion_date, with_grace_period=False):
     overdue_delta = relativedelta(days=365)
     days_late = max([
         (effective_reporting_date - completion_date - overdue_delta).days,
@@ -116,24 +116,24 @@ def get_days_late(trial):
         if trial.has_results:
             assert trial.reported_date, \
                 "{} has_results but no reported date".format(trial)
-            min_days_late = max_days_late = _days_late(
+            min_days_late = max_days_late = _days_delta(
                 trial.reported_date, trial.completion_date)
         else:
             original_start_date, cancelled, restart_date = qa_start_dates(trial)
             if original_start_date:
-                min_days_late = max_days_late = _days_late(
+                min_days_late = max_days_late = _days_delta(
                     original_start_date, trial.completion_date)
             if restart_date:
-                max_days_late = _days_late(restart_date, trial.completion_date)
+                max_days_late = _days_delta(restart_date, trial.completion_date)
             else:
                 if cancelled:
-                    max_days_late = _days_late(
+                    max_days_late = _days_delta(
                         date.today(),
                         trial.completion_date,
                         with_grace_period=True)
             no_qa = not original_start_date
             if no_qa:
-                min_days_late = max_days_late = _days_late(
+                min_days_late = max_days_late = _days_delta(
                     date.today(),
                     trial.completion_date,
                     with_grace_period=True)
