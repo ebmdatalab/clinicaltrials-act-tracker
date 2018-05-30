@@ -19,8 +19,10 @@ def makeTrial(sponsor, **kw):
     defaults.update(kw)
     trial = Trial.objects.filter(registry_id=defaults['registry_id'])
     if trial.count():
+        assert trial.count() == 1
         trial.update(**defaults)
         trial = trial.first()
+        trial.save()
     else:
         trial = Trial.objects.create(**defaults)
     trial.refresh_from_db()
