@@ -135,7 +135,7 @@ class Trial(models.Model):
     STATUS_OVERDUE_CANCELLED = 'overdue-cancelled'
     STATUS_CHOICES = (
         (STATUS_OVERDUE, 'Overdue'),
-        (STATUS_OVERDUE_CANCELLED, 'Overdue (cancelled)'),
+        (STATUS_OVERDUE_CANCELLED, 'Overdue (cancelled results)'),
         (STATUS_ONGOING, 'Ongoing'),
         (STATUS_REPORTED, 'Reported'),
         (STATUS_REPORTED_LATE, 'Reported (late)'),
