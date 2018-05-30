@@ -850,6 +850,10 @@ h1, h2 {
   height: 100%;
 }
 
+.checkbox-inline {
+  margin: 10px 0 0 0 !important;
+}
+
 .checkbox-info .btn-primary, .label-info {
   background-color: $teal-light;
   color: white;
