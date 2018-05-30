@@ -260,7 +260,7 @@ function trialsTable(sponsor_slug, statusFilter, sortCol, sortOrder) {
       {'data': 'status', 'name': 'status',
        'render': function(data, type, full, meta) {
          var statusClass = '';
-         if (data == 'overdue') {
+         if (data == 'overdue' || data == 'overdue-cancelled') {
            statusClass = 'danger';
          } else if (data == 'reported') {
            statusClass = 'success';

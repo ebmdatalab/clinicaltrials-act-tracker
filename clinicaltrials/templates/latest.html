@@ -14,7 +14,7 @@
   <form class="form">
     <label id="filter-trials">Filter trials by status:</label>
     {% for k, v in status_choices %}
-    <label for="filter-{{k}}" class="checkbox-inline {% if k == 'overdue' %}
+    <label for="filter-{{k}}" class="checkbox-inline {% if k == 'overdue' or k == 'overdue-cancelled' %}
                                      checkbox-danger
                                      {% elif k == 'reported' %}
                                      checkbox-success
