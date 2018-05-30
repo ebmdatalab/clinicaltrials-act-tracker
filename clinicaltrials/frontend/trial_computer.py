@@ -47,7 +47,6 @@ def compute_metadata(trial):
             trial.finable_days_late = None
         trial.previous_status = trial.status
         trial.status = get_status(trial)
-        trial.save()
 
 
 def qa_start_dates(trial):

@@ -180,8 +180,9 @@ class Trial(models.Model):
             return qa.submitted_to_regulator
         return None
 
-    def compute_metadata(self):
-        return compute_metadata(self)
+    def save(self, *args, **kwargs):
+        compute_metadata(self)
+        super(Trial, self).save(*args, **kwargs)
 
 
 class TrialQA(models.Model):
@@ -205,6 +206,10 @@ class TrialQA(models.Model):
 
     class Meta:
         ordering = ('submitted_to_regulator',)
+
+    def save(self, *args, **kwargs):
+        super(TrialQA, self).save(*args, **kwargs)
+        self.trial.save()   # recomputes metadata
 
 
 class Ranking(models.Model):

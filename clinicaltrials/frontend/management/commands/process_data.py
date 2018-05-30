@@ -222,12 +222,6 @@ class Command(BaseCommand):
         for trial in possible_results:
             set_qa_metadata(trial)
 
-        # Next, compute days_late and status for each trial
-        needs_metadata = Trial.objects.exclude(status=Trial.STATUS_NO_LONGER_ACT)
-        logger.info("Computing metadata for %s trials", needs_metadata.count())
-        for trial in needs_metadata:
-            trial.compute_metadata()
-
         # This should only happen after Trial statuses have been set
         logger.info("Setting current rankings")
         set_current_rankings()

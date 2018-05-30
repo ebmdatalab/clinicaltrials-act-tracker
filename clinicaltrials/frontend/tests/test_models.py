@@ -240,7 +240,6 @@ class SponsorTrialsStatusTestCase(TestCase):
             returned_to_sponsor=None,
             trial=trial
         )
-        trial.compute_metadata()
         self.assertEqual(trial.status, 'reported')
         self.assertEqual(str(trial.calculated_reported_date()), '2016-02-01')
 
@@ -255,7 +254,6 @@ class SponsorTrialsStatusTestCase(TestCase):
             returned_to_sponsor=None,
             trial=trial
         )
-        trial.compute_metadata()
         self.assertEqual(trial.status, 'reported-late')
 
     def test_trials_reported_late_is_late(self):
@@ -304,7 +302,6 @@ class SponsorTrialsLatenessTestCase(TestCase):
             reported_date= '2017-01-01')
         trial.results_due = False
         trial.save()
-        trial.compute_metadata()
         self.assertEqual(trial.finable_days_late, None)
 
     def test_reported_trial_not_late(self):
@@ -327,7 +324,6 @@ class SponsorTrialsLatenessTestCase(TestCase):
             returned_to_sponsor=None,
             trial=trial
         )
-        trial.compute_metadata()
         self.assertEqual(trial.days_late, None)
 
     def test_trial_under_qa_late(self):
@@ -341,7 +337,6 @@ class SponsorTrialsLatenessTestCase(TestCase):
             returned_to_sponsor=None,
             trial=trial
         )
-        trial.compute_metadata()
         self.assertEqual(trial.days_late, 1)
 
     def test_trial_under_qa_finably_late(self):
@@ -355,7 +350,6 @@ class SponsorTrialsLatenessTestCase(TestCase):
             returned_to_sponsor=None,
             trial=trial
         )
-        trial.compute_metadata()
         self.assertEqual(trial.days_late, 366)
         self.assertEqual(trial.finable_days_late, 336)
 
@@ -372,7 +366,6 @@ class SponsorTrialsLatenessTestCase(TestCase):
             cancelled_by_sponsor='2018-01-01',
             trial=trial
         )
-        trial.compute_metadata()
         self.assertEqual(trial.days_late, 790)
         self.assertEqual(trial.finable_days_late, 336)
 
@@ -399,7 +392,6 @@ class SponsorTrialsLatenessTestCase(TestCase):
             cancelled_by_sponsor='2016-02-02',
             trial=trial
         )
-        trial.compute_metadata()
         self.assertEqual(trial.days_late, 60)
         self.assertEqual(trial.finable_days_late, None)
 
@@ -423,7 +415,6 @@ class SponsorTrialsLatenessTestCase(TestCase):
             submitted_to_regulator='2017-03-01',
             trial=trial
         )
-        trial.compute_metadata()
         self.assertEqual(trial.days_late, 60)
         self.assertEqual(trial.finable_days_late, None)
 
