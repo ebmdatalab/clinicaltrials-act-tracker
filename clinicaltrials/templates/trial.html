@@ -14,6 +14,8 @@
         {% endif %}
       {% elif trial.status == 'overdue' %}
         This trial is overdue. It was due to report {{ due_date|naturaltime}}.
+      {% elif trial.status == 'overdue-cancelled' %}
+        This trial is overdue. It was due to report {{ due_date|naturaltime}}.
       {% elif trial.status == 'reported' %}
        This trial has reported on time, in line with the regulations.
       {% elif trial.status == 'reported-late' %}
