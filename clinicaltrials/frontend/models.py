@@ -66,13 +66,15 @@ class TrialQuerySet(models.QuerySet):
             status=Trial.STATUS_NO_LONGER_ACT).prefetch_related('trialqa_set')
 
     def due(self):
-        return self.visible().filter(status__in=['overdue', 'reported', 'reported-late'])
+        return self.visible().filter(status__in=[
+            'overdue', 'reported', 'reported-late', 'overdue-cancelled'])
 
     def not_due(self):
         return self.visible().filter(status='ongoing')
 
     def unreported(self):
-        return self.visible().filter(status__in=['overdue', 'ongoing'])
+        return self.visible().filter(status__in=[
+            'overdue', 'ongoing', 'overdue-cancelled'])
 
     def reported(self):
         return self.visible().filter(status__in=['reported', 'reported-late'])
@@ -84,15 +86,18 @@ class TrialQuerySet(models.QuerySet):
         return self.visible().filter(status='reported-late')
 
     def overdue(self):
-        return self.visible().filter(status='overdue')
+        return self.visible().filter(status__in=[
+            'overdue', 'overdue-cancelled'])
 
     def reported_early(self):
         return self.reported().filter(reported_date__lt=F('completion_date'))
 
     def overdue_today(self):
         return self.visible() \
-                   .filter(status=Trial.STATUS_OVERDUE) \
-                   .exclude(previous_status=Trial.STATUS_OVERDUE)
+                   .filter(status__in=[
+                       Trial.STATUS_OVERDUE, Trial.STATUS_OVERDUE_CANCELLED]) \
+                   .exclude(previous_status__in=[
+                       Trial.STATUS_OVERDUE, Trial.STATUS_OVERDUE_CANCELLED])
 
     def no_longer_overdue_today(self):
         # All trials except no-longer-overdue trials are updated every
@@ -102,9 +107,11 @@ class TrialQuerySet(models.QuerySet):
         # this query has to search non-current trials and filter by
         # date, explicitly.
         today = Ranking.objects.latest('date').date
-        return self.filter(previous_status=Trial.STATUS_OVERDUE) \
+        return self.filter(previous_status__in=[
+                       Trial.STATUS_OVERDUE, Trial.STATUS_OVERDUE_CANCELLED]) \
                    .filter(updated_date=today) \
-                   .exclude(status=Trial.STATUS_OVERDUE)
+                   .exclude(status__in=[
+                       Trial.STATUS_OVERDUE, Trial.STATUS_OVERDUE_CANCELLED])
 
     def late_today(self):
         return self.visible() \
@@ -124,7 +131,8 @@ class Trial(models.Model):
     STATUS_REPORTED = 'reported'
     STATUS_NO_LONGER_ACT = 'no-longer-act'
     STATUS_REPORTED_LATE = 'reported-late'
-    STATUS_OVERDUE_CANCELLED = 'reported-late'
+
+    STATUS_OVERDUE_CANCELLED = 'overdue-cancelled'
     STATUS_CHOICES = (
         (STATUS_OVERDUE, 'Overdue'),
         (STATUS_OVERDUE_CANCELLED, 'Overdue (cancelled)'),

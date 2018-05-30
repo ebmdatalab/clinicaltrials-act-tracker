@@ -110,7 +110,7 @@ def trials(request):
 
 def trial(request, registry_id=None):
     trial = get_object_or_404(Trial, registry_id=registry_id)
-    if trial.status == Trial.STATUS_OVERDUE:
+    if trial.status in [Trial.STATUS_OVERDUE, Trial.STATUS_OVERDUE_CANCELLED]:
         status_desc ='An overdue trial'
     elif trial.status == Trial.STATUS_ONGOING:
         status_desc = 'An ongoing trial'

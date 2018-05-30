@@ -152,12 +152,11 @@ def get_status(trial):
         else:
             # results are due, but none have been published
             original_start_date, cancelled, restart_date = qa_start_dates(trial)
-            qa_start_date = restart_date or original_start_date
-            if qa_start_date:
+            if original_start_date:
                 # although no results have been published, they have
                 # been submitted
                 if trial.days_late:
-                    if cancelled:
+                    if cancelled and not restart_date:
                         # The submission has been cancelled, so it's still overdue
                         status = trial_class.STATUS_OVERDUE_CANCELLED
                     else:

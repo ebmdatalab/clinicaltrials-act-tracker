@@ -1,3 +1,4 @@
+import datetime
 from collections import OrderedDict
 
 from django.test import TestCase
@@ -11,7 +12,7 @@ from frontend.models import TrialQA
 from frontend.models import Ranking
 from frontend.tests.common import simulateImport
 from frontend.tests.common import makeTrial
-
+from frontend.management.commands.process_data import set_current_rankings
 from unittest.mock import patch, Mock
 
 
@@ -88,15 +89,35 @@ class SponsorTrialsTestCase(TestCase):
         self.sponsor2 = Sponsor.objects.create(name="Sponsor 2")
         self.due_trial = makeTrial(
             self.sponsor,
+            registry_id='due_trial',
             results_due=True,
             has_results=False)
         self.reported_trial = makeTrial(
             self.sponsor,
+            registry_id='reported_trial',
             results_due=True,
             has_results=True,
             reported_date=date(2016,12,1))
+        self.qa_submitted_trial = makeTrial(
+            self.sponsor,
+            registry_id='qa_submitted_trial',
+            results_due=True
+        )
+        self.qa_submitted_trial.trialqa_set.create(
+            submitted_to_regulator=date(2016,12,1)
+        )
+        self.cancelled_trial = makeTrial(
+            self.sponsor,
+            registry_id='cancelled_trial',
+            results_due=True
+        )
+        self.cancelled_trial.trialqa_set.create(
+            submitted_to_regulator=date(2016,12,1),
+            cancelled_by_sponsor=date(2016,12,1)
+        )
         self.not_due_trial = makeTrial(
             self.sponsor,
+            registry_id='not_due_trial',
             results_due=False,
             has_results=False)
 
@@ -104,38 +125,67 @@ class SponsorTrialsTestCase(TestCase):
         self.assertEqual(self.sponsor.slug, 'sponsor-1')
 
     def test_zombie_sponsor(self):
-        self.assertEqual(len(self.sponsor.trial_set.visible()), 3)
+        self.assertEqual(len(self.sponsor.trial_set.visible()), 5)
         due = self.due_trial
         due.status = Trial.STATUS_NO_LONGER_ACT
         due.save()
-        self.assertEqual(len(self.sponsor.trial_set.visible()), 2)
+        self.assertEqual(len(self.sponsor.trial_set.visible()), 4)
 
     def test_trials_due(self):
-        self.assertEqual(
+        self.assertCountEqual(
             list(self.sponsor.trial_set.due()),
-            [self.due_trial, self.reported_trial])
+            [self.due_trial, self.reported_trial,
+             self.cancelled_trial, self.qa_submitted_trial])
 
     def test_trials_unreported(self):
-        self.assertEqual(
+        self.assertCountEqual(
             list(self.sponsor.trial_set.unreported()),
-            [self.due_trial, self.not_due_trial])
+            [self.due_trial, self.not_due_trial, self.cancelled_trial])
         self.assertEqual(self.not_due_trial.status, 'ongoing')
 
     def test_trials_reported(self):
-        self.assertEqual(
+        self.assertCountEqual(
             list(self.sponsor.trial_set.reported()),
-            [self.reported_trial])
+            [self.reported_trial, self.qa_submitted_trial])
 
     def test_trials_overdue(self):
         self.assertEqual(self.due_trial.status, 'overdue')
-        self.assertEqual(
+        self.assertCountEqual(
             list(self.sponsor.trial_set.overdue()),
-            [self.due_trial])
+            [self.due_trial, self.cancelled_trial])
 
     def test_trials_reported_early(self):
-        self.assertEqual(
+        self.assertCountEqual(
             list(self.sponsor.trial_set.reported_early()),
             [])
+
+    def test_today_counts(self):
+        # save all the Trials with a new date to simulate an import run
+        for trial in Trial.objects.all():
+            trial.updated_date += datetime.timedelta(days=1)
+            trial.save()
+        # now alter a couple so we have new "today" state changes
+        self.cancelled_trial.trialqa_set.create(
+            submitted_to_regulator=date(2017,1,1)
+        )
+        self.due_trial.trialqa_set.create(
+            submitted_to_regulator=date(2016,1,1)
+        )
+        set_current_rankings()
+
+        self.assertCountEqual(
+            Trial.objects.no_longer_overdue_today(),
+            [self.due_trial, self.cancelled_trial]
+        )
+        self.assertCountEqual(
+            Trial.objects.late_today(),
+            [self.cancelled_trial]
+        )
+        self.assertCountEqual(
+            Trial.objects.on_time_today(),
+            [self.due_trial]
+        )
+
 
 class SponsorTrialsStatusTestCase(TestCase):
     def setUp(self):
