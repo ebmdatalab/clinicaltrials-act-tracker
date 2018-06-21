@@ -111,8 +111,8 @@ LOGGING = {
         'applogfile': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(PROJECT_ROOT, 'clinicialtrials.log'),
-            'maxBytes': 1024*1024*15, # 15MB
+            'filename': os.path.join(PROJECT_ROOT, 'clinicaltrials.log'),
+            'maxBytes': 1024*1024*50, # 50MB
             'backupCount': 10,
         },
     },
@@ -124,7 +124,7 @@ LOGGING = {
         },
         'clinicaltrials': {
             'handlers': ['applogfile'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     }
 }

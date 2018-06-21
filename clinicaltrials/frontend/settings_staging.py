@@ -35,20 +35,20 @@ LOGGING = {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
             'formatter': 'verbose',
-            'filename': os.path.join(PROJECT_ROOT, 'clinicialtrials.log'),
-            'maxBytes': 1024*1024*15, # 15MB
+            'filename': os.path.join(PROJECT_ROOT, 'clinicaltrials.log'),
+            'maxBytes': 1024*1024*50, # 50MB
             'backupCount': 10,
         },
     },
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins', 'applogfile'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
         },
         'frontend': {
             'handlers': ['applogfile'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     }
 }
