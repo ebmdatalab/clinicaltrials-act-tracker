@@ -209,10 +209,11 @@ class Command(BaseCommand):
                     Trial.objects.create(**d)
 
         # Mark zombie trials
-        zombies = Trial.objects.filter(updated_date__lt=today)
+        zombies = Trial.objects.filter(
+            updated_date__lt=today).exclude(status=Trial.STATUS_NO_LONGER_ACT)
         logger.info("Marking %s zombie trials", zombies.count())
         zombies.update(
-            status=Trial.STATUS_NO_LONGER_ACT)
+            status=Trial.STATUS_NO_LONGER_ACT, updated_date=today)
 
         # Now scrape trials that might be in QA (these would be
         # flagged as having no results, but if in QA we consider

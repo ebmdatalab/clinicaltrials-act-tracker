@@ -117,24 +117,25 @@ class CommandsTestCase(TestCase):
     def test_second_import_with_disappeared_trials(self, datetime_mock):
         """Is the disappearance of a trial from the CSV reflected in our
         database?"""
-        datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
+        datetime_mock.today = mock.Mock(return_value=date(2018, 1, 1))
 
-        args = []
         sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq.csv')
         opts = {'input_csv': sample_csv}
-        call_command('process_data', *args, **opts)
+        call_command('process_data', **opts)
 
         # Pretend the previous import took place ages ago
-        Trial.objects.all().update(updated_date=date(2017,1,1))
+        date_in_the_past = date(2017, 1, 1)
+        Trial.objects.all().update(updated_date=date_in_the_past)
 
         # Import empty file
         sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq_empty.csv')
         opts = {'input_csv': sample_csv}
-        call_command('process_data', *args, **opts)
+        call_command('process_data', **opts)
 
         # There should be no Trials visible
         self.assertEqual(Trial.objects.count(), 6)
         self.assertEqual(Trial.objects.visible().count(), 0)
+        self.assertNotEqual(Trial.objects.first().updated_date, date_in_the_past)
 
 
     @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
