@@ -202,6 +202,9 @@ class TrialQA(models.Model):
     cancellation_date_inferred = models.NullBooleanField()
     returned_to_sponsor = models.DateField(null=True, blank=True)
 
+    class Meta:
+        ordering = ('id',)
+
 
 class Ranking(models.Model):
     sponsor = models.ForeignKey(
