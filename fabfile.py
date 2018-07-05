@@ -16,7 +16,7 @@ environments = {
     'test': 'fdaaa_test',
 }
 
-def sudo_script(script):
+def sudo_script(script, www_user=False):
     """Run script under `deploy/fab_scripts/` as sudo.
 
     We don't use the `fabric` `sudo()` command, because instead we
@@ -25,7 +25,11 @@ def sudo_script(script):
     a member of the `fabric` group (see `setup_sudo()`, below).
 
     """
-    return run('sudo ' +
+    if www_user:
+        sudo_cmd = 'sudo -u www-data '
+    else:
+        sudo_cmd = 'sudo '
+    return run(sudo_cmd +
         os.path.join(
             env.path,
             'clinicaltrials-act-tracker/deploy/fab_scripts/%s' % script)
@@ -38,7 +42,7 @@ def setup_sudo():
     """
     sudoer_file = '/etc/sudoers.d/fdaaa_fabric_{}'.format(env.app)
     if not exists(sudoer_file):
-        sudo('echo "%fabric ALL = NOPASSWD: {}/clinicaltrials-act-tracker/deploy/fab_scripts/" > {}'.format(env.path, sudoer_file))
+        sudo('echo "%fabric ALL = (www-data) NOPASSWD: {}/clinicaltrials-act-tracker/deploy/fab_scripts/" > {}'.format(env.path, sudoer_file))
 
 def make_directory():
     if not exists(env.path):
@@ -119,7 +123,8 @@ def update(environment):
     # may miss out the moderation step and scrape directly to live.
     env = setup(environment)
     if environment == 'staging':
-        sudo_script('kickoff_background_data_load.sh %s' % env.app)
+        sudo_script(
+            'kickoff_background_data_load.sh %s' % env.app, www_user=True)
     elif environment == 'live':
         sudo_script('copy_staging_to_live.sh')
 

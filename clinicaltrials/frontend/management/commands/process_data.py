@@ -40,7 +40,7 @@ def set_qa_metadata(trial):
                 # for a description of cancellations
                 cancelled = re.findall(
                     r"\n\s+([^<>]*)<br/>.*?cancell?ed.*? (?:-|on) (.*?)\)<br/>",
-                    tostring(row).decode('utf8'),
+                    tostring(row).decode('utf8').replace("&#13;", ""), # carriage return
                     re.I|re.DOTALL)
                 # Oh god, sometimes it's returned and cancelled on the
                 # same day or something
@@ -215,10 +215,11 @@ class Command(BaseCommand):
                     instance.save()
 
         # Mark zombie trials
-        zombies = Trial.objects.filter(updated_date__lt=today)
+        zombies = Trial.objects.filter(
+            updated_date__lt=today).exclude(status=Trial.STATUS_NO_LONGER_ACT)
         logger.info("Marking %s zombie trials", zombies.count())
         zombies.update(
-            status=Trial.STATUS_NO_LONGER_ACT)
+            status=Trial.STATUS_NO_LONGER_ACT, updated_date=today)
 
         # Now scrape trials that might be in QA (these would be
         # flagged as having no results, but if in QA we consider

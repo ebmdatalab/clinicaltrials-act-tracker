@@ -198,7 +198,7 @@ class TrialQA(models.Model):
 
     When a trial is submitted to ClinicalTrials.gov, it immediately
     enters a QA process which can take several months.  However, when
-    it leaves the QA process, it's submission date is considered the
+    it leaves the QA process, its submission date is considered the
     date it entered the QA process.
 
     The QA process involves a ping-pong between sponsor and
@@ -213,7 +213,7 @@ class TrialQA(models.Model):
     returned_to_sponsor = models.DateField(null=True, blank=True)
 
     class Meta:
-        ordering = ('submitted_to_regulator',)
+        ordering = ('submitted_to_regulator','id',)
 
     def save(self, *args, **kwargs):
         super(TrialQA, self).save(*args, **kwargs)
