@@ -181,7 +181,7 @@ def process_data():
                 "{}python".format(settings.PROCESSING_VENV_BIN),
                 "{}/manage.py".format(settings.BASE_DIR),
                 "process_data",
-                "--input-csv=asd{}".format(settings.INTERMEDIATE_CSV_PATH),
+                "--input-csv={}".format(settings.INTERMEDIATE_CSV_PATH),
                 "--settings=frontend.settings"
             ],
             stderr=subprocess.STDOUT,
