@@ -9,11 +9,15 @@ https://docs.djangoproject.com/en/1.10/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
-
+import logging
 import os
 import datetime
 
 import common.utils
+
+import custom_logging
+
+logging.custom_handlers = custom_logging
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -110,9 +114,9 @@ LOGGING = {
         },
         'applogfile': {
             'level':'DEBUG',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(PROJECT_ROOT, 'clinicialtrials.log'),
-            'maxBytes': 1024*1024*15, # 15MB
+            'class': 'custom_logging.GroupWriteRotatingFileHandler',
+            'filename': os.path.join(PROJECT_ROOT, 'clinicaltrials.log'),
+            'maxBytes': 1024*1024*50, # 50MB
             'backupCount': 10,
         },
     },
@@ -124,7 +128,7 @@ LOGGING = {
         },
         'clinicaltrials': {
             'handlers': ['applogfile'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     }
 }

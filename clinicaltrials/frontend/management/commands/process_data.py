@@ -47,7 +47,7 @@ def set_qa_metadata(trial):
                 # for a description of cancellations
                 cancelled = re.findall(
                     r"\n\s+([^<>]*)<br/>.*?cancell?ed.*? (?:-|on) (.*?)\)<br/>",
-                    tostring(row).decode('utf8'),
+                    tostring(row).decode('utf8').replace("&#13;", ""), # carriage return
                     re.I|re.DOTALL)
                 # Oh god, sometimes it's returned and cancelled on the
                 # same day or something

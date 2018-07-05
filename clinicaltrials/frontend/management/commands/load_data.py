@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import sys
 import traceback
 
 from bigquery import Client
@@ -174,16 +175,27 @@ def get_env(path):
 
 def process_data():
     # TODO no need to call via shell any more (now we are also a command)
-    subprocess.check_call(
-        [
-            "{}python".format(settings.PROCESSING_VENV_BIN),
-            "{}/manage.py".format(settings.BASE_DIR),
-            "process_data",
-            "--input-csv={}".format(settings.INTERMEDIATE_CSV_PATH),
-            "--settings=frontend.settings"
-        ],
-        env=get_env(settings.PROCESSING_ENV_PATH))
-    notify_slack("""Today's data uploaded to FDAAA staging: https://staging-fdaaa.ebmdatalab.net.  If this looks good, tell ebmbot to 'update fdaaa staging'""")
+    try:
+        subprocess.check_output(
+            [
+                "{}python".format(settings.PROCESSING_VENV_BIN),
+                "{}/manage.py".format(settings.BASE_DIR),
+                "process_data",
+                "--input-csv={}".format(settings.INTERMEDIATE_CSV_PATH),
+                "--settings=frontend.settings"
+            ],
+            stderr=subprocess.STDOUT,
+            env=get_env(settings.PROCESSING_ENV_PATH))
+        notify_slack("Today's data uploaded to FDAAA staging: "
+                     "https://staging-fdaaa.ebmdatalab.net.  "
+                     "If this looks good, tell ebmbot to "
+                     "'update fdaaa staging'""")
+    except subprocess.CalledProcessError as e:
+        notify_slack("Error in FDAAA import: command `{}` "
+                     "failed with error code {} "
+                     "and output {}".format(
+                         e.cmd, e.returncode, e.output))
+        sys.exit(1)
 
 
 class Command(BaseCommand):
