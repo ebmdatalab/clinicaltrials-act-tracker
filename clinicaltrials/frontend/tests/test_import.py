@@ -141,7 +141,7 @@ class CommandsTestCase(TestCase):
         # There should be no Trials visible
         self.assertEqual(Trial.objects.count(), 6)
         self.assertEqual(Trial.objects.visible().count(), 0)
-        self.assertNotEqual(Trial.objects.first().updated_date, date_in_the_past)
+        self.assertNotEqual(Trial.objects.first().updated_date, self.last_year)
 
     @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
     @mock.patch('frontend.models.date')
