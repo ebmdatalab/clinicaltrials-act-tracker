@@ -1,4 +1,4 @@
 # WARNING: this file is run as root. Be certain you know what it does.
 # min hour day/month month day/week
 MAILTO=root
-00 04 * * * ebmbot /var/www/fdaaa/clinicaltrials-act-tracker/deploy/fab_scripts/kickoff_background_data_load.sh
+00 04 * * Sunday-Thursday ebmbot sudo -u www-data /var/www/fdaaa/clinicaltrials-act-tracker/deploy/fab_scripts/kickoff_background_data_load.sh

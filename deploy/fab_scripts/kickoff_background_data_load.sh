@@ -13,4 +13,4 @@ else
 fi
 
 . /etc/profile.d/$profile.sh
-dtach -n `mktemp -u /tmp/dtach.XXXX` /bin/bash -c "/var/www/$profile/venv/bin/python /var/www/$profile/clinicaltrials-act-tracker/clinicaltrials/manage.py load_data > /mnt/volume-lon1-01/$(mktemp -u ${profile}_XXX)_data_load.out 2>&1"
+dtach -n `mktemp -u /tmp/dtach.XXXX` /bin/bash -c "/var/www/$profile/venv/bin/python /var/www/$profile/clinicaltrials-act-tracker/clinicaltrials/manage.py load_data > $(mktemp -u /tmp/${profile}_XXX_data_load.out) 2>&1"
