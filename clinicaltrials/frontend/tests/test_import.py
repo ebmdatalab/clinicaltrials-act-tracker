@@ -1,4 +1,5 @@
 from datetime import date
+from datetime import timedelta
 from unittest import mock
 import os
 
@@ -36,11 +37,16 @@ def ccgov_results_by_url(url):
 
 
 class CommandsTestCase(TestCase):
+    def setUp(self):
+        self.today = date(2018, 1, 1)
+        self.yesterday = self.today - timedelta(days=1)
+        self.last_year = self.today - timedelta(days=366)
+
     @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
     @mock.patch('frontend.trial_computer.date')
     def test_import(self, datetime_mock):
         "Does a simple import create expected rankings and sponsors?"
-        datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
+        datetime_mock.today = mock.Mock(return_value=self.today)
 
         args = []
         sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq.csv')
@@ -86,8 +92,8 @@ class CommandsTestCase(TestCase):
         """Does importing the same data twice on subsequent days affect
         individual trials as expected?
         """
-        mock_date_1.today = mock.Mock(return_value=date(2018,1,1))
-        mock_date_2.today = mock.Mock(return_value=date(2018,1,1))
+        mock_date_1.today = mock.Mock(return_value=self.today)
+        mock_date_2.today = mock.Mock(return_value=self.today)
 
         args = []
         sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq.csv')
@@ -101,31 +107,31 @@ class CommandsTestCase(TestCase):
         Trial.objects.all().update(updated_date=date(2017,1,1))
 
         # Import again
-        mock_date_1.today = mock.Mock(return_value=date(2018,1,2))
-        mock_date_2.today = mock.Mock(return_value=date(2018,1,2))
+        tomorrow = self.today + timedelta(days=1)
+        mock_date_1.today = mock.Mock(return_value=tomorrow)
+        mock_date_2.today = mock.Mock(return_value=tomorrow)
         call_command('process_data', *args, **opts)
 
         overdue = Trial.objects.get(registry_id='overdue')
         self.assertEqual(overdue.status, 'overdue')
         self.assertEqual(overdue.days_late, 62)
 
-        self.assertEqual(overdue.updated_date, date(2018,1,2))
-        self.assertEqual(overdue.first_seen_date, date(2018,1,1))
+        self.assertEqual(overdue.updated_date, tomorrow)
+        self.assertEqual(overdue.first_seen_date, self.today)
 
     @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
     @mock.patch('frontend.models.date')
     def test_second_import_with_disappeared_trials(self, datetime_mock):
         """Is the disappearance of a trial from the CSV reflected in our
         database?"""
-        datetime_mock.today = mock.Mock(return_value=date(2018, 1, 1))
 
+        datetime_mock.today = mock.Mock(return_value=self.today)
         sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq.csv')
         opts = {'input_csv': sample_csv}
         call_command('process_data', **opts)
 
         # Pretend the previous import took place ages ago
-        date_in_the_past = date(2017, 1, 1)
-        Trial.objects.all().update(updated_date=date_in_the_past)
+        Trial.objects.all().update(updated_date=self.last_year)
 
         # Import empty file
         sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq_empty.csv')
@@ -135,14 +141,41 @@ class CommandsTestCase(TestCase):
         # There should be no Trials visible
         self.assertEqual(Trial.objects.count(), 6)
         self.assertEqual(Trial.objects.visible().count(), 0)
-        self.assertNotEqual(Trial.objects.first().updated_date, date_in_the_past)
+        self.assertNotEqual(Trial.objects.first().updated_date, self.last_year)
 
+    @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
+    @mock.patch('frontend.models.date')
+    def test_third_import_with_reappearing_trials(self, datetime_mock):
+        """Is the disappearance of a trial from the CSV reflected in our
+        database?"""
+        datetime_mock.today = mock.Mock(return_value=self.today)
+
+        # First import
+        sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq.csv')
+        call_command('process_data', input_csv=sample_csv)
+        # Pretend that import above took place ages ago
+        Trial.objects.all().update(updated_date=self.last_year)
+        overdue = Trial.objects.get(registry_id='overdue')
+        self.assertEqual(overdue.status, 'overdue')
+
+        # Second import: empty file (i.e. everything's gone no-longer-pact)
+        sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq_empty.csv')
+        call_command('process_data', input_csv=sample_csv)
+        Trial.objects.all().update(updated_date=self.yesterday)
+
+        # Third import: everything's become a pACT again
+        sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq.csv')
+        call_command('process_data', input_csv=sample_csv)
+
+        overdue = Trial.objects.get(registry_id='overdue')
+        self.assertEqual(overdue.status, 'overdue')
+        self.assertEqual(overdue.previous_status, 'no-longer-act')
 
     @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
     @mock.patch('frontend.trial_computer.date')
     def test_qa(self, datetime_mock):
         "Does a simple import create expected rankings and sponsors?"
-        datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
+        datetime_mock.today = mock.Mock(return_value=self.today)
 
         args = []
         sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/sample_bq_qa.csv')
@@ -213,7 +246,7 @@ class CommandsTestCase(TestCase):
     @mock.patch('frontend.trial_computer.date')
     def test_import_twice(self, datetime_mock, requests_mock):
         "Is importing idempotent?"
-        datetime_mock.today = mock.Mock(return_value=date(2018,1,1))
+        datetime_mock.today = mock.Mock(return_value=self.today)
         args = []
         sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/two_months_qa.csv')
         opts = {'input_csv': sample_csv}

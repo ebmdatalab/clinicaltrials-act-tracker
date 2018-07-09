@@ -23,7 +23,8 @@ def makeTrial(sponsor, **kw):
         trial = trial.first()
     else:
         trial = Trial.objects.create(**defaults)
-    trial.compute_metadata()
+    if trial.status != Trial.STATUS_NO_LONGER_ACT:
+        trial.compute_metadata()
     trial.refresh_from_db()
     return trial
 
