@@ -92,6 +92,10 @@ SELECT TRIM(json_EXTRACT(json,
     JSON_EXTRACT_SCALAR(json,
       "$.clinical_study.last_update_submitted")) AS last_updated_date,
   CASE
+    WHEN json_EXTRACT(json,  "$.clinical_study.pending_results") IS NOT NULL THEN 1
+    ELSE 0
+  END AS pending_results,
+  CASE
     WHEN json_EXTRACT(json,  "$.clinical_study.clinical_results") IS NOT NULL THEN 1
     ELSE 0
   END AS has_results,
@@ -127,7 +131,9 @@ SELECT TRIM(json_EXTRACT(json,
   json_EXTRACT(json,
     "$.clinical_study.intervention") AS intervention,
   json_EXTRACT(json,
-    "$.clinical_study.intervention_browse") AS intervention_mesh
+    "$.clinical_study.intervention_browse") AS intervention_mesh,
+  json_EXTRACT(json,
+    "$.clinical_study.keyword") AS keywords
 FROM
    ebmdatalab.clinicaltrials.{table_name}),
 
@@ -175,6 +181,7 @@ website_data AS (
 
 /*Results Related Info*/
   has_results,
+  pending_results,
   case when certificate_date is not null then 1 else 0 end as has_certificate,
   case when
   --Steps for determining if results are due
@@ -279,7 +286,8 @@ website_data AS (
   condition,
   condition_mesh,
   intervention,
-  intervention_mesh
+  intervention_mesh,
+  keywords
 FROM
   full_data_extract
 LEFT JOIN
