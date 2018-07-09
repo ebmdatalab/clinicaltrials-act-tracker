@@ -670,7 +670,7 @@ button:focus {
   background-color: $orange;
 }
 
-.claimed-fines, .overdue {
+.claimed-fines, .overdue, .overdue-cancelled {
   background-color: $red;
 }
 
@@ -852,6 +852,10 @@ h1, h2 {
 
 .card .icon img {
   height: 100%;
+}
+
+.checkbox-inline {
+  margin: 10px 0 0 0 !important;
 }
 
 .checkbox-info .btn-primary, .label-info {

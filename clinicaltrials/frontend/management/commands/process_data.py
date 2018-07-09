@@ -179,17 +179,22 @@ class Command(BaseCommand):
         f = open(options['input_csv'])
         logger.info("Creating new trials and sponsors from %s", options['input_csv'])
         with transaction.atomic():
+            # We don't use auto_now on models for `today`, purely so
+            # we can mock this in tests.
             today = date.today()
             for row in csv.DictReader(f):
                 # Create / update sponsor
-                try:
-                    sponsor = Sponsor.objects.get(pk=slugify(row['sponsor']))
-                except Sponsor.DoesNotExist:
-                    sponsor = Sponsor.objects.create(
-                        name=row['sponsor'])
-                sponsor.updated_date = today
-                sponsor.is_industry_sponsor = row['sponsor_type'] == 'Industry'
-                sponsor.save()
+                d = {
+                    'name': row['sponsor'],
+                    'is_industry_sponsor': row['sponsor_type'] == 'Industry',
+                    'updated_date': today
+                }
+                sponsor, created = Sponsor.objects.get_or_create(
+                    pk=slugify(row['sponsor']), defaults=d)
+                if not created:
+                    sponsor.updated_date = today
+                    sponsor.is_industry_sponsor = d['is_industry_sponsor']
+                    sponsor.save()
 
                 # Create / update Trial
                 d = {
@@ -202,18 +207,21 @@ class Command(BaseCommand):
                     'is_pact': truthy(row['included_pact_flag']),
                     'sponsor_id': sponsor.pk,
                     'start_date': row['start_date'],
+                    'first_seen_date': today,
                     'updated_date': today,
                     'reported_date': row['results_submitted_date'] or None,
                 }
                 if row['available_completion_date']:
                     d['completion_date'] = row['available_completion_date']
-                trial_set = Trial.objects.filter(registry_id=row['nct_id'])
-                trial = trial_set.first()
-                if trial:
-                    trial_set.update(**d)
-                else:
-                    d['first_seen_date'] = today
-                    Trial.objects.create(**d)
+                instance, created = Trial.objects.get_or_create(
+                    registry_id=row['nct_id'], defaults=d)
+                if not created:
+                    for attr, value in d.items():
+                        if attr != 'first_seen_date':
+                            setattr(instance, attr, value)
+                    instance.updated_date = today
+                    instance.save()
+
 
         # Now scrape trials that might be in QA (these would be
         # flagged as having no results, but if in QA we consider
@@ -222,13 +230,6 @@ class Command(BaseCommand):
         logger.info("Scraping %s trials for QA metadata", possible_results.count())
         for trial in possible_results:
             set_qa_metadata(trial)
-
-        # Next, compute days_late and status for each trial that we
-        # currently consider a pACT/ACT
-        needs_metadata = Trial.objects.filter(updated_date=today)
-        logger.info("Computing metadata for %s trials", needs_metadata.count())
-        for trial in needs_metadata:
-            trial.compute_metadata()
 
         # Update the status of trials that no longer appear in the dataset
         zombies = Trial.objects.filter(

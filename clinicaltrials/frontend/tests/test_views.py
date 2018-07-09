@@ -205,7 +205,7 @@ class ApiResultsTestCase(TestCase):
         self.assertEqual(response['results'][0]['title'], self.due_trial.title)
 
         response = client.get('/api/trials/', {'is_no_longer_overdue_today': '2'}, format='json').json()
-        self.assertEqual(response['recordsFiltered'], 2)
+        self.assertEqual(response['recordsFiltered'], 1)
         self.assertEqual(response['results'][0]['title'], self.reported_trial.title)
 
 
@@ -359,7 +359,8 @@ class ApiPerformanceResultsTestCase(TestCase):
         mock_date.today.return_value = self.mock_today
         mock_date.today = self.mock_today
         client = APIClient()
-
+        # default status is `ongoing`, so making new trials which are
+        # (e.g.) overdue will be counted as overdue today.
         response = client.get('/api/performance/', format='json').json()
         self.assertEqual(response['due'], 2)
         self.assertEqual(response['overdue_today'], 1)

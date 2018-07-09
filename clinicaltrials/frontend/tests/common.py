@@ -19,13 +19,16 @@ def makeTrial(sponsor, **kw):
     defaults.update(kw)
     trial = Trial.objects.filter(registry_id=defaults['registry_id'])
     if trial.count():
+        assert trial.count() == 1
         trial.update(**defaults)
         trial = trial.first()
+        trial.save()
     else:
         trial = Trial.objects.create(**defaults)
-    if trial.status != Trial.STATUS_NO_LONGER_ACT:
-        trial.compute_metadata()
     trial.refresh_from_db()
+    if kw.get('status', None) == Trial.STATUS_NO_LONGER_ACT:
+        # The test wants to override any computed status
+        Trial.objects.filter(pk=trial.pk).update(status=kw['status'])
     return trial
 
 
