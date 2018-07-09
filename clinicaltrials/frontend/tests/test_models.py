@@ -126,10 +126,12 @@ class SponsorTrialsTestCase(TestCase):
 
     def test_zombie_sponsor(self):
         self.assertEqual(len(self.sponsor.trial_set.visible()), 5)
-        due = self.due_trial
-        due.status = Trial.STATUS_NO_LONGER_ACT
-        due.save()
-        self.assertEqual(len(self.sponsor.trial_set.visible()), 4)
+        filtered_due = Trial.objects.filter(
+            registry_id=self.due_trial.registry_id)
+        # Updating via querset means we don't trigger `save()`
+        # callbacks, which recompute status based on dates etc.
+        filtered_due.update(status=Trial.STATUS_NO_LONGER_ACT)
+        self.assertEqual(len(self.sponsor.trial_set.visible()), 4) # still 5 failure
 
     def test_trials_due(self):
         self.assertCountEqual(

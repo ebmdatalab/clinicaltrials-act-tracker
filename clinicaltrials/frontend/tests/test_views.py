@@ -205,7 +205,7 @@ class ApiResultsTestCase(TestCase):
         self.assertEqual(response['results'][0]['title'], self.due_trial.title)
 
         response = client.get('/api/trials/', {'is_no_longer_overdue_today': '2'}, format='json').json()
-        self.assertEqual(response['recordsFiltered'], 2)
+        self.assertEqual(response['recordsFiltered'], 1)
         self.assertEqual(response['results'][0]['title'], self.reported_trial.title)
 
 

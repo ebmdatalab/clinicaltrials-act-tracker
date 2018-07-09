@@ -26,6 +26,9 @@ def makeTrial(sponsor, **kw):
     else:
         trial = Trial.objects.create(**defaults)
     trial.refresh_from_db()
+    if kw.get('status', None) == Trial.STATUS_NO_LONGER_ACT:
+        # The test wants to override any computed status
+        Trial.objects.filter(pk=trial.pk).update(status=kw['status'])
     return trial
 
 

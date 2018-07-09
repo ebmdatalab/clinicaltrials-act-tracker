@@ -34,19 +34,18 @@ def compute_metadata(trial):
     """
     # Logic in trial status calculations depends on how many days late
     # a trial is, so this must be called before `get_status`
-    if trial.status != type(trial).STATUS_NO_LONGER_ACT:
-        min_days_late, max_days_late = get_days_late(trial)
-        trial.days_late = max_days_late
-        if trial.days_late:
-            trial.finable_days_late = max([
-                (min_days_late or 0) - type(trial).FINES_GRACE_PERIOD,
-                0])
-            if trial.finable_days_late == 0:
-                trial.finable_days_late = None
-        else:
+    min_days_late, max_days_late = get_days_late(trial)
+    trial.days_late = max_days_late
+    if trial.days_late:
+        trial.finable_days_late = max([
+            (min_days_late or 0) - type(trial).FINES_GRACE_PERIOD,
+            0])
+        if trial.finable_days_late == 0:
             trial.finable_days_late = None
-        trial.previous_status = trial.status
-        trial.status = get_status(trial)
+    else:
+        trial.finable_days_late = None
+    trial.previous_status = trial.status
+    trial.status = get_status(trial)
 
 
 def qa_start_dates(trial):

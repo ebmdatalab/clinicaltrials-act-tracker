@@ -27,6 +27,13 @@ logger = logging.getLogger(__name__)
 EARLIEST_CANCELLATION_DATE = date(2018, 7, 5)
 
 def set_qa_metadata(trial):
+    """Scrape `Results Submitted` tab on website for interim reporting
+    (this means results have been submitted at some point, and are
+    under QA).
+
+    Store this data in a TrialQA table
+
+    """
     registry_id = trial.registry_id
     url = "https://clinicaltrials.gov/ct2/show/results/{}".format(registry_id)
     content = html.fromstring(requests.get(url).text)
@@ -61,8 +68,8 @@ def set_qa_metadata(trial):
                     qa, _ = TrialQA.objects.get_or_create(
                         submitted_to_regulator=submitted_date,
                         trial=trial)
-                    qa.cancelled_by_sponsor=cancelled_date
-                    qa.cancellation_date_inferred=cancellation_date_inferred
+                    qa.cancelled_by_sponsor = cancelled_date
+                    qa.cancellation_date_inferred = cancellation_date_inferred
                     qa.save()
 
                 # Take the date on the last line, to cater for cases
@@ -201,6 +208,7 @@ class Command(BaseCommand):
                     'sponsor_id': sponsor.pk,
                     'start_date': row['start_date'],
                     'first_seen_date': today,
+                    'updated_date': today,
                     'reported_date': row['results_submitted_date'] or None,
                 }
                 if row['available_completion_date']:
@@ -214,12 +222,6 @@ class Command(BaseCommand):
                     instance.updated_date = today
                     instance.save()
 
-        # Mark zombie trials
-        zombies = Trial.objects.filter(
-            updated_date__lt=today).exclude(status=Trial.STATUS_NO_LONGER_ACT)
-        logger.info("Marking %s zombie trials", zombies.count())
-        zombies.update(
-            status=Trial.STATUS_NO_LONGER_ACT, updated_date=today)
 
         # Now scrape trials that might be in QA (these would be
         # flagged as having no results, but if in QA we consider
@@ -228,6 +230,13 @@ class Command(BaseCommand):
         logger.info("Scraping %s trials for QA metadata", possible_results.count())
         for trial in possible_results:
             set_qa_metadata(trial)
+
+        # Update the status of trials that no longer appear in the dataset
+        zombies = Trial.objects.filter(
+            updated_date__lt=today).exclude(status=Trial.STATUS_NO_LONGER_ACT)
+        logger.info("Marking %s zombie trials", zombies.count())
+        zombies.update(
+            status=Trial.STATUS_NO_LONGER_ACT, updated_date=today)
 
         # This should only happen after Trial statuses have been set
         logger.info("Setting current rankings")
