@@ -16,7 +16,7 @@
 
         <p>
           The best currently available evidence shows that the results
-          of clinical trials are routinely withheld from doctors,
+          of clinical trials are <a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0114023">routinely withheld</a> from doctors,
           researchers, and patients. This is
           a <a href="http://alltrials.net/">global public health
           scandal</a>.
@@ -79,15 +79,15 @@
 
           <li>You can advocate for better trial reporting in your own work community.</li>
           <li>You can use our data to encourage trialists to report their trials.</li>
-          <li>You can call your elected representatives and tell them to pressure the FDA to levy fines and publicly censure researchers and sponsors who fail to report their trial results.</li>
+            <li>You can <a href="https://callyourrep.co/">call your elected representatives</a> and tell them to pressure the FDA to levy fines and publicly censure researchers and sponsors who fail to report their trial results.</li>
         </ul>
 
-        <h2>I think some trials on clinicaltrials.gov are missing from
+        <h2>I think some trials on ClinicalTrials.gov are missing from
           your site! Doesn’t the law cover all trials?</h2>
         <p>Sadly, FDAAA 2007 only covers a narrow subgroup of
         trials. We think all trials should report results: you can
-        read more about the AllTrials.net campaign online. On this
-        website we track only compliance with the law. We have a range
+        read more about the <a href="http://alltrials.net">AllTrials.net</a> campaign online. On this
+        website we only track compliance with the law. We have a range
         of “TrialsTrackers” which monitor reporting for other kinds of
         clinical trial
         at <a href="https://trialsTracker.net">TrialsTracker.net</a></p>
@@ -121,7 +121,7 @@
           </li>
           <li>
             <strong>The sponsor may have applied for an exemption:</strong>
-            Sponsors can apply for a certificates that can delay the posting of results for certain trials, for up to 2 additional years. You can see if this is the case by clicking on the “Results’ tab on ClinicalTrials.gov. We might start flagging this on our website too, if it’s useful and interesting for you.
+            Sponsors can apply for a certificate that allows certain trils to delay the posting of results for up to 2 additional years. You can see if this is the case by clicking on the “Results" tab on ClinicalTrials.gov. We might start flagging this on our website too, if it’s useful and interesting for you.
           </li>
           <li>
             <strong>The trial may not be required to report results under FDAAA:</strong>
@@ -135,8 +135,7 @@
             </ul>
          
           <p>If after reading this you think we are missing a due trial, please <a href="mailto:hello@ebmdatalab.net">get in touch</a>!</p>
-         
-       
+             
 
         <h2>I found a journal article/conference abstract/other document containing results from this study. Why are you saying it has unreported results?</h2>
         <p>The FDAAA 2007 is a law that requires all applicable trials to report their results on ClinicalTrials.gov within 12 months of completion. This is to ensure that results are shared in a timely manner without editorial delays; to ensure that results can be easily located; and to ensure that results are completely and correctly reported. FDAAA sets out a standard format for reporting clinical trials. <a href="http://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1001566">Previous research has shown</a> that overall journal publications are significantly less complete than structured reports on ClinicalTrials.gov: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4650202/">for example, journals often permit misreporting of prespecified outcomes</a>, and are less complete on safety data. Journal reporting is often interesting and useful but the law requires results to be reported on ClinicalTrials.gov.</p>
@@ -147,6 +146,12 @@
         <h2>How do you calculate what fines a sponsor could receive?</h2>
         <p>The FDA can fine (per 333(f)(3)(B) in table <a href="https://www.gpo.gov/fdsys/pkg/FR-2017-02-03/pdf/2017-02300.pdf">here</a>) non-reporting sponsors up to ${{ FINE_PER_DAY|intcomma }} a day following a 30 day notice period. We calculate the maximum possible fine assuming the sponsor was notified the day after they failed to meet their submission deadline. So each day after 1 year plus 30 days since trial completion without submitted results is another ${{ FINE_PER_DAY|intcomma }}. You can read more on this in <a href="https://www.biorxiv.org/content/biorxiv/early/2018/03/12/266452.full.pdf">our paper</a>.</p>
 
+        <h2>This trial's recruitment status isn't listed as "Completed" and/or the primary completion date is listed as "anticipated" on ClinicalTrials.gov. Why is it due to report?</h2>
+        <p>As explained in our paper, any status other than "Withdrawn" (which means no subjects were enrolled before the study was halted) is not considered when deternmining whether a trial is due to report results under the law. Additionally, while sponsors are allowed to use "anticipated" primary completion dates if the actual date is not yet known, it is their repsonsibility to ensure these dates are accurate. The law clearly states that in the absense of an actual primary completion date, the deadline for results will be calculated from the anticipated primary completion date (<a href="https://www.law.cornell.edu/uscode/text/42/282">US Code 402(j)(3)(E)(i)(I)</a>) 
+          
+          <h2>What are cancelled result?</h2>    
+          <p>When a sponsor has submitted results, but before they have completed quality control with ClinicalTrials.gov, they can choose to cancel their submission. This is noted in the trial record along with any subsequent resubmissions. For the purposes of the FDAAA TrialsTracker, we note these trials in their own "Overdue (cancelled results)" category until new results are resubmitted, but do not calculate any additional fines as it is unclear how these would be assessed.</p>  
+          
           <h2>How can I cite this work?</h2>
           <p>Please cite the website as:</p>
 
