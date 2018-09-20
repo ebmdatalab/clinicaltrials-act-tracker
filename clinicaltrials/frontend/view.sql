@@ -95,6 +95,7 @@ SELECT TRIM(json_EXTRACT(json,
     WHEN json_EXTRACT(json,  "$.clinical_study.pending_results") IS NOT NULL THEN 1
     ELSE 0
   END AS pending_results,
+  TRIM(json_EXTRACT(json,  "$.clinical_study.pending_results"), '"') AS pending_data,    
   CASE
     WHEN json_EXTRACT(json,  "$.clinical_study.clinical_results") IS NOT NULL THEN 1
     ELSE 0
@@ -182,6 +183,7 @@ website_data AS (
 /*Results Related Info*/
   has_results,
   pending_results,
+  pending_data,
   case when certificate_date is not null then 1 else 0 end as has_certificate,
   case when
   --Steps for determining if results are due
