@@ -14,7 +14,6 @@ from django.urls import reverse
 from frontend.trial_computer import compute_metadata
 
 
-
 class Sponsor(models.Model):
     slug = models.SlugField(max_length=200, primary_key=True)
     name = models.CharField(max_length=200)
@@ -211,12 +210,33 @@ class TrialQA(models.Model):
     cancelled_by_sponsor = models.DateField(null=True, blank=True)
     cancellation_date_inferred = models.NullBooleanField()
     returned_to_sponsor = models.DateField(null=True, blank=True)
+    first_seen_date = models.DateField(default=date.today, null=True)
 
     class Meta:
         ordering = ('submitted_to_regulator','id',)
 
     def save(self, *args, **kwargs):
         super(TrialQA, self).save(*args, **kwargs)
+        # In the case where a trial has been seen to be overdue for
+        # the first time, on the very same day that we've first seen
+        # this QA that might cancel the overdue status, then reset the
+        # `status` to `ongoing`.
+        #
+        # This is because we use `previous_status` to mean "status
+        # that could have been seen on previous days"; when two state
+        # changes originate from two different sources (the
+        # ClincialTrials download, and scraping the QA tabs) on the
+        # same day, it is (in our current workflow) impossible for the
+        # first state change to have been seen.
+        #
+        # This unpleasant hack is a consequence of the fact our data
+        # model really needs refactoring - see the README for context
+        # and issue #155 for explanation of this particular wart
+        newly_overdue = (self.first_seen_date == self.trial.updated_date
+                         and self.trial.previous_status == 'ongoing'
+                         and self.trial.status == 'overdue')
+        if newly_overdue:
+            self.trial.status = self.trial.previous_status
         self.trial.save()   # recomputes metadata
 
 
