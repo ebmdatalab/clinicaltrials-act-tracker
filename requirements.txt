@@ -20,7 +20,7 @@ decorator==4.3.0          # via ipython, traitlets
 django-appconf==1.0.2     # via django-compressor
 django-compressor==2.2
 django-extensions==2.0.3
-django-filter==1.1.0
+django-filter==2.0.0
 django-libsass==0.7
 django==2.1.4
 djangorestframework-csv==2.1.0
