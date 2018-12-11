@@ -92,7 +92,7 @@ Install required Python packages.
 Set environment variables required (edit `environment` and then run `source environment`).
 
 
-Checkout the data respository.
+Checkout the respository.
 
     cd ..
     git clone git@github.com:ebmdatalab/clinicaltrials-act-tracker.git
