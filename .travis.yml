@@ -3,6 +3,8 @@ python:
 - '3.5'
 services:
 - postgresql
+addons:
+  postgresql: "9.4"
 env:
   global:
     CLINICALTRIALS_SECRET_KEY: x
