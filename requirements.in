@@ -22,3 +22,6 @@ slackbot
 coveralls
 mistune
 python-twitter
+ipython
+django-extensions
+ipdb

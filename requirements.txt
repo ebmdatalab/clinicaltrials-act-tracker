@@ -5,6 +5,7 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 asn1crypto==0.24.0        # via cryptography
+backcall==0.1.0           # via ipython
 bcrypt==3.1.4             # via paramiko
 cachetools==2.0.1         # via google-auth
 certifi==2018.1.18        # via requests
@@ -12,15 +13,16 @@ cffi==1.11.5              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
 coverage==4.5.1
 coveralls==1.3.0
-cryptography==2.1.4       # via paramiko
+cryptography==2.4.2       # via paramiko
 csscompressor==0.9.5
 dateparser==0.7.0
+decorator==4.3.0          # via ipython, traitlets
 django-appconf==1.0.2     # via django-compressor
 django-compressor==2.2
 django-extensions==2.0.3
-django-filter==1.1.0
+django-filter==2.0.0
 django-libsass==0.7
-django==2.0.3
+django==2.1.4
 djangorestframework-csv==2.1.0
 djangorestframework==3.7.7
 docopt==0.6.2             # via coveralls
@@ -36,18 +38,28 @@ googleapis-common-protos==1.5.3  # via google-cloud-core
 gunicorn==19.7.1
 httplib2==0.10.3          # via google-api-python-client, oauth2client
 idna==2.6                 # via cryptography, requests
+ipdb==0.11
+ipython-genutils==0.2.0   # via traitlets
+ipython==7.2.0
+jedi==0.13.1              # via ipython
 libsass==0.14.0           # via django-libsass
 lxml==4.1.1
 mistune==0.8.3
 monotonic==1.4            # via tenacity
 oauth2client==4.1.2       # via google-api-python-client
 oauthlib==2.0.6           # via requests-oauthlib
-paramiko==2.4.0           # via fabric3
+paramiko==2.4.2           # via fabric3
+parso==0.3.1              # via jedi
+pexpect==4.6.0            # via ipython
+pickleshare==0.7.5        # via ipython
+prompt-toolkit==2.0.7     # via ipython
 protobuf==3.5.2           # via google-cloud-core, googleapis-common-protos
 psycopg2-binary==2.7.4
+ptyprocess==0.6.0         # via pexpect
 pyasn1-modules==0.2.1     # via google-auth, oauth2client
 pyasn1==0.4.2             # via oauth2client, paramiko, pyasn1-modules, rsa
 pycparser==2.18           # via cffi
+pygments==2.3.0           # via ipython
 pynacl==1.2.1             # via paramiko
 python-dateutil==2.6.1    # via dateparser
 python-twitter==3.4
@@ -55,17 +67,19 @@ pytz==2018.3              # via dateparser, django, tzlocal
 rcssmin==1.0.6            # via django-compressor
 regex==2018.2.21          # via dateparser
 requests-oauthlib==0.8.0  # via python-twitter
-requests==2.18.4
+requests==2.20.1
 rjsmin==1.0.12            # via django-compressor
 rsa==3.4.2                # via google-auth, oauth2client
-six==1.11.0               # via bcrypt, cryptography, django-extensions, djangorestframework-csv, fabric3, google-api-python-client, google-auth, google-cloud-core, google-resumable-media, libsass, oauth2client, protobuf, pynacl, python-dateutil, slackbot, tenacity, websocket-client
+six==1.11.0               # via bcrypt, cryptography, django-extensions, djangorestframework-csv, fabric3, google-api-python-client, google-auth, google-cloud-core, google-resumable-media, libsass, oauth2client, prompt-toolkit, protobuf, pynacl, python-dateutil, slackbot, tenacity, traitlets, websocket-client
 slackbot==0.5.1
 slacker==0.9.60           # via slackbot
 tenacity==4.9.0           # via google-cloud-core
+traitlets==4.3.2          # via ipython
 tzlocal==1.5.1            # via dateparser
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.0        # via google-api-python-client
 urllib3==1.22             # via requests
+wcwidth==0.1.7            # via prompt-toolkit
 websocket-client==0.47.0  # via slackbot
 werkzeug==0.14.1
 xmltodict==0.11.0
