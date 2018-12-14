@@ -163,16 +163,19 @@ class SponsorTrialsTestCase(TestCase):
 
     def test_today_counts(self):
         # save all the Trials with a new date to simulate an import run
+        new_date = date.today() + datetime.timedelta(days=1)
         for trial in Trial.objects.all():
-            trial.updated_date += datetime.timedelta(days=1)
+            trial.updated_date = new_date
+            trial.sponsor.updated_date = new_date
             trial.save()
+            trial.sponsor.save()
         # now alter a couple so we have new "today" state changes
-        self.cancelled_trial.trialqa_set.create(
-            submitted_to_regulator=date(2017,1,1)
-        )
-        self.due_trial.trialqa_set.create(
-            submitted_to_regulator=date(2016,1,1)
-        )
+        TrialQA.objects.create(
+            submitted_to_regulator=date(2017, 1, 1),
+            trial_id=self.cancelled_trial.id)
+        TrialQA.objects.create(
+            submitted_to_regulator=date(2016, 1, 1),
+            trial_id=self.due_trial.id)
         set_current_rankings()
 
         self.assertCountEqual(

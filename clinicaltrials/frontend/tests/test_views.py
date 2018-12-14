@@ -189,10 +189,10 @@ class ApiResultsTestCase(TestCase):
         self.assertEqual(response['recordsFiltered'], 1)
         self.assertEqual(response['results'][0]['title'], self.due_trial.title)
 
-        response = client.get('/api/trials/', {'status': 'xxx'}, format='json').json()
+        response = client.get('/api/trials/', {'status': 'overdue-cancelled'}, format='json').json()
         self.assertEqual(response['recordsFiltered'], 0)
 
-        response = client.get('/api/trials/', {'search[value]': 'xxx'}, format='json').json()
+        response = client.get('/api/trials/', {'search[value]': 'overdue-cancelled'}, format='json').json()
         self.assertEqual(response['recordsFiltered'], 0)
 
         response = client.get('/api/trials/', {'search[value]': 'Trial'}, format='json').json()
@@ -237,11 +237,11 @@ class ApiResultsTestCase(TestCase):
 
     def test_sponsor_filter(self):
         client = APIClient()
-        response = client.get('/api/sponsors/', {'num_trials_0': 0}, format='json').json()
+        response = client.get('/api/sponsors/', {'num_trials_min': 0}, format='json').json()
         self.assertEqual(response['recordsFiltered'], 1)
         self.assertEqual(response['results'][0]['slug'], self.sponsor.slug)
 
-        response = client.get('/api/sponsors/', {'num_trials_0': 4}, format='json').json()
+        response = client.get('/api/sponsors/', {'num_trials_min': 4}, format='json').json()
         self.assertEqual(response['recordsFiltered'], 0)
 
     def test_ranking_results(self):

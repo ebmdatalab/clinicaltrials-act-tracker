@@ -266,3 +266,26 @@ class CommandsTestCase(TestCase):
         self.assertEqual(len(qa), 1)
         self.assertEqual(qa[0].submitted_to_regulator, date(2017, 11, 13))
         self.assertEqual(qa[0].returned_to_sponsor, date(2017, 12, 11))
+
+    @mock.patch('requests.get')
+    @mock.patch('frontend.trial_computer.date')
+    @mock.patch('frontend.models.date')
+    def test_import_and_qa(self, date_mock_1, date_mock_2, requests_mock):
+        """When a trial becomes overdue but then QA shows reporting *on the
+        same day*, its previous_status should remain `ongoing`"""
+        date_mock_1.today = date_mock_2.today = mock.Mock(
+            return_value=self.today)
+        args = []
+        # A single trial, 2 months late, due 1st Nov 2018
+        sample_csv = os.path.join(settings.BASE_DIR, 'frontend/tests/fixtures/two_months_qa.csv')
+        opts = {'input_csv': sample_csv}
+
+        def month_1_results(arg):
+            # However, the QA means it's not overdue after all - Nov 13 2017
+            return mock_ccgov_results('nolongeroverdueinqa')
+        requests_mock.side_effect = month_1_results
+        call_command('process_data', *args, **opts)
+
+        trial = Trial.objects.get(
+            registry_id='overdueinqa_two_months')
+        self.assertEqual(trial.previous_status, 'ongoing')
