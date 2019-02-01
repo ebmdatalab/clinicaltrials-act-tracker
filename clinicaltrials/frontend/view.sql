@@ -196,7 +196,7 @@ website_data AS (
     ((study_type = 'Interventional')
     AND (fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes')
     AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' or phase = 'Phase 3' or phase = 'Phase 4' or phase = 'N/A')
-    AND (primary_purpose <> 'Device Feasibility')
+    AND (primary_purpose <> 'Device Feasibility' OR primary_purpose IS null)
     AND (start_date >= '2017-01-18')
     AND (study_status <> 'Withdrawn'))
 
@@ -206,7 +206,7 @@ website_data AS (
     AND (regexp_contains(intervention, '"Biological"') OR regexp_contains(intervention, '"Drug"')
     OR regexp_contains(intervention, '"Device"') OR regexp_contains(intervention, '"Genetic"') OR regexp_contains(intervention, '"Radiation"') OR regexp_contains(intervention, '"Combination Product"') OR regexp_contains(intervention, '"Diagnostic Test"'))
     AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' or phase = 'Phase 3' or phase = 'Phase 4' or phase = 'N/A')
-    AND (primary_purpose <> 'Device Feasibility')
+    AND (primary_purpose <> 'Device Feasibility' OR primary_purpose IS null)
     AND (available_completion_date >= '2017-01-18')
     AND (start_date < '2017-01-18')
     AND (study_status <> 'Withdrawn')
