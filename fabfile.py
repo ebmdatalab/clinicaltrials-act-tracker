@@ -101,6 +101,11 @@ def setup(environment, branch='master'):
 @task
 def deploy(environment, branch='master'):
     env = setup(environment, branch)
+    if environment == 'live':
+        # Always deploy to staging first, thanks to our update
+        # workflow (below)
+        deploy('staging', branch=branch)
+
     make_directory()
     setup_sudo()
     with cd(env.path):
