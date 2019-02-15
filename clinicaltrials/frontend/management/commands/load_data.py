@@ -39,10 +39,15 @@ def postprocessor(path, key, value):
     """
     if key.startswith('#') or key.startswith('@'):
         key = key[1:]
+    if key == 'clinical_results':
+        # Arbitrarily long field that we don't need, see #179
+        value = {'truncated_by_postprocessor': True}
     return key, value
+
 
 def wget_file(target, url):
     subprocess.check_call(["wget", "-q", "-O", target, url])
+
 
 def download_and_extract():
     """Clean up from past runs, then download into a temp location and move the
