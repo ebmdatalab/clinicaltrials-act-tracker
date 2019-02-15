@@ -97,7 +97,7 @@ SELECT TRIM(json_EXTRACT(json,
   END AS pending_results,
   TRIM(json_EXTRACT(json,  "$.clinical_study.pending_results"), '"') AS pending_data,    
   CASE
-    WHEN json_EXTRACT(json,  "$.clinical_study.clinical_results") IS NOT NULL THEN 1
+    WHEN JSON_EXTRACT_SCALAR(json,"$.clinical_study.results_first_submitted") IS NOT NULL THEN 1
     ELSE 0
   END AS has_results,
   PARSE_DATE("%B %e, %Y",
