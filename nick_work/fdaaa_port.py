@@ -147,6 +147,8 @@ with open('test_output.csv', 'w') as test_csv:
                 act_flag = 0
 
             #included_pact_flag
+            #Learned during this exercise - we need to change "U.S. Virgin Islands" to "Virgin Islands (U.S.)"
+            #Can either leave here and compare to currnet SQL or correct the SQL first and then compare
             for it in soup.find_all("intervention_type"):
                 if ('Drug' or 'Device' or 'Biological' or 'Genetic' or\
                 'Radiation' or 'Combination Product' or 'Diagnostic Test') in it:
@@ -174,7 +176,7 @@ with open('test_output.csv', 'w') as test_csv:
             ) and\
             (
              ('United States' or 'American Samoa' or 'Guam' or\
-             'Northern Mariana Islands' or 'Puerto Rico' or 'Virgin Islands (U.S.)') in locs
+             'Northern Mariana Islands' or 'Puerto Rico' or 'U.S. Virgin Islands') in locs
             ):
                 included_pact_flag = 1
             else:
