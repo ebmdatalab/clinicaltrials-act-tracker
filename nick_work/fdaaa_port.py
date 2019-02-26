@@ -146,9 +146,7 @@ with open('test_output.csv', 'w') as test_csv:
             else:
                 act_flag = 0
 
-            #included_pact_flag
-            #Learned during this exercise - we need to change "U.S. Virgin Islands" to "Virgin Islands (U.S.)"
-            #Can either leave here and compare to currnet SQL or correct the SQL first and then compare
+            #old_pact_flag
             for it in soup.find_all("intervention_type"):
                 if ('Drug' or 'Device' or 'Biological' or 'Genetic' or\
                 'Radiation' or 'Combination Product' or 'Diagnostic Test') in it:
@@ -176,18 +174,40 @@ with open('test_output.csv', 'w') as test_csv:
             ) and\
             (
              ('United States' or 'American Samoa' or 'Guam' or\
-             'Northern Mariana Islands' or 'Puerto Rico' or 'U.S. Virgin Islands') in locs
+             'Northern Mariana Islands' or 'Puerto Rico' or 'Virgin Islands (U.S.)') in locs
             ):
+                old_pact_flag = 1
+            else:
+                old_pact_flag = 0
+
+            #new_pact_flag
+            if study_type == 'Interventional' and\
+            (fda_reg_drug == 'Yes' or fda_reg_device == 'Yes') and\
+            (
+             phase == 'Phase 1/Phase 2' or phase == 'Phase 2' or\
+             phase == 'Phase 2/Phase 3' or phase == 'Phase 3' or\
+             phase == 'Phase 4' or phase == 'N/A'
+            ) and\
+            primary_purpose != 'Device Feasibility' and\
+            start_date < effective_date and\
+            available_completion_date >= effective_date and\
+            study_status != 'Withdrawn':
+                new_pact_flag = 1
+            else:
+                new_act_flag = 0 
+            
+            #included_pact_flag
+            if old_pact_flag == 1 or new_pact_flag == 1:
                 included_pact_flag = 1
             else:
-                included_pact_flag = 0
-
+                included_pact_flag = 0    
+  
             #location
             try:
                 location = json.dumps(parsed_json['clinical_study']['location_countries'])
             except KeyError:
-                location = None
-
+                location = None     
+           
             #has_results
             rsd = soup.results_first_submitted
             if rsd is not None:
