@@ -175,7 +175,7 @@ website_data AS (
     OR regexp_contains(location, concat("\\b", "Guam", "\\b"))
     OR regexp_contains(location, concat("\\b", "Northern Mariana Islands", "\\b"))
     OR regexp_contains(location, concat("\\b", "Puerto Rico", "\\b"))
-    OR regexp_contains(location, concat("\\b", "U.S. Virgin Islands", "\\b")))
+    OR regexp_contains(location, concat("\\b", "Virgin Islands (U.S.)", "\\b")))
     THEN 1
     ELSE 0
   END AS included_pact_flag,
@@ -222,7 +222,7 @@ website_data AS (
     OR regexp_contains(location, concat("\\b", "Guam", "\\b"))
     OR regexp_contains(location, concat("\\b", "Northern Mariana Islands", "\\b"))
     OR regexp_contains(location, concat("\\b", "Puerto Rico", "\\b"))
-    OR regexp_contains(location, concat("\\b", "U.S. Virgin Islands", "\\b"))))
+    OR regexp_contains(location, concat("\\b", "Virgin Islands (U.S.)", "\\b"))))
     )
   --checks to see if it has a certificate of exemption or if it's 3 years + 30 days after the primary completion date in which it's due no matter what
   AND (certificate_date is null OR (Date_ADD(Date_ADD(available_completion_date, Interval 3 YEAR), Interval 30 DAY) < current_date()))
