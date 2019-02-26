@@ -155,76 +155,91 @@ website_data AS (
 
 /*Creating the Flag for a pACT*/
   CASE
-    WHEN study_type = 'Interventional'
-    AND (regexp_contains(intervention, '"Biological"') OR regexp_contains(intervention, '"Drug"')
+    WHEN 
+    (study_type = 'Interventional'
+    AND (regexp_contains(intervention, '"Biological"') OR regexp_contains(intervention, '"Drug"') 
     OR regexp_contains(intervention, '"Device"') OR regexp_contains(intervention, '"Genetic"') OR regexp_contains(intervention, '"Radiation"') OR regexp_contains(intervention, '"Combination Product"') OR regexp_contains(intervention, '"Diagnostic Test"'))
-    AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' or phase = 'Phase 3' or phase = 'Phase 4' or phase = 'N/A')
-    AND (primary_purpose <> 'Device Feasibility' OR primary_purpose IS null)
+    AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' or phase = 'Phase 3' or phase = 'Phase 4' or phase = 'N/A') 
+    AND (primary_purpose <> 'Device Feasibility' OR primary_purpose is null)
     AND (available_completion_date >= '2017-01-18')
     AND (start_date < '2017-01-18')
-    AND study_status <> 'Withdrawn'
-    AND (
-          (fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes')
-        OR
-          (is_fda_regulated IS NOT FALSE
+    AND study_status <> 'Withdrawn' 
+    AND (is_fda_regulated IS NOT FALSE
             AND fda_reg_drug IS NULL
             AND fda_reg_device IS NULL)
-            ) -- for trials which were pACTs and the sponsor subsequently updated. See #92.
+             -- for trials which were pACTs and the sponsor subsequently updated. See #92.
     AND (regexp_contains(location, concat("\\b", "United States", "\\b"))
-    OR regexp_contains(location, concat("\\b", "American Samoa", "\\b"))
-    OR regexp_contains(location, concat("\\b", "Guam", "\\b"))
+    OR regexp_contains(location, concat("\\b", "American Samoa", "\\b"))  
+    OR regexp_contains(location, concat("\\b", "Guam", "\\b")) 
     OR regexp_contains(location, concat("\\b", "Northern Mariana Islands", "\\b"))
     OR regexp_contains(location, concat("\\b", "Puerto Rico", "\\b"))
-    OR regexp_contains(location, concat("\\b", "Virgin Islands (U.S.)", "\\b")))
+    OR regexp_contains(location, concat("\\b", "Virgin Islands (U.S.)", "\\b"))))
+    
+    OR
+    (study_type = 'Interventional' 
+    AND (fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes')
+    AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' OR phase = 'Phase 3' OR phase = 'Phase 4' OR phase = 'N/A') 
+    AND (primary_purpose <> 'Device Feasibility' OR primary_purpose is null)
+    AND (start_date < '2017-01-18') 
+    AND (available_completion_date >= '2017-01-18')
+    AND study_status <> 'Withdrawn') 
     THEN 1
     ELSE 0
-  END AS included_pact_flag,
+  END AS included_pact_flag,  
 
 /*Results Related Info*/
   has_results,
   pending_results,
   pending_data,
   case when certificate_date is not null then 1 else 0 end as has_certificate,
-  case when
+    case when 
   --Steps for determining if results are due
   --Sets the deadline for results as 1 year + 30 days from completion date
-  (Date_Add(Date_Add(available_completion_date, INTERVAL 1 YEAR), INTERVAL 30 DAY) < current_date())
-
-    AND
+  (Date_Add(Date_Add(available_completion_date, INTERVAL 1 YEAR), INTERVAL 30 DAY) < current_date()) 
+    
+    AND 
     --checks to see if it is an ACT
     (
     ((study_type = 'Interventional')
     AND (fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes')
-    AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' or phase = 'Phase 3' or phase = 'Phase 4' or phase = 'N/A')
-    AND (primary_purpose <> 'Device Feasibility' OR primary_purpose IS null)
-    AND (start_date >= '2017-01-18')
+    AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' or phase = 'Phase 3' or phase = 'Phase 4' or phase = 'N/A') 
+    AND (primary_purpose <> 'Device Feasibility' OR primary_purpose is null)
+    AND (start_date >= '2017-01-18') 
     AND (study_status <> 'Withdrawn'))
-
+    
     OR
-   --checks to see if it's a pACT
+   --checks to see if it's a pACT without the new fields
    ((study_type = 'Interventional')
-    AND (regexp_contains(intervention, '"Biological"') OR regexp_contains(intervention, '"Drug"')
+    AND (regexp_contains(intervention, '"Biological"') OR regexp_contains(intervention, '"Drug"') 
     OR regexp_contains(intervention, '"Device"') OR regexp_contains(intervention, '"Genetic"') OR regexp_contains(intervention, '"Radiation"') OR regexp_contains(intervention, '"Combination Product"') OR regexp_contains(intervention, '"Diagnostic Test"'))
-    AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' or phase = 'Phase 3' or phase = 'Phase 4' or phase = 'N/A')
-    AND (primary_purpose <> 'Device Feasibility' OR primary_purpose IS null)
-    AND (available_completion_date >= '2017-01-18')
+    AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' or phase = 'Phase 3' or phase = 'Phase 4' or phase = 'N/A') 
+    AND (primary_purpose <> 'Device Feasibility' OR primary_purpose is null)
+    AND (available_completion_date >= '2017-01-18') 
     AND (start_date < '2017-01-18')
-    AND (study_status <> 'Withdrawn')
-    AND (
-          (fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes')
-        OR
-          (is_fda_regulated IS NOT FALSE
+    AND (study_status <> 'Withdrawn') 
+    AND (is_fda_regulated IS NOT FALSE
             AND fda_reg_drug IS NULL
             AND fda_reg_device IS NULL)
             ) -- for trials which were pACTs and the sponsor subsequently updated. See #92.
     AND (regexp_contains(location, concat("\\b", "United States", "\\b"))
-    OR regexp_contains(location, concat("\\b", "American Samoa", "\\b"))
-    OR regexp_contains(location, concat("\\b", "Guam", "\\b"))
+    OR regexp_contains(location, concat("\\b", "American Samoa", "\\b"))  
+    OR regexp_contains(location, concat("\\b", "Guam", "\\b")) 
     OR regexp_contains(location, concat("\\b", "Northern Mariana Islands", "\\b"))
     OR regexp_contains(location, concat("\\b", "Puerto Rico", "\\b"))
-    OR regexp_contains(location, concat("\\b", "Virgin Islands (U.S.)", "\\b"))))
-    )
-  --checks to see if it has a certificate of exemption or if it's 3 years + 30 days after the primary completion date in which it's due no matter what
+    OR regexp_contains(location, concat("\\b", "Virgin Islands (U.S.)", "\\b"))) 
+    
+    
+    OR
+    --checks to see if it's a pACT with the new fields
+    (study_type = 'Interventional' 
+    AND (fda_reg_drug = 'Yes' OR fda_reg_device = 'Yes')
+    AND (phase = 'Phase 1/Phase 2' OR phase = 'Phase 2' OR Phase = 'Phase 2/Phase 3' OR phase = 'Phase 3' OR phase = 'Phase 4' OR phase = 'N/A') 
+    AND (primary_purpose <> 'Device Feasibility' OR primary_purpose is null)
+    AND (start_date < '2017-01-18') 
+    AND (available_completion_date >= '2017-01-18')
+    AND study_status <> 'Withdrawn'))
+    
+  --checks to see if it has a certificate of exemption or if it's 3 years + 30 days after the primary completion date in which it's due no matter what  
   AND (certificate_date is null OR (Date_ADD(Date_ADD(available_completion_date, Interval 3 YEAR), Interval 30 DAY) < current_date()))
   then 1 else 0 end as results_due,
 
