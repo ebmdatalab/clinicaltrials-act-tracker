@@ -120,71 +120,56 @@ with open('test_output.csv', 'w', newline='',encoding='utf-8') as test_csv:
 
             td = {}
 
-            nct_id = t(soup.nct_id)
-            td['nct_id'] = nct_id
+            td['nct_id'] = t(soup.nct_id)
 
-            study_type = t(soup.study_type)
-            td['study_type'] = study_type
+            td['study_type'] = t(soup.study_type)
+        
+            td['has_certificate'] = does_it_exist(soup.disposition_first_submitted)
 
-            has_certificate = does_it_exist(soup.disposition_first_submitted)
-            td['has_certificate'] = has_certificate
+            td['phase'] = t(soup.phase)
 
-            phase = t(soup.phase)
-            td['phase'] = phase
+            td['fda_reg_drug'] = t(soup.is_fda_regulated_drug)
 
-            fda_reg_drug = t(soup.is_fda_regulated_drug)
-            td['fda_reg_drug'] = fda_reg_drug
-
-            fda_reg_device = t(soup.is_fda_regulated_device)
-            td['fda_reg_device'] = fda_reg_device
-
-            primary_purpose = t(soup.find('primary_purpose'))
-            td['primary_purpose'] = primary_purpose
+            td['fda_reg_device'] = t(soup.is_fda_regulated_device)
+   
+            td['primary_purpose'] = t(soup.find('primary_purpose'))
 
             try:
-                if fda_reg_dict[nct_id] == 'false':
-                    is_fda_regulated = False
-                elif fda_reg_dict[nct_id] == 'true':
-                    is_fda_regulated = True
+                if fda_reg_dict[td['nct_id']] == 'false':
+                    td['is_fda_regulated'] = False
+                elif fda_reg_dict[td['nct_id']] == 'true':
+                    td['is_fda_regulated'] = True
                 else:
-                    is_fda_regulated = None
+                    td['is_fda_regulated'] = None
             except KeyError:
-                is_fda_regulated = None
-            td['is_fda_regulated'] = is_fda_regulated
+                td['is_fda_regulated'] = None
 
-            study_status = t(soup.overall_status)
-            td['study_status'] = study_status
+            td['study_status'] = t(soup.overall_status)
 
-            start_date = (str_to_date(soup.start_date))[0]
-            td['start_date'] = start_date
+            td['start_date'] = (str_to_date(soup.start_date))[0]
 
-            primary_completion_date, defaulted_pcd_flag = str_to_date(soup.primary_completion_date)
-            td['defaulted_pcd_flag'] = defaulted_pcd_flag
+            primary_completion_date, td['defaulted_pcd_flag'] = str_to_date(soup.primary_completion_date)
 
-            completion_date, defaulted_cd_flag = str_to_date(soup.completion_date)
-            td['defaulted_cd_flag'] = defaulted_cd_flag
+            completion_date, td['defaulted_cd_flag'] = str_to_date(soup.completion_date)
 
             if not primary_completion_date and not completion_date:
-                available_completion_date = None
+                td['available_completion_date'] = None
             elif completion_date and not primary_completion_date:
-                available_completion_date = completion_date
-                used_primary_completion_date = False
+                td['available_completion_date'] = completion_date
+                td['used_primary_completion_date'] = False
             else:
-                available_completion_date = primary_completion_date
-                used_primary_completion_date = True
-            td['available_completion_date'] = available_completion_date
-            td['used_primary_completion_date'] = used_primary_completion_date
+                td['available_completion_date'] = primary_completion_date
+                td['used_primary_completion_date'] = True
 
-            if (is_interventional(study_type) and
-                is_fda_reg(fda_reg_drug, fda_reg_device) and
-                is_covered_phase(phase) and
-                is_not_device_feasibility(primary_purpose) and
-                start_date >= effective_date and
-                is_not_withdrawn(study_status)):
-                act_flag = True
+            if (is_interventional(td['study_type']) and
+                is_fda_reg(td['fda_reg_drug'], td['fda_reg_device']) and
+                is_covered_phase(td['phase']) and
+                is_not_device_feasibility(td['primary_purpose']) and
+                td['start_date'] >= effective_date and
+                is_not_withdrawn(td['study_status'])):
+                td['act_flag'] = True
             else:
-                act_flag = False
-            td['act_flag'] = act_flag
+                td['act_flag'] = False
 
             intervention_type_field = soup.find_all("intervention_type")
             trial_intervention_types = []
@@ -193,36 +178,35 @@ with open('test_output.csv', 'w', newline='',encoding='utf-8') as test_csv:
             
             locs = t(soup.location_countries)
 
-            if (is_interventional(study_type) and
+            if (is_interventional(td['study_type']) and
                 is_covered_intervention(trial_intervention_types) and
-                is_covered_phase(phase) and
-                is_not_device_feasibility(primary_purpose) and
-                available_completion_date >= effective_date and
-                start_date < effective_date and
-                is_not_withdrawn(study_status) and
-                (is_fda_reg(fda_reg_drug, fda_reg_device) or
-                 is_old_fda_regulated(is_fda_regulated, fda_reg_drug, fda_reg_device)) and
+                is_covered_phase(td['phase']) and
+                is_not_device_feasibility(td['primary_purpose']) and
+                td['available_completion_date'] >= effective_date and
+                td['start_date'] < effective_date and
+                is_not_withdrawn(td['study_status']) and
+                (is_fda_reg(td['fda_reg_drug'], td['fda_reg_device']) or
+                 is_old_fda_regulated(td['is_fda_regulated'], td['fda_reg_drug'], td['fda_reg_device'])) and
                 has_us_loc(locs)):
                 old_pact_flag = True
             else:
                 old_pact_flag = False
 
-            if (is_interventional(study_type) and
-                is_fda_reg(fda_reg_drug, fda_reg_device) and
-                is_covered_phase(phase) and
-                is_not_device_feasibility(primary_purpose) and
-                start_date < effective_date and
-                available_completion_date >= effective_date and
-                is_not_withdrawn(study_status)):
+            if (is_interventional(td['study_type']) and
+                is_fda_reg(td['fda_reg_drug'], td['fda_reg_device']) and
+                is_covered_phase(td['phase']) and
+                is_not_device_feasibility(td['primary_purpose']) and
+                td['start_date'] < effective_date and
+                td['available_completion_date'] >= effective_date and
+                is_not_withdrawn(td['study_status'])):
                 new_pact_flag = True
             else:
                 new_pact_flag = False
 
             if old_pact_flag == True or new_pact_flag == True:
-                included_pact_flag = True
+                td['included_pact_flag'] = True
             else:
-                included_pact_flag = False
-            td['included_pact_flag'] = included_pact_flag
+                td['included_pact_flag'] = False
 
             td['location'] = dict_or_none(parsed_json,[cs, 'location_countries'])
 
@@ -232,9 +216,9 @@ with open('test_output.csv', 'w', newline='',encoding='utf-8') as test_csv:
 
             td['pending_data'] = dict_or_none(parsed_json,[cs,'pending_results'])
 
-            if ((act_flag == True or included_pact_flag == True) and
-                date.today() > available_completion_date + relativedelta(years=1) + timedelta(days=30) and
-                (has_certificate == 0 or (date.today() > available_completion_date + relativedelta(years=3) + timedelta(days=30)))):
+            if ((td['act_flag'] == True or td['included_pact_flag'] == True) and
+                date.today() > td['available_completion_date'] + relativedelta(years=1) + timedelta(days=30) and
+                (td['has_certificate'] == 0 or (date.today() > td['available_completion_date'] + relativedelta(years=3) + timedelta(days=30)))):
                 td['results_due'] = True
             else:
                 td['results_due'] = False 
@@ -243,8 +227,7 @@ with open('test_output.csv', 'w', newline='',encoding='utf-8') as test_csv:
 
             td['last_updated_date'] = (str_to_date(soup.last_update_submitted))[0]
 
-            certificate_date = (str_to_date(soup.disposition_first_submitted))[0]
-            td['certificate_date'] = certificate_date
+            td['certificate_date'] = (str_to_date(soup.disposition_first_submitted))[0]
 
             td['enrollment'] = t(soup.enrollment)
 
@@ -256,36 +239,39 @@ with open('test_output.csv', 'w', newline='',encoding='utf-8') as test_csv:
 
             td['exported'] = t(soup.oversight_info.is_us_export)
 
-            td['url'] = (soup.url).text
+            td['url'] = t(soup.url)
 
-            official_title = t(soup.official_title)
-            td['official_title'] = official_title
+            td['official_title'] = t(soup.official_title)
 
-            brief_title = t(soup.brief_title)
-            td['brief_title'] = brief_title
-
-            if official_title is not None:
-                td['title'] = official_title
-            elif official_title is None and brief_title is not None:
-                td['title'] = brief_title
+            td['brief_title'] = t(soup.brief_title)
+            
+            td['title'] = td['official_title'] or td['brief_title']
+            
+            if td['official_title'] is not None:
+                td['title'] = td['official_title']
+            elif td['official_title'] is None and td['brief_title'] is not None:
+                td['title'] = td['brief_title']
             else:
                 td['title'] = None
 
             #add this to "if" statement after testing: 'and completion_date is not null')
+            not_ongoing = ["Unknown status", "Active, not recruiting", "Not yet recruiting", "Enrolling by invitation", "Suspended", "Recruiting"]
             if ((primary_completion_date < date.today() or primary_completion_date is None) and 
-                completion_date < date.today() and study_status in ["Unknown status", "Active, not recruiting", "Not yet recruiting", 
-                                                                    "Enrolling by invitation", "Suspended", "Recruiting"]):
+                completion_date < date.today() and td['study_status'] in not_ongoing):
                 td['discrep_date_status'] = True
             else:
                 td['discrep_date_status'] = False
-
-            if certificate_date is not None and certificate_date > (certificate_date + relativedelta(years=1)):
-                td['late_cert'] = True
+            
+            if td['certificate_date'] is not None:
+                if td['certificate_date'] > (td['available_completion_date'] + relativedelta(years=1)):
+                    td['late_cert'] = True
+                else:
+                    td['late_cert'] = False
             else:
                 td['late_cert'] = False
 
-            if ((used_primary_completion_date == True and defaulted_pcd_flag == True) or 
-                used_primary_completion_date == False and defaulted_cd_flag == True):
+            if ((td['used_primary_completion_date'] == True and td['defaulted_pcd_flag'] == True) or 
+                td['used_primary_completion_date'] == False and td['defaulted_cd_flag'] == True):
                 td['defaulted_date'] = True
             else:
                 td['defaulted_date'] = False
