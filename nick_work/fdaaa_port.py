@@ -56,9 +56,7 @@ def has_us_loc(locs):
     for us_loc in us_locs:
         if us_loc in locs:
             return True
-            break
-        else:
-            return False
+    return False
     
 def dict_or_none(data, keys):
     for k in keys:
@@ -104,8 +102,6 @@ headers = ['nct_id', 'act_flag', 'included_pact_flag', 'has_results', 'pending_r
 
 effective_date = date(2017, 1, 18)
 directory = 'NCTxxx' #this points to a folder in my working directory. Change as needed.
-
-trial_dict = defaultdict(list)
 
 with open('test_output.csv', 'w', newline='',encoding='utf-8') as test_csv:
     writer = csv.DictWriter(test_csv, fieldnames=headers)
