@@ -16,6 +16,7 @@ environments = {
     'test': 'fdaaa_test',
 }
 
+
 def sudo_script(script, www_user=False):
     """Run script under `deploy/fab_scripts/` as sudo.
 
@@ -73,9 +74,6 @@ def setup_cron():
     if env.environment == 'live':
         sudo_script('setup_cron.sh %s' % (env.path))
 
-def setup_ebmbot():
-    sudo_script('setup_ebmbot.sh %s' % env.app)
-
 def setup_django():
     with prefix('source venv/bin/activate'):
         run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py collectstatic --noinput --settings=frontend.settings')
@@ -112,7 +110,6 @@ def deploy(environment, branch='master'):
         with prefix("source /etc/profile.d/%s.sh" % env.app):
             venv_init()
             update_from_git(branch)
-            setup_ebmbot()
             setup_cron()
             pip_install()
             setup_django()
