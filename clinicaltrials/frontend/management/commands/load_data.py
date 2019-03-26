@@ -178,6 +178,7 @@ def get_env(path):
             env[k] = v
     return env
 
+
 def process_data():
     # TODO no need to call via shell any more (now we are also a command)
     try:
@@ -194,7 +195,7 @@ def process_data():
         notify_slack("Today's data uploaded to FDAAA staging: "
                      "https://staging-fdaaa.ebmdatalab.net.  "
                      "If this looks good, tell ebmbot to "
-                     "'update fdaaa staging'""")
+                     "'@ebmbot fdaaa deploy'""")
     except subprocess.CalledProcessError as e:
         notify_slack("Error in FDAAA import: command `{}` "
                      "failed with error code {} "
