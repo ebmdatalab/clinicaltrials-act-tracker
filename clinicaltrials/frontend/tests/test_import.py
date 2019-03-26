@@ -311,6 +311,12 @@ class CommandsTestCase(TestCase):
         requests_mock.side_effect = month_1_results
         call_command('process_data', *args, **opts)
 
+        # This trial starts off as overdue; the mocked CC.gov webpage
+        # makes that `reported-late`.
+        trial = Trial.objects.get(registry_id='overdueinqa_two_months')
+        self.assertEqual(trial.status, Trial.STATUS_REPORTED_LATE)
+        self.assertEqual(trial.trialqa_set.count(), 1)
+
         def month_2_results(arg):
             return mock_ccgov_results('no_qa')
         requests_mock.side_effect = month_2_results
