@@ -18,7 +18,6 @@ google-cloud-storage==1.3.2
 xmltodict
 lxml
 coverage
-slackbot
 coveralls
 mistune
 python-twitter
