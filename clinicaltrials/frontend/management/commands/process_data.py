@@ -94,6 +94,10 @@ def set_qa_metadata(trial):
                 if returned:
                     qa.returned_to_sponsor = returned
                     qa.save()
+    else:
+        deleted, _ = trial.trialqa_set.all().delete()
+        if deleted:
+            trial.save()
 
 
 def _compute_ranks():

@@ -68,9 +68,10 @@ class CommandsTestCase(TestCase):
         overdueinqa = Trial.objects.get(registry_id='overdueinqa')
         self.assertEqual(overdueinqa.status, 'reported-late')
         self.assertEqual(overdueinqa.days_late, 12)
-        self.assertEqual(qa_start_dates(overdueinqa)[0], date(2017,11,13))
+        self.assertEqual(qa_start_dates(overdueinqa)[0], date(2017, 11, 13))
 
-        late_sponsor_ranking = Ranking.objects.filter(sponsor=overdueinqa.sponsor).first()
+        late_sponsor_ranking = Ranking.objects.filter(
+            sponsor=overdueinqa.sponsor).first()
         self.assertEqual(late_sponsor_ranking.days_late, 73)
         self.assertEqual(late_sponsor_ranking.finable_days_late, 31)
 
@@ -175,6 +176,10 @@ class CommandsTestCase(TestCase):
     @mock.patch('frontend.trial_computer.date')
     def test_qa(self, datetime_mock):
         "Does a simple import create expected rankings and sponsors?"
+        # The CSV imported at the start of this test contains a
+        # variety of trials whose trial id corresponds with a fixture
+        # which is a copy of a CC.gov webpage containing various sorts
+        # of QA tables.
         datetime_mock.today = mock.Mock(return_value=self.today)
 
         args = []
@@ -289,3 +294,35 @@ class CommandsTestCase(TestCase):
         trial = Trial.objects.get(
             registry_id='overdueinqa_two_months')
         self.assertEqual(trial.previous_status, 'ongoing')
+
+
+    @mock.patch('requests.get')
+    @mock.patch('frontend.trial_computer.date')
+    def test_import_with_disappearing_qa(self, datetime_mock, requests_mock):
+        "If QA table disappears, trial should revert to overdue"
+        datetime_mock.today = mock.Mock(return_value=self.today)
+        args = []
+        sample_csv = os.path.join(
+            settings.BASE_DIR, 'frontend/tests/fixtures/two_months_qa.csv')
+        opts = {'input_csv': sample_csv}
+
+        def month_1_results(arg):
+            return mock_ccgov_results('overdueinqa_month_1')
+        requests_mock.side_effect = month_1_results
+        call_command('process_data', *args, **opts)
+
+        # This trial starts off as overdue; the mocked CC.gov webpage
+        # makes that `reported-late`.
+        trial = Trial.objects.get(registry_id='overdueinqa_two_months')
+        self.assertEqual(trial.status, Trial.STATUS_REPORTED_LATE)
+        self.assertEqual(trial.trialqa_set.count(), 1)
+
+        def month_2_results(arg):
+            return mock_ccgov_results('no_qa')
+        requests_mock.side_effect = month_2_results
+        call_command('process_data', *args, **opts)
+
+        trial = Trial.objects.get(registry_id='overdueinqa_two_months')
+        qa_count = trial.trialqa_set.count()
+        self.assertEqual(qa_count, 0)
+        self.assertEqual(trial.status, Trial.STATUS_OVERDUE)
