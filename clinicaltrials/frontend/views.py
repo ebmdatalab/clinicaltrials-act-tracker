@@ -81,7 +81,7 @@ def rankings(request):
 # Sponsor page
 
 def sponsor(request, slug):
-    sponsor = Sponsor.objects.get(slug=slug)
+    sponsor = get_object_or_404(Sponsor, slug=slug)
     days_late = sponsor.trial_set.aggregate(
         days_late=Sum('finable_days_late'))['days_late']
     if days_late:
