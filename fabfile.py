@@ -103,7 +103,7 @@ def deploy(environment, branch='master'):
         # Always deploy to staging first, thanks to our update
         # workflow (below)
         deploy('staging', branch=branch)
-        deploy('live', branch=branch)
+
     make_directory()
     setup_sudo()
     with cd(env.path):
