@@ -296,7 +296,7 @@ def dict_or_none(data, keys):
             data = data[k]
         except KeyError:
             return None
-    return json.dumps(data)
+    return json.dumps(data, separators=(',', ':'))
 
 
 # Some dates on clinicaltrials.gov are only Month-Year not
@@ -330,6 +330,17 @@ def does_it_exist(dataloc):
         return False
     else:
         return True
+
+
+def convert_bools_to_ints(row):
+    for k, v in row.items():
+        if v is True:
+            v = 1
+            row[k] = v
+        elif v is False:
+            v = 0
+            row[k] = v
+    return row
 
 
 def convert_to_csv():
@@ -429,7 +440,6 @@ def convert_to_csv():
                     td["is_fda_regulated"] = None
             except KeyError:
                 td["is_fda_regulated"] = None
-
             td["study_status"] = t(soup.overall_status)
 
             td["start_date"] = (str_to_date(soup.start_date))[0]
@@ -632,7 +642,7 @@ def convert_to_csv():
 
             td["keywords"] = dict_or_none(parsed_json, [cs, "keyword"])
 
-            writer.writerow(td)
+            writer.writerow(convert_bools_to_ints(td))
 
 
 class Command(BaseCommand):
