@@ -653,8 +653,8 @@ class Command(BaseCommand):
             os.remove(settings.INTERMEDIATE_CSV_PATH)
         try:
             download_and_extract()
-            #convert_to_json()
-            #upload_to_cloud()
+            convert_to_json()
+            upload_to_cloud()
             convert_to_csv()
             process_data()
         except:
