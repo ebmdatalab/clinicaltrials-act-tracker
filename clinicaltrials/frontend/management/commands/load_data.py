@@ -38,9 +38,8 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-
 def raw_json_name():
-    date = datetime.datetime.now().strftime('%Y-%m-%d')
+    date = datetime.now().strftime('%Y-%m-%d')
     return "raw_clincialtrials_json_{}.csv".format(date)
 
 
@@ -114,7 +113,7 @@ def convert_to_json():
     logger.info("Converting to JSON...")
     dpath = os.path.join(settings.WORKING_DIR, 'NCT*/')
     files = [x for x in sorted(glob.glob(dpath + '*.xml'))]
-    start = datetime.datetime.now()
+    start = datetime.now()
     completed = 0
     with open(os.path.join(settings.WORKING_DIR, raw_json_name()), 'w') as f2:
         for source in files:
@@ -133,7 +132,7 @@ def convert_to_json():
 
         completed += 1
         if completed % 100 == 0:
-            elapsed = datetime.datetime.now() - start
+            elapsed = datetime.now() - start
             per_file = elapsed.seconds / completed
             remaining = int(per_file * (len(files) - completed) / 60.0)
             logger.info("%s minutes remaining", remaining)
