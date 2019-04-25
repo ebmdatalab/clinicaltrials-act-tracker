@@ -584,7 +584,6 @@ def convert_to_csv():
             else:
                 td["title"] = None
 
-            # add this to "if" statement after testing: 'and completion_date is not null')
             not_ongoing = [
                 "Unknown status",
                 "Active, not recruiting",
@@ -599,6 +598,7 @@ def convert_to_csv():
                     or primary_completion_date is None
                 )
                 and completion_date < date.today()
+                and completion_date is not null
                 and td["study_status"] in not_ongoing
             ):
                 td["discrep_date_status"] = True
