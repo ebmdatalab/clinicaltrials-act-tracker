@@ -254,15 +254,15 @@ class Ranking(models.Model):
     reported = models.IntegerField()
     reported_late = models.IntegerField()
     reported_on_time = models.IntegerField()
-    percentage = models.IntegerField(null=True)
+
+    @property
+    def percentage(self):
+        if not self.due:
+            return None
+        return round(100.0*self.reported/self.due, 1)
 
     def __str__(self):
         return "{}: {} at {}% on {}".format(self.rank, self.sponsor, self.percentage, self.date)
-
-    def save(self, *args, **kwargs):
-        if self.due:
-            self.percentage = float(self.reported)/self.due * 100
-        super(Ranking, self).save(*args, **kwargs)
 
     class Meta:
         unique_together = ('sponsor', 'date',)
