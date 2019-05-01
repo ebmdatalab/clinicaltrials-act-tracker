@@ -297,6 +297,11 @@ def dict_or_none(data, keys):
             return None
     return json.dumps(data, separators=(',', ':'))
 
+def date_check(date, condition):
+    if date is None:
+        return(False)
+    else:
+        return(condition)
 
 # Some dates on clinicaltrials.gov are only Month-Year not
 # Day-Month-Year.  When this happens, we assign them to the last day
@@ -465,7 +470,7 @@ def convert_to_csv():
                 and is_fda_reg(td["fda_reg_drug"], td["fda_reg_device"])
                 and is_covered_phase(td["phase"])
                 and is_not_device_feasibility(td["primary_purpose"])
-                and td["start_date"] >= effective_date
+                and date_check(td["start_date"], td["start_date"] >= effective_date)
                 and is_not_withdrawn(td["study_status"])
             ):
                 td["act_flag"] = True
@@ -484,8 +489,8 @@ def convert_to_csv():
                 and is_covered_intervention(trial_intervention_types)
                 and is_covered_phase(td["phase"])
                 and is_not_device_feasibility(td["primary_purpose"])
-                and td["available_completion_date"] >= effective_date
-                and td["start_date"] < effective_date
+                and date_check(td["available_completion_date"], td["available_completion_date"] >= effective_date)
+                and date_check(td["start_date"), td["start_date"] < effective_date)
                 and is_not_withdrawn(td["study_status"])
                 and (
                     is_fda_reg(td["fda_reg_drug"], td["fda_reg_device"])
@@ -506,8 +511,8 @@ def convert_to_csv():
                 and is_fda_reg(td["fda_reg_drug"], td["fda_reg_device"])
                 and is_covered_phase(td["phase"])
                 and is_not_device_feasibility(td["primary_purpose"])
-                and td["start_date"] < effective_date
-                and td["available_completion_date"] >= effective_date
+                and date_check(td["start_date"],td["start_date"] < effective_date)
+                and date_check(td["available_completion_date"], td["available_completion_date"] >= effective_date)
                 and is_not_withdrawn(td["study_status"])
             ):
                 new_pact_flag = True
@@ -526,20 +531,22 @@ def convert_to_csv():
             td["pending_results"] = does_it_exist(soup.pending_results)
 
             td["pending_data"] = dict_or_none(parsed_json, [cs, "pending_results"])
+                                  
+            date_cond1 = td["available_completion_date"]
+                                  + relativedelta(years=1)
+                                  + timedelta(days=30)
+            
+            date_cond2 = td["available_completion_date"]
+                                  + relativedelta(years=3)
+                                  + timedelta(days=30)                    
 
             if (
                 (td["act_flag"] == True or td["included_pact_flag"] == True)
-                and date.today()
-                > td["available_completion_date"]
-                + relativedelta(years=1)
-                + timedelta(days=30)
+                and
+                date_check(td["available_completion_date"], date.today() > date_cond1)
                 and (
                     td["has_certificate"] == 0
-                    or (
-                        date.today()
-                        > td["available_completion_date"]
-                        + relativedelta(years=3)
-                        + timedelta(days=30)
+                    or (date_check(td["available_completion_date"], date.today() > date_cond2)
                     )
                 )
             ):
