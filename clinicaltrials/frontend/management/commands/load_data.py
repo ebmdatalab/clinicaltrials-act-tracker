@@ -521,7 +521,10 @@ def convert_to_csv():
 
             td["location"] = dict_or_none(parsed_json, [cs, "location_countries"])
 
-            td["has_results"] = does_it_exist(soup.results_first_submitted)
+            if does_it_exist(soup.results_first_submitted) or does_it_exist(soup.pending_results):
+                td["has_results"] = True
+            else:
+                td["has_results"] = False
 
             td["pending_results"] = does_it_exist(soup.pending_results)
 
