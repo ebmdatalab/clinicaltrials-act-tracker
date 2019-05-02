@@ -465,6 +465,7 @@ def convert_to_csv():
                 and is_fda_reg(td["fda_reg_drug"], td["fda_reg_device"])
                 and is_covered_phase(td["phase"])
                 and is_not_device_feasibility(td["primary_purpose"])
+                and td["start_date"]
                 and td["start_date"] >= effective_date
                 and is_not_withdrawn(td["study_status"])
             ):
@@ -484,7 +485,9 @@ def convert_to_csv():
                 and is_covered_intervention(trial_intervention_types)
                 and is_covered_phase(td["phase"])
                 and is_not_device_feasibility(td["primary_purpose"])
+                and td["available_completion_date"]
                 and td["available_completion_date"] >= effective_date
+                and td["start_date"]
                 and td["start_date"] < effective_date
                 and is_not_withdrawn(td["study_status"])
                 and (
@@ -506,7 +509,9 @@ def convert_to_csv():
                 and is_fda_reg(td["fda_reg_drug"], td["fda_reg_device"])
                 and is_covered_phase(td["phase"])
                 and is_not_device_feasibility(td["primary_purpose"])
+                and td["start_date"]
                 and td["start_date"] < effective_date
+                and td["available_completion_date"]
                 and td["available_completion_date"] >= effective_date
                 and is_not_withdrawn(td["study_status"])
             ):
