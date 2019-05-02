@@ -532,13 +532,9 @@ def convert_to_csv():
 
             td["pending_data"] = dict_or_none(parsed_json, [cs, "pending_results"])
                                   
-            date_cond1 = td["available_completion_date"]
-                                  + relativedelta(years=1)
-                                  + timedelta(days=30)
+            date_cond1 = td["available_completion_date"] + relativedelta(years=1) + timedelta(days=30)
             
-            date_cond2 = td["available_completion_date"]
-                                  + relativedelta(years=3)
-                                  + timedelta(days=30)                    
+            date_cond2 = td["available_completion_date"] + relativedelta(years=3) + timedelta(days=30)                    
 
             if (
                 (td["act_flag"] == True or td["included_pact_flag"] == True)
