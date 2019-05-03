@@ -563,16 +563,17 @@ def convert_to_csv():
             )[0]
 
             td["enrollment"] = t(soup.enrollment)
-
-            td["sponsor"] = t(soup.sponsors.lead_sponsor.agency)
-
-            td["sponsor_type"] = t(soup.sponsors.lead_sponsor.agency_class)
+            if soup.sponsors and soup.sponsors.lead_sponsor:
+                td["sponsor"] = t(soup.sponsors.lead_sponsor.agency)
+                td["sponsor_type"] = t(soup.sponsors.lead_sponsor.agency_class)
+            else:
+                td["sponsor"] = td["sponsor_type"] = None
 
             td["collaborators"] = dict_or_none(
                 parsed_json, [cs, "sponsors", "collaborator"]
             )
 
-            td["exported"] = t(soup.oversight_info.is_us_export)
+            td["exported"] = t(soup.oversight_info and soup.oversight_info.is_us_export)
 
             td["url"] = t(soup.url)
 
