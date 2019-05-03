@@ -600,11 +600,11 @@ def convert_to_csv():
             ]
             if (
                 (
+                    primary_completion_date is None or
                     primary_completion_date < date.today()
-                    or primary_completion_date is None
                 )
-                and completion_date < date.today()
                 and completion_date is not None
+                and completion_date < date.today()
                 and td["study_status"] in not_ongoing
             ):
                 td["discrep_date_status"] = True
