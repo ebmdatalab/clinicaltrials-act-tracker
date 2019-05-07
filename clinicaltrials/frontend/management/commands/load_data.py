@@ -623,11 +623,14 @@ def convert_to_csv():
 
             if (
                 (
-                    td["used_primary_completion_date"] == True
-                    and td["defaulted_pcd_flag"] == True
+                    td.get("used_primary_completion_date", False)
+                    and td.get("defaulted_pcd_flag", False)
                 )
-                or td["used_primary_completion_date"] == False
-                and td["defaulted_cd_flag"] == True
+                or
+                (
+                    td.get("used_primary_completion_date", False)
+                    and td.get("defaulted_cd_flag", False)
+                )
             ):
                 td["defaulted_date"] = True
             else:
