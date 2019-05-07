@@ -611,7 +611,7 @@ def convert_to_csv():
             else:
                 td["discrep_date_status"] = False
 
-            if td["certificate_date"] is not None:
+            if td["certificate_date"] is not None and td["available_completion_date"] is not None:
                 if td["certificate_date"] > (
                     td["available_completion_date"] + relativedelta(years=1)
                 ):
