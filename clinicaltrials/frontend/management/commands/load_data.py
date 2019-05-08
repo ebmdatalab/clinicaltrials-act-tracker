@@ -138,7 +138,6 @@ def convert_to_json():
             logger.info("%s minutes remaining", remaining)
 
 
-
 def convert_and_download():
     logger.info("Executing SQL in cloud and downloading results...")
     storage_path = os.path.join(settings.STORAGE_PREFIX, raw_json_name())
@@ -283,9 +282,10 @@ def has_us_loc(locs):
         "Puerto Rico",
         "Virgin Islands (U.S.)",
     ]
-    for us_loc in us_locs:
-        if us_loc in locs:
-            return True
+    if locs:
+        for us_loc in us_locs:
+            if us_loc in locs:
+                return True
     return False
 
 
