@@ -649,8 +649,8 @@ def convert_to_csv():
             )
 
             td["keywords"] = dict_or_none(parsed_json, [cs, "keyword"])
-
-            writer.writerow(convert_bools_to_ints(td))
+            if td["act_flag"] or td["included_pact_flag"]:
+                writer.writerow(convert_bools_to_ints(td))
 
 
 class Command(BaseCommand):
