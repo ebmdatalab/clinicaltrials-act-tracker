@@ -283,9 +283,10 @@ def has_us_loc(locs):
         "Puerto Rico",
         "Virgin Islands (U.S.)",
     ]
-    for us_loc in us_locs:
-        if us_loc in locs:
-            return True
+    if locs:
+        for us_loc in us_locs:
+            if us_loc in locs:
+                return True
     return False
 
 
