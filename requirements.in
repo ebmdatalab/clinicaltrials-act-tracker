@@ -25,3 +25,4 @@ ipython
 django-extensions
 ipdb
 bs4
+-e git://github.com/ebmdatalab/clinicaltrials-act-converter#egg=clinicaltrials_converter
