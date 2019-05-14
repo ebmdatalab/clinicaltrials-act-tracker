@@ -38,6 +38,7 @@ def set_qa_metadata(trial):
     url = "https://clinicaltrials.gov/ct2/show/results/{}".format(registry_id)
     content = html.fromstring(requests.get(url).text)
     table = content.xpath("//table[.//th//text()[contains(., 'Submission Cycle')]]")
+    results = content.xpath('//*[@id="results"]/text()')[0].strip()
     if table:
         for row in table[0].xpath(".//tr"):
             if len(row.xpath(".//td")) == 0:
@@ -94,6 +95,12 @@ def set_qa_metadata(trial):
                 if returned:
                     qa.returned_to_sponsor = returned
                     qa.save()
+    elif not table and results == 'Study Results':
+        # This can happen where a study has published the results, but
+        # the data dump doesn't yet reflect this. We assume the state
+        # is the same as the last time QA results were checked. See
+        # #198 for background.
+        pass
     else:
         deleted, _ = trial.trialqa_set.all().delete()
         if deleted:
