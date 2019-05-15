@@ -1,7 +1,7 @@
+import io
 from datetime import date
 from lxml.etree import tostring
 import csv
-import datetime
 import logging
 import re
 
@@ -14,8 +14,6 @@ from django.utils.text import slugify
 from frontend.models import Trial
 from frontend.models import TrialQA
 from frontend.models import Sponsor
-from frontend.models import Ranking
-from frontend.models import date
 import requests
 from lxml import html
 import dateparser
@@ -25,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 # The date cc.gov first started recording cancellations
 EARLIEST_CANCELLATION_DATE = date(2018, 7, 5)
+
 
 def set_qa_metadata(trial):
     """Scrape `Results Submitted` tab on website for interim reporting
@@ -180,7 +179,11 @@ class Command(BaseCommand):
             type=str)
 
     def handle(self, *args, **options):
-        f = open(options['input_csv'])
+        if '://' in options['input_csv']:
+            resp = requests.get(options['input_csv'], stream=True)
+            f = io.StringIO(resp.text)
+        else:
+            f = open(options['input_csv'])
         logger.info("Creating new trials and sponsors from %s", options['input_csv'])
         with transaction.atomic():
             # We don't use auto_now on models for `today`, purely so
