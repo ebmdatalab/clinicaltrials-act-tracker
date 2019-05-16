@@ -19,14 +19,12 @@ reporting easier.
 
 Operational overview:
 
-1. Python script `load_data.py`:
- * downloads a zip clinical trials registry data from ClinicalTrials.gov
- * converts the XML to JSON
- * uploads it to BigQuery
- * runs SQL to transform it to tabular format including fields to
-   indentify ACTs and their lateness
- * downloads SQL as a CSV file
-
+1. A CSV file of ACTs and pACTs is generated from a full zip archive
+published daily by ClinicalTrials.gov. This is done via a
+transformation process maintained in a [separate
+repo](https://github.com/ebmdatalab/clinicaltrials-act-converter), and
+triggered via the `load_data.py` management command, which following
+CSV conversion goes on to call the...
 2. Django management command `process_data`:
   * imports CSV file into Django models
   * precomputes aggregate statistics and turns these into rankings
@@ -36,25 +34,17 @@ Operational overview:
     (specifically, trials which have been submitted but are under a QA
     process).
 
-These two commands are run daily via a `fab` script, and the results
-loaded into a staging database / website.
+`load_data` is run daily by a cron job
+([job](https://github.com/ebmdatalab/clinicaltrials-act-tracker/blob/master/deploy/crontab-fdaaa-update),
+[script](https://github.com/ebmdatalab/clinicaltrials-act-tracker/blob/master/deploy/fab_scripts/kickoff_background_data_load.sh))
+in a staging environment, where the latest data is reviewed by a team
+member.
 
-A separate command copies new data from staging to production
-(following moderation).
-
-Much complex logic has been expressed in SQL, which makes it hard to read
-and test.  This is a legacy of splitting the development between
-academics with the domain expertise (and who could use SQL to
-prototype) and software engineers.  Now the project has been running
-for a while and new development interations are less frequent, a useful
-project would be as much of this logic to Python.
-
-Similarly, the only reason step (1) exists is to create a CSV which
-can be imported to the database.  That CSV is useful in its own right
-for QA by our academics, but the XML and JSON artefacts are just
-intermediate formats that could legitimately be dropped in a
-refactored solution (and the CSV could be generated directly from the
-database).
+A [separate
+command](https://github.com/ebmdatalab/clinicaltrials-act-tracker/blob/master/deploy/fab_scripts/copy_staging_to_live.sh)
+copies new data from staging to production (following moderation).
+These commands can also be triggered via fab, and via `ebmbot`
+chatops.
 
 The historic reason for the XML -> JSON route is because BigQuery
 includes a number of useful JSON functions which can be manipulated by
