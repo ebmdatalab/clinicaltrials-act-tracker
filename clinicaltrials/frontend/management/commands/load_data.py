@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-import logging
 import os
 import requests
-import sys
 import traceback
 from frontend.management.commands.process_data import Command as ProcessCommand
 from django.core.management.base import BaseCommand
@@ -31,14 +29,14 @@ def convert_data():
     # an exception if its startup script finished in an error or
     # unknown state
     create_instance.main(
-        "ebmdatalab", "europe-west2-a", "ctgov-converter", wait=True)
+        "ebmdatalab", "ctgov-converter", wait=True)
 
 
 def process_data():
     cmd = ProcessCommand()
     cmd.handle(
         input_csv=('https://storage.googleapis.com/ebmdatalab/clinicaltrials/'
-                   'clinical_trials.csv.tmp'))
+                   'clinical_trials.csv'))
 
 
 class Command(BaseCommand):
