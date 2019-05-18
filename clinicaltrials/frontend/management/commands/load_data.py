@@ -184,7 +184,7 @@ def process_data():
     try:
         subprocess.check_output(
             [
-                "{}python".format(settings.PROCESSING_VENV_BIN),
+                shutil.which("python"),
                 "{}/manage.py".format(settings.BASE_DIR),
                 "process_data",
                 "--input-csv={}".format(settings.INTERMEDIATE_CSV_PATH),

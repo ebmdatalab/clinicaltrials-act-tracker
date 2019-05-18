@@ -268,7 +268,6 @@ TWITTER_ACCESS_TOKEN_SECRET = common.utils.get_env_setting('TWITTER_ACCESS_TOKEN
 
 # Path to shell script of lines `export FOO=bar`. See environment-example for a sample.
 PROCESSING_ENV_PATH = '/etc/profile.d/fdaaa_staging.sh'
-PROCESSING_VENV_BIN = '/var/www/fdaaa_staging/venv/bin/'
 PROCESSING_STORAGE_TABLE_NAME = 'current_raw_json'
 
 # Bucket in GCS to store data
