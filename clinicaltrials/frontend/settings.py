@@ -13,7 +13,7 @@ import logging
 import os
 import datetime
 
-import common.utils
+from common.utils import Unset, get_env_setting
 
 import custom_logging
 
@@ -28,21 +28,23 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, '../static')
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = common.utils.get_env_setting('CLINICALTRIALS_SECRET_KEY')
+SECRET_KEY = get_env_setting('CLINICALTRIALS_SECRET_KEY',
+        'cae7Ip2Utah7voochee9mahnoachingahra>faiv%ua8Uep)ai-zi!thee2xee8a')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-CLINICALTRIALS_DEBUG = common.utils.get_env_setting('CLINICALTRIALS_DEBUG')
+CLINICALTRIALS_DEBUG = get_env_setting('CLINICALTRIALS_DEBUG', 'yes')
 assert CLINICALTRIALS_DEBUG in ['yes', 'no'], "CLINICALTRIALS_DEBUG was '{}'".format(CLINICALTRIALS_DEBUG)
 DEBUG = CLINICALTRIALS_DEBUG == 'yes'
 
-ALLOWED_HOSTS = [
-    'staging-fdaaa.ebmdatalab.net', '127.0.0.1', '192.168.0.55', 'localhost',
-    'fdaaa.trialstracker.net']
 
+ALLOWED_HOSTS = ['fdaaa.trialstracker.net']
+if DEBUG:
+    ALLOWED_HOSTS.extend(['staging-fdaaa.ebmdatalab.net', '127.0.0.1', '192.168.0.55', 'localhost'])
 
 # Parameters
 
-GOOGLE_TRACKING_ID = common.utils.get_env_setting('CLINICALTRIALS_GOOGLE_TRACKING_ID')
+GOOGLE_TRACKING_ID = get_env_setting('CLINICALTRIALS_GOOGLE_TRACKING_ID', None if DEBUG else Unset)
+SLACK_GENERAL_POST_KEY = get_env_setting('SLACK_GENERAL_POST_KEY', None if DEBUG else Unset)
 
 
 # Application definition
@@ -263,15 +265,15 @@ BQ_HSCIC_DATASET = ''
 
 # Twitter
 
-TWITTER_CONSUMER_SECRET = common.utils.get_env_setting('TWITTER_CONSUMER_SECRET')
-TWITTER_ACCESS_TOKEN_SECRET = common.utils.get_env_setting('TWITTER_ACCESS_TOKEN_SECRET')
+TWITTER_CONSUMER_SECRET = get_env_setting('TWITTER_CONSUMER_SECRET', None if DEBUG else Unset)
+TWITTER_ACCESS_TOKEN_SECRET = get_env_setting('TWITTER_ACCESS_TOKEN_SECRET', None if DEBUG else Unset)
 
 # Path to shell script of lines `export FOO=bar`. See environment-example for a sample.
-PROCESSING_ENV_PATH = '/etc/profile.d/fdaaa_staging.sh'
+PROCESSING_ENV_PATH = '/etc/profile.d/fdaaa_staging.sh' if not DEBUG else None
 PROCESSING_STORAGE_TABLE_NAME = 'current_raw_json'
 
 # Bucket in GCS to store data
-STORAGE_PREFIX = 'clinicaltrials/'
-WORKING_VOLUME = '/mnt/volume-lon1-01/'   # should have at least 10GB space
+STORAGE_PREFIX = 'trialdata'
+WORKING_VOLUME = get_env_setting('WORKDIR', '/mnt/volume-lon1-01/' if not DEBUG else os.curdir)   # should have at least 10GB space
 WORKING_DIR = os.path.join(WORKING_VOLUME, STORAGE_PREFIX)
 INTERMEDIATE_CSV_PATH = os.path.join(WORKING_VOLUME, STORAGE_PREFIX, 'clinical_trials.csv')
