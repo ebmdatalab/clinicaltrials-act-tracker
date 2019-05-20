@@ -41,6 +41,19 @@ ALLOWED_HOSTS = ['fdaaa.trialstracker.net']
 if DEBUG:
     ALLOWED_HOSTS.extend(['staging-fdaaa.ebmdatalab.net', '127.0.0.1', '192.168.0.55', 'localhost'])
 
+if DEBUG:
+    DEFAULT_DB_NAME = "storage.sqlite3"
+    DEFAULT_DB_USER = None
+    DEFAULT_DB_PASSWORD = None
+    DEFAULT_DB_HOST = None
+    DEFAULT_DB_ENGINE = 'django.db.backends.sqlite3'
+else:
+    DEFAULT_DB_NAME = Unset
+    DEFAULT_DB_USER = Unset
+    DEFAULT_DB_PASSWORD = Unset
+    DEFAULT_DB_HOST = 'localhost'
+    DEFAULT_DB_ENGINE = 'django.db.backends.postgresql_psycopg2',
+
 # Parameters
 
 GOOGLE_TRACKING_ID = get_env_setting('CLINICALTRIALS_GOOGLE_TRACKING_ID', None if DEBUG else Unset)
@@ -183,16 +196,15 @@ STATICFILES_FINDERS = (
 
 WSGI_APPLICATION = 'frontend.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': common.utils.get_env_setting('CLINICALTRIALS_DB'),
-        'USER': common.utils.get_env_setting('CLINICALTRIALS_DB_NAME'),
-        'PASSWORD': common.utils.get_env_setting('CLINICALTRIALS_DB_PASS'),
-        'HOST': 'localhost',
+        'ENGINE': get_env_setting('CLINICALTRIALS_DB', DEFAULT_DB_ENGINE),
+        'NAME': get_env_setting('CLINICALTRIALS_DB', DEFAULT_DB_NAME),
+        'USER': get_env_setting('CLINICALTRIALS_DB_NAME', DEFAULT_DB_USER),
+        'PASSWORD': get_env_setting('CLINICALTRIALS_DB_PASS', DEFAULT_DB_PASSWORD),
+        'HOST': get_env_setting('CLINICALTRIALS_DB_PASS', DEFAULT_DB_HOST),
         'CONN_MAX_AGE': 0  # Must be zero, see api/view_utils#db_timeout
     },
 }

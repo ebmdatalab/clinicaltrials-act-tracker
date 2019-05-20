@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -10,5 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL('ALTER TABLE frontend_trial ALTER sponsor_id TYPE varchar(200);'),
+        migrations.AlterField('trial', 'sponsor_id', models.CharField(max_length=200)),
     ]
