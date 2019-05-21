@@ -185,16 +185,37 @@ WSGI_APPLICATION = 'frontend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': common.utils.get_env_setting('CLINICALTRIALS_DB'),
-        'USER': common.utils.get_env_setting('CLINICALTRIALS_DB_NAME'),
-        'PASSWORD': common.utils.get_env_setting('CLINICALTRIALS_DB_PASS'),
-        'HOST': 'localhost',
-        'CONN_MAX_AGE': 0  # Must be zero, see api/view_utils#db_timeout
-    },
-}
+
+if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
+    # Running on production App Engine, so connect to Google Cloud SQL using
+    # the unix socket at /cloudsql/<your-cloudsql-connection string>
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'HOST': '/cloudsql/ebmdatalab:europe-west1:general-purpose-1',
+            'NAME': common.utils.get_env_setting('CLINICALTRIALS_DB'),
+            'USER': common.utils.get_env_setting('CLINICALTRIALS_DB_NAME'),
+            'PASSWORD': common.utils.get_env_setting('CLINICALTRIALS_DB_PASS')
+            ,
+        }
+    }
+else:
+    # Running locally so connect to either a local MySQL instance or connect to
+    # Cloud SQL via the proxy. To start the proxy via command line:
+    #
+    #     $ cloud_sql_proxy -instances=[INSTANCE_CONNECTION_NAME]=tcp:3306
+    #
+    # See https://cloud.google.com/sql/docs/mysql-connect-proxy
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': common.utils.get_env_setting('CLINICALTRIALS_DB'),
+            'USER': common.utils.get_env_setting('CLINICALTRIALS_DB_NAME'),
+            'PASSWORD': common.utils.get_env_setting('CLINICALTRIALS_DB_PASS'),
+            'HOST': 'localhost',
+            'CONN_MAX_AGE': 0  # Must be zero, see api/view_utils#db_timeout
+        },
+    }
 
 
 # Password validation
