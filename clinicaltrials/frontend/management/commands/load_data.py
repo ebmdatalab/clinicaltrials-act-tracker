@@ -29,7 +29,7 @@ def convert_data():
     # an exception if its startup script finished in an error or
     # unknown state
     create_instance.main(
-        "ebmdatalab", "ctgov-converter", wait=True)
+        "ebmdatalab", "europe-west2-a", "ctgov-converter", wait=True)
 
 
 def process_data():
