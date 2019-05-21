@@ -97,9 +97,12 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
-        }
+        'heroku': {
+            'format': ('%(asctime)s [%(process)d] [%(levelname)s] ' +
+                       'pathname=%(pathname)s lineno=%(lineno)s ' +
+                       'funcname=%(funcName)s %(message)s'),
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
     },
     'filters': {
         'require_debug_false': {
@@ -107,27 +110,25 @@ LOGGING = {
         }
     },
     'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'heroku'
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        'applogfile': {
-            'level':'DEBUG',
-            'class': 'custom_logging.GroupWriteRotatingFileHandler',
-            'filename': os.path.join(PROJECT_ROOT, 'clinicaltrials.log'),
-            'maxBytes': 1024*1024*50, # 50MB
-            'backupCount': 10,
-        },
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins', 'applogfile'],
+            'handlers': ['mail_admins', 'console'],
             'level': 'ERROR',
             'propagate': True,
         },
         'clinicaltrials': {
-            'handlers': ['applogfile'],
+            'handlers': ['console'],
             'level': 'INFO',
         },
     }
