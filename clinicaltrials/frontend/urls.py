@@ -71,5 +71,6 @@ urlpatterns = [
     # Management endpoints
     path('management/process_data/<path:path>', management_views.process_data),
     path('management/load_data/', management_views.load_data),
+    path('management/migrate/', management_views.migrate),
 
 ]

@@ -1,3 +1,6 @@
+import io
+from contextlib import redirect_stdout
+
 from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
 from django.core.management import call_command
@@ -20,10 +23,27 @@ def valid_secret(func):
 @valid_secret
 def process_data(request, path=None):
     command = "process_data"
-    result = call_command(command, input_csv=path)
+    f = io.StringIO()
+    with redirect_stdout(f):
+        call_command(command, input_csv=path)
+    result = f.getvalue()
     context = {
         'command': command,
         'args': 'path={}'.format(path),
+        'result': result
+    }
+    return render(request, "command.html", context=context)
+
+
+@valid_secret
+def migrate(request):
+    command = "migrate"
+    f = io.StringIO()
+    with redirect_stdout(f):
+        call_command(command)
+    result = f.getvalue()
+    context = {
+        'command': command,
         'result': result
     }
     return render(request, "command.html", context=context)
