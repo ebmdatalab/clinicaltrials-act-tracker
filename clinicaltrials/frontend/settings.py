@@ -29,15 +29,15 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, '../static')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = common.utils.get_env_setting('CLINICALTRIALS_SECRET_KEY')
+SECRET_MANAGEMENT_KEY = common.utils.get_env_setting('CLINICALTRIALS_SECRET_MANAGEMENT_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 CLINICALTRIALS_DEBUG = common.utils.get_env_setting('CLINICALTRIALS_DEBUG')
 assert CLINICALTRIALS_DEBUG in ['yes', 'no'], "CLINICALTRIALS_DEBUG was '{}'".format(CLINICALTRIALS_DEBUG)
 DEBUG = CLINICALTRIALS_DEBUG == 'yes'
 
-ALLOWED_HOSTS = [
-    'staging-fdaaa.ebmdatalab.net', '127.0.0.1', '192.168.0.55', 'localhost',
-    'fdaaa.trialstracker.net']
+
+ALLOWED_HOSTS = ['*']
 
 
 # Parameters

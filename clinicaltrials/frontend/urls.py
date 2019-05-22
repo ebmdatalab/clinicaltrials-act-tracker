@@ -12,6 +12,7 @@ from rest_framework import routers
 from frontend.models import Sponsor
 from frontend.models import Trial
 from frontend import views
+from frontend import management_views
 
 from .custom_rest_views import TrialViewSet
 from .custom_rest_views import RankingViewSet
@@ -66,4 +67,9 @@ urlpatterns = [
 
     # Redirects
     path('about/', RedirectView.as_view(url='/faq/', permanent=True), name='views.about'),
+
+    # Management endpoints
+    path('management/process_data/<path:path>', management_views.process_data),
+    path('management/load_data/', management_views.load_data),
+
 ]
