@@ -1,0 +1,16 @@
+service: management
+
+runtime: python37
+instance_class: B1  # can run for 24 hours
+
+basic_scaling:
+  max_instances: 1
+  idle_timeout: 60m
+
+handlers:
+- url: /management/process_data.*
+  script: clinicaltrials.wsgi.application
+
+env_variables:
+  CLINICALTRIALS_DB_NAME: 'clinicaltrials'
+  CLINICALTRIALS_DB_PASS: 'ec9SSnG@e2M^9QKu'

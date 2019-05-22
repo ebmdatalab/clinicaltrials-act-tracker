@@ -1,0 +1,6 @@
+dispatch:
+  - url: "*/management/*"
+    service: management
+
+  - url: "*"
+    service: web
