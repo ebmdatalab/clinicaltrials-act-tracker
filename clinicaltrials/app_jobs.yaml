@@ -2,14 +2,15 @@ service: management
 
 runtime: python37
 instance_class: B1  # can run for 24 hours
+entrypoint: cd clinicaltrials && gunicorn -b :$PORT clinicaltrials.wsgi
 
 basic_scaling:
   max_instances: 1
-  idle_timeout: 60m
+  idle_timeout: 60m  # I think 30m prob fine
 
 handlers:
 - url: /management/process_data.*
-  script: clinicaltrials.wsgi.application
+  script: auto
 
 env_variables:
   CLINICALTRIALS_DB_NAME: 'clinicaltrials'
