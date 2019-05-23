@@ -122,7 +122,7 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django.request': {
+        'django': {
             'handlers': ['mail_admins', 'console'],
             'level': 'ERROR',
             'propagate': True,
@@ -130,6 +130,7 @@ LOGGING = {
         'clinicaltrials': {
             'handlers': ['console'],
             'level': 'INFO',
+            'propagate': True
         },
     }
 }
