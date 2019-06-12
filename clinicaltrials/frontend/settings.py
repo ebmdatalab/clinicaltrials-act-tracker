@@ -169,7 +169,7 @@ STATICFILES_FINDERS = (
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
+if 'GAE_SERVICE' in os.environ:
     # Running on production App Engine, so connect to Google Cloud SQL using
     # the unix socket at /cloudsql/<your-cloudsql-connection string>
     DATABASES = {
