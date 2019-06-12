@@ -1,17 +1,22 @@
-service: default
+service: management-long-timeout
 runtime: python37
 
+instance_class: B4  # 512MB, can run for 24 hours, $0.20/h
+
+basic_scaling:
+  max_instances: 1
+  idle_timeout: 60m  # I think 30m prob fine
+
+# see "known issue" documented at https://cloud.google.com/appengine/docs/standard/python3/config/appref
 handlers:
-- url: /static
-  static_dir: static/
-- url: /.*
+- url: '/.*'
   script: auto
 
 env_variables:
   CLINICALTRIALS_SECRET_KEY: 'asd' # random longish string for sessions
   CLINICALTRIALS_SECRET_MANAGEMENT_KEY: 'asd' # random longish string for securing REST endpoints
   CLINICALTRIALS_DEBUG: 'yes' # yes or no
-  #CLINICALTRIALS_GOOGLE_TRACKING_ID asd # optional Analytics id, e.g. UA-nnnnnnnn-n
+  CLINICALTRIALS_GOOGLE_TRACKING_ID: '' # optional Analytics id, e.g. UA-nnnnnnnn-n
   CLINICALTRIALS_DB: 'clinicaltrials'
   CLINICALTRIALS_DB_NAME: 'fdaaa'
   CLINICALTRIALS_DB_PASS: 'fdaaa'
