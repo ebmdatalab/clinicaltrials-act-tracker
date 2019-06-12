@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sitemaps',
     'django.contrib.staticfiles',
-    'compressor',
     'rest_framework',
     'django_filters',
     'frontend',
@@ -161,24 +160,9 @@ TEMPLATES = [
     },
 ]
 
-COMPRESS_PRECOMPILERS = (
-    ('text/x-scss', 'django_libsass.SassCompiler'),
-)
-
-COMPRESS_ROOT = 'static'
-
-COMPRESS_CSS_FILTERS = [
-  'compressor.filters.css_default.CssAbsoluteFilter',
-  'compressor.filters.cssmin.CSSCompressorFilter'
-]
-
-# This is breaking the styling, now sure why
-COMPRESS_ENABLED = False
-
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
 )
 
 
