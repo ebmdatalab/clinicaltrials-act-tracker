@@ -179,11 +179,10 @@ if 'GAE_SERVICE' in os.environ:
             'NAME': common.utils.get_env_setting('CLINICALTRIALS_DB'),
             'USER': common.utils.get_env_setting('CLINICALTRIALS_DB_NAME'),
             'PASSWORD': common.utils.get_env_setting('CLINICALTRIALS_DB_PASS')
-            ,
         }
     }
 else:
-    # Running locally so connect to either a local MySQL instance or connect to
+    # Running locally so connect to either a local postgres instance or connect to
     # Cloud SQL via the proxy. To start the proxy via command line:
     #
     #     $ cloud_sql_proxy -instances=[INSTANCE_CONNECTION_NAME]=tcp:3306
