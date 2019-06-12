@@ -1,12 +1,14 @@
 fabric3
 Django
+django_compressor
 django-libsass
+csscompressor
+gunicorn
 psycopg2-binary
 djangorestframework
 djangorestframework-csv
 django-filter
 django-extensions
-google-api-python-client
 werkzeug
 dateparser
 requests

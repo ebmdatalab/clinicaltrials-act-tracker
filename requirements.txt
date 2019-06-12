@@ -17,10 +17,11 @@ chardet==3.0.4            # via requests
 coverage==4.5.2
 coveralls==1.5.1
 cryptography==2.5         # via paramiko
+csscompressor==0.9.5
 dateparser==0.7.1
 decorator==4.3.2          # via ipython, traitlets
 django-appconf==1.0.2     # via django-compressor
-django-compressor==2.2    # via django-libsass
+django-compressor==2.2
 django-extensions==2.1.5
 django-filter==2.1.0
 django-libsass==0.7
@@ -39,6 +40,7 @@ google-cloud-core==1.0.0  # via google-cloud-bigquery, google-cloud-storage
 google-cloud-storage==1.16.0
 google-resumable-media==0.3.2  # via google-cloud-bigquery, google-cloud-storage
 googleapis-common-protos==1.5.10  # via google-api-core
+gunicorn==19.9.0
 httplib2==0.12.3          # via google-api-python-client, google-auth-httplib2
 idna==2.8                 # via requests
 ipdb==0.11
