@@ -1,6 +1,6 @@
 dispatch:
   - url: "*/management/*"
-    service: management
+    service: management-long-timeout
 
   - url: "*/*"
     service: default
