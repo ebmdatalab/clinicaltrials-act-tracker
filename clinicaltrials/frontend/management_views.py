@@ -78,9 +78,13 @@ def general_view(request, args):
 
     args = [
         x for x in parts[1:] if x
-    ]  # remove empty strings that result from trailing slashes
-    kwargs = dict(request.GET).copy()
-    kwargs.pop("secret")
+    ]  # remove empty strings caused by trailing slashes
+    kwargs = {}
+    for k, v in request.GET.items():
+        if k in kwargs:
+            raise Exception("Can't handle duplicate values from query string")
+        if k != "secret":
+            kwargs[k] = v
     f = io.StringIO()
     with redirect_stdout(f):
         call_command(command_name, *args, **kwargs)
