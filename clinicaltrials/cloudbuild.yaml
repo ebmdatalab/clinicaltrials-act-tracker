@@ -1,0 +1,36 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'django-manage', '.']
+- name: "django-manage"
+  args: ["collectstatic", "--noinput"]
+  env:
+    - 'CLINICALTRIALS_SECRET_KEY=asd'
+    - 'CLINICALTRIALS_HTTP_MANAGEMENT_SECRET=asd'
+    - 'CLINICALTRIALS_DEBUG=yes'
+    - 'CLINICALTRIALS_GOOGLE_TRACKING_ID=asdc'
+    - 'CLINICALTRIALS_DB=clinicaltrials'
+    - 'CLINICALTRIALS_DB_NAME=root'
+    - 'CLINICALTRIALS_DB_PASS=root'
+    - 'GOOGLE_APPLICATION_CREDENTIALS=asd'
+    - 'SLACK_GENERAL_POST_KEY=asd'
+    - 'TWITTER_CONSUMER_SECRET=asd'
+    - 'TWITTER_ACCESS_TOKEN_SECRET=qwerty'
+- name: "django-manage"
+  args: ["compress"]
+  env:
+    - 'CLINICALTRIALS_SECRET_KEY=asd'
+    - 'CLINICALTRIALS_HTTP_MANAGEMENT_SECRET=asd'
+    - 'CLINICALTRIALS_DEBUG=yes'
+    - 'CLINICALTRIALS_GOOGLE_TRACKING_ID=asdc'
+    - 'CLINICALTRIALS_DB=clinicaltrials'
+    - 'CLINICALTRIALS_DB_NAME=root'
+    - 'CLINICALTRIALS_DB_PASS=root'
+    - 'GOOGLE_APPLICATION_CREDENTIALS=asd'
+    - 'SLACK_GENERAL_POST_KEY=asd'
+    - 'TWITTER_CONSUMER_SECRET=asd'
+    - 'TWITTER_ACCESS_TOKEN_SECRET=qwerty'
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["app", "deploy", "app.yaml", "--quiet", "--project=clinicaltrials-243513"]
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["app", "deploy", "app_long_jobs.yaml"]
+timeout: "1600s"

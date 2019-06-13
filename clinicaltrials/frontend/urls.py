@@ -21,56 +21,64 @@ from .custom_rest_views import SponsorViewSet
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r'trials', TrialViewSet, base_name='trials')
-router.register(r'rankings', RankingViewSet)
-router.register(r'sponsors', SponsorViewSet)
+router.register(r"trials", TrialViewSet, base_name="trials")
+router.register(r"rankings", RankingViewSet)
+router.register(r"sponsors", SponsorViewSet)
+
 
 class StaticViewSitemap(Sitemap):
     priority = 0.5
-    changefreq = 'daily'
+    changefreq = "daily"
 
     def items(self):
-        return ['views.latest_overdue',
-                'views.rankings',
-                'views.trials',
-                'views.about',
-                'views.fund',
-                'views.trials']
+        return [
+            "views.latest_overdue",
+            "views.rankings",
+            "views.trials",
+            "views.about",
+            "views.fund",
+            "views.trials",
+        ]
 
     def location(self, item):
         return reverse(item)
 
+
 urlpatterns = [
-    path('', views.latest_overdue, name='views.latest_overdue'),
-    path('rankings/', views.rankings, name='views.rankings'),
-    path('api/performance/', views.performance, name='views.performance'),
-    path('api/', include(router.urls)),
-    path('trials/', views.trials, name='views.trials'),
-    path('trial/<str:registry_id>/', views.trial, name='views.trial'),
-    path('sponsor/<slug:slug>/', views.sponsor, name='views.sponsor'),
-    path('api/', include('rest_framework.urls')),
-    path('faq/', TemplateView.as_view(template_name="faq.html"), name='views.faq'),
-    path('fund/', TemplateView.as_view(template_name="fund.html"), name='views.fund'),
-    path('pages/<path:path>', views.static_markdown, name='views.static_markdown'),
-    path('sitemap.xml', sitemap,
-         {'sitemaps': {
-             'static': StaticViewSitemap,
-             'sponsor': GenericSitemap(
-                 {'queryset': Sponsor.objects.all(),
-                  'date_field': 'updated_date'}, priority=0.5),
-             'trial': GenericSitemap(
-                 {'queryset': Trial.objects.all(),
-                  'date_field': 'updated_date'}, priority=0.5),
-         }},
-         name='django.contrib.sitemaps.views.sitemap'),
-    path('accounts/', include('django.contrib.auth.urls')),
-
+    path("", views.latest_overdue, name="views.latest_overdue"),
+    path("rankings/", views.rankings, name="views.rankings"),
+    path("api/performance/", views.performance, name="views.performance"),
+    path("api/", include(router.urls)),
+    path("trials/", views.trials, name="views.trials"),
+    path("trial/<str:registry_id>/", views.trial, name="views.trial"),
+    path("sponsor/<slug:slug>/", views.sponsor, name="views.sponsor"),
+    path("api/", include("rest_framework.urls")),
+    path("faq/", TemplateView.as_view(template_name="faq.html"), name="views.faq"),
+    path("fund/", TemplateView.as_view(template_name="fund.html"), name="views.fund"),
+    path("pages/<path:path>", views.static_markdown, name="views.static_markdown"),
+    path(
+        "sitemap.xml",
+        sitemap,
+        {
+            "sitemaps": {
+                "static": StaticViewSitemap,
+                "sponsor": GenericSitemap(
+                    {"queryset": Sponsor.objects.all(), "date_field": "updated_date"},
+                    priority=0.5,
+                ),
+                "trial": GenericSitemap(
+                    {"queryset": Trial.objects.all(), "date_field": "updated_date"},
+                    priority=0.5,
+                ),
+            }
+        },
+        name="django.contrib.sitemaps.views.sitemap",
+    ),
+    path("accounts/", include("django.contrib.auth.urls")),
     # Redirects
-    path('about/', RedirectView.as_view(url='/faq/', permanent=True), name='views.about'),
-
+    path(
+        "about/", RedirectView.as_view(url="/faq/", permanent=True), name="views.about"
+    ),
     # Management endpoints
-    path('management/process_data/<path:path>', management_views.process_data),
-    path('management/load_data/', management_views.load_data),
-    path('management/migrate/', management_views.migrate),
-
+    path("management/<path:args>", management_views.general_view),
 ]
