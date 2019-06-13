@@ -76,8 +76,10 @@ def general_view(request, args):
     if command_name not in settings.HTTP_MANAGEMENT_WHITELIST:
         raise PermissionDenied
 
-    args = parts[1:]
-    kwargs = request.GET.copy()
+    args = [
+        x for x in parts[1:] if x
+    ]  # remove empty strings that result from trailing slashes
+    kwargs = dict(request.GET).copy()
     kwargs.pop("secret")
     f = io.StringIO()
     with redirect_stdout(f):
