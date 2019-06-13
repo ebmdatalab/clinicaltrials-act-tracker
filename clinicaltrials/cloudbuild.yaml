@@ -1,8 +1,12 @@
 steps:
+- name: 'gcr.io/cloud-builders/git'
+  args: ['clone', '--branch=${_BRANCH}', 'https://github.com/ebmdatalab/clinicaltrials-act-tracker.git']
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'django-manage', '.']
+  dir: 'clinicaltrials'
 - name: "django-manage"
   args: ["collectstatic", "--noinput"]
+  dir: 'clinicaltrials'
   env:
     - 'CLINICALTRIALS_SECRET_KEY=asd'
     - 'CLINICALTRIALS_HTTP_MANAGEMENT_SECRET=asd'
@@ -17,6 +21,7 @@ steps:
     - 'TWITTER_ACCESS_TOKEN_SECRET=qwerty'
 - name: "django-manage"
   args: ["compress"]
+  dir: 'clinicaltrials'
   env:
     - 'CLINICALTRIALS_SECRET_KEY=asd'
     - 'CLINICALTRIALS_HTTP_MANAGEMENT_SECRET=asd'
@@ -30,7 +35,9 @@ steps:
     - 'TWITTER_CONSUMER_SECRET=asd'
     - 'TWITTER_ACCESS_TOKEN_SECRET=qwerty'
 - name: "gcr.io/cloud-builders/gcloud"
+  dir: 'clinicaltrials'
   args: ["app", "deploy", "app.yaml", "--quiet", "--project=clinicaltrials-243513"]
 - name: "gcr.io/cloud-builders/gcloud"
+  dir: 'clinicaltrials'
   args: ["app", "deploy", "app_long_jobs.yaml"]
 timeout: "1600s"
