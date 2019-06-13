@@ -9,6 +9,16 @@ handlers:
   redirect_http_response_code: 301
   script: auto
 
+# Instances that don't pass this check are not added to the pool.
+readiness_check:
+  path: "/"  # A 200 OK indicates success
+  check_interval_sec: 5
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+  app_start_timeout_sec: 300  # For new deployments, failures here will result in a roll back
+
+
 env_variables:
   CLINICALTRIALS_SECRET_KEY: 'asd' # random longish string for sessions
   CLINICALTRIALS_HTTP_MANAGEMENT_SECRET: 'asd' # random longish string for securing REST endpoints
