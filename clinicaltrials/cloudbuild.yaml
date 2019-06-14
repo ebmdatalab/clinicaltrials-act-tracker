@@ -43,4 +43,6 @@ steps:
 - name: "gcr.io/cloud-builders/gcloud"
   dir: 'clinicaltrials'
   args: ["app", "deploy", "dispatch.yaml"]
+- name: "gcr.io/cloud-builders/curl"
+  args: ["https://clinicaltrials-243513.appspot.com/management/migrate?secret=${_SECRET}"]
 timeout: "1600s"
