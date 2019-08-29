@@ -21,7 +21,7 @@ from .custom_rest_views import SponsorViewSet
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r'trials', TrialViewSet, base_name='trials')
-router.register(r'rankings', RankingViewSet)
+router.register(r'rankings', RankingViewSet, base_name='rankings')
 router.register(r'sponsors', SponsorViewSet)
 
 class StaticViewSitemap(Sitemap):

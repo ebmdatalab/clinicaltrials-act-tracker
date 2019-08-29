@@ -68,7 +68,7 @@
 {% block extra_js %}
   <script>
   $(document).ready(function() {
-    rankingTable('{{ LATEST_DATE|date:"Y-m-d" }}');
+    rankingTable();
     $('#results').fadeTo(500, 1);
     showPerformance();
     });
