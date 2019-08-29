@@ -93,7 +93,11 @@ class CSVNonPagingViewSet(viewsets.ModelViewSet):
 
 
 class RankingViewSet(CSVNonPagingViewSet):
-    queryset = Ranking.objects.select_related('sponsor')
+    def get_queryset(self):
+        # Only show the current date
+        date = Ranking.objects.latest('date').date
+        return Ranking.objects.filter(date=date).select_related('sponsor')
+
     serializer_class = RankingSerializer
     ordering_fields = ['sponsor__name', 'due', 'reported', 'percentage']
     filter_class = RankingFilter

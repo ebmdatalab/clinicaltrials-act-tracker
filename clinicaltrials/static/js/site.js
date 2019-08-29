@@ -121,10 +121,9 @@ function showPerformance(sponsorSlug) {
   });
 }
 
-function rankingTable(latestDate) {
+function rankingTable() {
   var url = '/api/rankings/?limit=5000';
   var params = getRankingParams();
-  params['date'] = latestDate;
   params['due__gte'] = 1;
   setFormValues(params);
   var table = $('#sponsor_table').DataTable( {
