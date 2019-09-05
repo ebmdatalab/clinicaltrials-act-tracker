@@ -26,7 +26,7 @@ class Command(BaseCommand):
         callback = "https://{}/management/process_data/?secret={}&input_csv={}".format(
             options["callback_host"],
             settings.HTTP_MANAGEMENT_SECRET,
-            "https://storage.googleapis.com/" + get_csv_path(),
+            "https://storage.googleapis.com/ebmdatalab/" + get_csv_path(),
         )
         result = create_instance.main(
             "ebmdatalab", "europe-west2-a", "ctgov-converter", callback, wait=False
