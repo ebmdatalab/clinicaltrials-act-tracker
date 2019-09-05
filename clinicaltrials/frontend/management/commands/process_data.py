@@ -24,6 +24,23 @@ logger = logging.getLogger(__name__)
 # The date cc.gov first started recording cancellations
 EARLIEST_CANCELLATION_DATE = date(2018, 7, 5)
 
+def notify_slack(message):
+    """Posts the message to #general
+    """
+    # Set the webhook_url to the one provided by Slack when you create
+    # the webhook at
+    # https://my.slack.com/services/new/incoming-webhook/
+    webhook_url = os.environ['SLACK_GENERAL_POST_KEY']
+    slack_data = {'text': message}
+
+    response = requests.post(webhook_url, json=slack_data)
+    if response.status_code != 200:
+        raise ValueError(
+            'Request to slack returned an error %s, the response is:\n%s'
+            % (response.status_code, response.text)
+        )
+
+
 
 def set_qa_metadata(trial):
     """Scrape `Results Submitted` tab on website for interim reporting
@@ -247,7 +264,7 @@ class Command(BaseCommand):
         for trial in possible_results:
             set_qa_metadata(trial)
 
-        # Update the status of trials that no longer appear in the dataset
+        # Update the status of trials that no londef notiger appear in the dataset
         zombies = Trial.objects.filter(
             updated_date__lt=today).exclude(status=Trial.STATUS_NO_LONGER_ACT)
         logger.info("Marking %s zombie trials", zombies.count())
@@ -257,3 +274,7 @@ class Command(BaseCommand):
         # This should only happen after Trial statuses have been set
         logger.info("Setting current rankings")
         set_current_rankings()
+        notify_slack("Today's data uploaded to FDAAA staging: "
+                     "https://staging-fdaaa.ebmdatalab.net.  "
+                     "If this looks good, tell ebmbot to "
+                     "'@ebmbot fdaaa deploy'""")
