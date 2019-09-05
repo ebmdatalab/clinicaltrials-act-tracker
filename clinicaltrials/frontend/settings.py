@@ -119,6 +119,14 @@ LOGGING = {
             "filters": ["require_debug_false"],
             "class": "django.utils.log.AdminEmailHandler",
         },
+        "applogfile": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(PROJECT_ROOT, "clinicaltrials.log"),
+            "maxBytes": 1024 * 1024 * 15,  # 15MB
+            "backupCount": 10,
+            "formatter": "heroku",
+        },
     },
     "loggers": {
         "django": {
@@ -126,7 +134,7 @@ LOGGING = {
             "level": "ERROR",
             "propagate": True,
         },
-        "clinicaltrials": {"handlers": ["console"], "level": "INFO", "propagate": True},
+        "": {"handlers": ["applogfile"], "level": "INFO", "propagate": True},
     },
 }
 
