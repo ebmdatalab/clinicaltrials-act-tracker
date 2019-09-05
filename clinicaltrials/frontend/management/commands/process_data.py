@@ -189,6 +189,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if '://' in options['input_csv']:
             resp = requests.get(options['input_csv'], stream=True)
+            resp.raise_for_status()
             f = io.StringIO(resp.text)
         else:
             f = open(options['input_csv'])
