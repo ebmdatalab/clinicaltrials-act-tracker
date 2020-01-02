@@ -13,7 +13,7 @@ import logging
 import os
 import datetime
 
-import common.utils
+from common.utils import Unset, get_env_setting
 
 import custom_logging
 
@@ -28,21 +28,36 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, '../static')
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = common.utils.get_env_setting('CLINICALTRIALS_SECRET_KEY')
+SECRET_KEY = get_env_setting('CLINICALTRIALS_SECRET_KEY',
+        'cae7Ip2Utah7voochee9mahnoachingahra>faiv%ua8Uep)ai-zi!thee2xee8a')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-CLINICALTRIALS_DEBUG = common.utils.get_env_setting('CLINICALTRIALS_DEBUG')
+CLINICALTRIALS_DEBUG = get_env_setting('CLINICALTRIALS_DEBUG', 'yes')
 assert CLINICALTRIALS_DEBUG in ['yes', 'no'], "CLINICALTRIALS_DEBUG was '{}'".format(CLINICALTRIALS_DEBUG)
 DEBUG = CLINICALTRIALS_DEBUG == 'yes'
 
-ALLOWED_HOSTS = [
-    'staging-fdaaa.ebmdatalab.net', '127.0.0.1', '192.168.0.55', 'localhost',
-    'fdaaa.trialstracker.net']
 
+ALLOWED_HOSTS = ['fdaaa.trialstracker.net']
+if DEBUG:
+    ALLOWED_HOSTS.extend(['staging-fdaaa.ebmdatalab.net', '127.0.0.1', '192.168.0.55', 'localhost'])
+
+if DEBUG:
+    DEFAULT_DB_NAME = "storage.sqlite3"
+    DEFAULT_DB_USER = None
+    DEFAULT_DB_PASSWORD = None
+    DEFAULT_DB_HOST = None
+    DEFAULT_DB_ENGINE = 'django.db.backends.sqlite3'
+else:
+    DEFAULT_DB_NAME = Unset
+    DEFAULT_DB_USER = Unset
+    DEFAULT_DB_PASSWORD = Unset
+    DEFAULT_DB_HOST = 'localhost'
+    DEFAULT_DB_ENGINE = 'django.db.backends.postgresql_psycopg2',
 
 # Parameters
 
-GOOGLE_TRACKING_ID = common.utils.get_env_setting('CLINICALTRIALS_GOOGLE_TRACKING_ID')
+GOOGLE_TRACKING_ID = get_env_setting('CLINICALTRIALS_GOOGLE_TRACKING_ID', None if DEBUG else Unset)
+SLACK_GENERAL_POST_KEY = get_env_setting('SLACK_GENERAL_POST_KEY', None if DEBUG else Unset)
 
 
 # Application definition
@@ -181,16 +196,15 @@ STATICFILES_FINDERS = (
 
 WSGI_APPLICATION = 'frontend.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': common.utils.get_env_setting('CLINICALTRIALS_DB'),
-        'USER': common.utils.get_env_setting('CLINICALTRIALS_DB_NAME'),
-        'PASSWORD': common.utils.get_env_setting('CLINICALTRIALS_DB_PASS'),
-        'HOST': 'localhost',
+        'ENGINE': get_env_setting('CLINICALTRIALS_DB', DEFAULT_DB_ENGINE),
+        'NAME': get_env_setting('CLINICALTRIALS_DB', DEFAULT_DB_NAME),
+        'USER': get_env_setting('CLINICALTRIALS_DB_NAME', DEFAULT_DB_USER),
+        'PASSWORD': get_env_setting('CLINICALTRIALS_DB_PASS', DEFAULT_DB_PASSWORD),
+        'HOST': get_env_setting('CLINICALTRIALS_DB_PASS', DEFAULT_DB_HOST),
         'CONN_MAX_AGE': 0  # Must be zero, see api/view_utils#db_timeout
     },
 }
@@ -263,16 +277,15 @@ BQ_HSCIC_DATASET = ''
 
 # Twitter
 
-TWITTER_CONSUMER_SECRET = common.utils.get_env_setting('TWITTER_CONSUMER_SECRET')
-TWITTER_ACCESS_TOKEN_SECRET = common.utils.get_env_setting('TWITTER_ACCESS_TOKEN_SECRET')
+TWITTER_CONSUMER_SECRET = get_env_setting('TWITTER_CONSUMER_SECRET', None if DEBUG else Unset)
+TWITTER_ACCESS_TOKEN_SECRET = get_env_setting('TWITTER_ACCESS_TOKEN_SECRET', None if DEBUG else Unset)
 
 # Path to shell script of lines `export FOO=bar`. See environment-example for a sample.
-PROCESSING_ENV_PATH = '/etc/profile.d/fdaaa_staging.sh'
-PROCESSING_VENV_BIN = '/var/www/fdaaa_staging/venv/bin/'
+PROCESSING_ENV_PATH = '/etc/profile.d/fdaaa_staging.sh' if not DEBUG else None
 PROCESSING_STORAGE_TABLE_NAME = 'current_raw_json'
 
 # Bucket in GCS to store data
-STORAGE_PREFIX = 'clinicaltrials/'
-WORKING_VOLUME = '/mnt/volume-lon1-01/'   # should have at least 10GB space
+STORAGE_PREFIX = 'trialdata'
+WORKING_VOLUME = get_env_setting('WORKDIR', '/mnt/volume-lon1-01/' if not DEBUG else os.curdir)   # should have at least 10GB space
 WORKING_DIR = os.path.join(WORKING_VOLUME, STORAGE_PREFIX)
 INTERMEDIATE_CSV_PATH = os.path.join(WORKING_VOLUME, STORAGE_PREFIX, 'clinical_trials.csv')

@@ -13,10 +13,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             [
-                ("UPDATE frontend_trial SET status = %s WHERE no_longer_on_website is true",
+                ("UPDATE frontend_trial SET status = %s WHERE no_longer_on_website = (1=1)",
                  [Trial.STATUS_NO_LONGER_ACT])],
             [
-                ("UPDATE frontend_trial SET no_longer_on_website = true WHERE status = %s",
+                ("UPDATE frontend_trial SET no_longer_on_website = (1=1) WHERE status = %s",
                  [Trial.STATUS_NO_LONGER_ACT])],
         )
     ]

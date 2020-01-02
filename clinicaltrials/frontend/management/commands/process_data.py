@@ -109,22 +109,21 @@ def set_qa_metadata(trial):
 
 
 def _compute_ranks():
-    sql = ("WITH ranked AS (SELECT date, ranking.id, RANK() OVER ("
-           "  PARTITION BY date "
-           "ORDER BY percentage DESC"
-           ") AS computed_rank "
-           "FROM frontend_ranking ranking WHERE percentage IS NOT NULL "
-           "AND date = %s"
-           ") ")
-
-    sql += ("UPDATE "
-            " frontend_ranking "
-            "SET "
-            " rank = ranked.computed_rank "
-            "FROM ranked "
-            "WHERE ranked.id = frontend_ranking.id AND ranked.date = frontend_ranking.date")
+    sql = """
+            UPDATE frontend_ranking
+            SET rank = (
+                SELECT
+                    count(*)
+                FROM
+                    frontend_ranking AS f
+                WHERE
+                    f.percentage<frontend_ranking.percentage AND f.date=frontend_ranking
+            )
+            WHERE percentage IS NOT NULL AND date=%s
+    """
     on_date = Sponsor.objects.latest('updated_date').updated_date
     with connection.cursor() as c:
+            c.execute("UPDATE frontend_ranking SET rank=NULL WHERE date=%s", [on_date])
             c.execute(sql, [on_date])
 
 

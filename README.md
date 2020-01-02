@@ -19,16 +19,13 @@ reporting easier.
 
 Operational overview:
 
-1. Python script `load_data.py`:
+1. Django management command `load_data`:
  * downloads a zip clinical trials registry data from ClinicalTrials.gov
- * converts the XML to JSON
- * uploads it to BigQuery
- * runs SQL to transform it to tabular format including fields to
-   indentify ACTs and their lateness
- * downloads SQL as a CSV file
+ * transforms XML into a CSV file
+ * all of #2, `process_data`
 
 2. Django management command `process_data`:
-  * imports CSV file into Django models
+  * imports existing CSV file into Django models
   * precomputes aggregate statistics and turns these into rankings
   * handles other metadata (in particular, hiding trials that are no
     longer ACTs)
@@ -42,12 +39,9 @@ loaded into a staging database / website.
 A separate command copies new data from staging to production
 (following moderation).
 
-Much complex logic has been expressed in SQL, which makes it hard to read
-and test.  This is a legacy of splitting the development between
-academics with the domain expertise (and who could use SQL to
-prototype) and software engineers.  Now the project has been running
-for a while and new development interations are less frequent, a useful
-project would be as much of this logic to Python.
+In the past, importing processes computed and filtered in SQL through
+Bigtable service and some JSON processing, but that is largely gone.
+You may still see scars.
 
 Similarly, the only reason step (1) exists is to create a CSV which
 can be imported to the database.  That CSV is useful in its own right
@@ -55,12 +49,6 @@ for QA by our academics, but the XML and JSON artefacts are just
 intermediate formats that could legitimately be dropped in a
 refactored solution (and the CSV could be generated directly from the
 database).
-
-The historic reason for the XML -> JSON route is because BigQuery
-includes a number of useful JSON functions which can be manipulated by
-people competent in SQL. At the time of writing, there
-is [an open issue](https://github.com/ebmdatalab/clinicaltrials-act-tracker/issues/121) with
-some ideas about refactoring this process.
 
 Static Pages
 ============

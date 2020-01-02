@@ -58,7 +58,7 @@ def download_and_extract():
 
     # download and extract
     container = tempfile.mkdtemp(
-        prefix=settings.STORAGE_PREFIX.rstrip(os.sep), dir=settings.WORKING_VOLUME)
+        prefix=settings.STORAGE_PREFIX, dir=settings.WORKING_VOLUME)
     try:
         data_file = os.path.join(container, "data.zip")
         wget_file(data_file, url)
@@ -76,7 +76,7 @@ def upload_to_cloud():
     client = StorageClient()
     bucket = client.get_bucket()
     blob = bucket.blob(
-        "{}{}".format(settings.STORAGE_PREFIX, raw_json_name()),
+        "{}/{}".format(settings.STORAGE_PREFIX, raw_json_name()),
         chunk_size=1024*1024
     )
     with open(os.path.join(settings.WORKING_DIR, raw_json_name()), 'rb') as f:
@@ -89,7 +89,11 @@ def notify_slack(message):
     # Set the webhook_url to the one provided by Slack when you create
     # the webhook at
     # https://my.slack.com/services/new/incoming-webhook/
-    webhook_url = os.environ['SLACK_GENERAL_POST_KEY']
+    webhook_url = settings.SLACK_GENERAL_POST_KEY
+
+    if webhook_url is None:
+        return
+
     slack_data = {'text': message}
 
     response = requests.post(webhook_url, json=slack_data)
@@ -164,7 +168,7 @@ def convert_and_download():
         wait_for_job(job)
 
 
-    t1_exporter = TableExporter(tmp_table, settings.STORAGE_PREFIX + 'test_table-')
+    t1_exporter = TableExporter(tmp_table, settings.STORAGE_PREFIX + '/' + 'test_table-')
     t1_exporter.export_to_storage()
 
     with open(settings.INTERMEDIATE_CSV_PATH, 'w') as f:
@@ -172,6 +176,8 @@ def convert_and_download():
 
 
 def get_env(path):
+    """Terrible hack to bridge using env vars to having settings files."""
+    if not path: return {}
     env = os.environ.copy()
     with open(path) as e:
         for k, v in re.findall(r"^export ([A-Z][A-Z0-9_]*)=(\S*)", e.read(), re.MULTILINE):
@@ -184,7 +190,7 @@ def process_data():
     try:
         subprocess.check_output(
             [
-                "{}python".format(settings.PROCESSING_VENV_BIN),
+                shutil.which("python"),
                 "{}/manage.py".format(settings.BASE_DIR),
                 "process_data",
                 "--input-csv={}".format(settings.INTERMEDIATE_CSV_PATH),

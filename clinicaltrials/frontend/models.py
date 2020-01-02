@@ -36,11 +36,8 @@ class Sponsor(models.Model):
     def status_choices(self):
         """A list of tuples representing valid choices for trial statuses
         """
-        statuses = [x[0] for x in
-                    self.trial_set.visible().order_by(
-                        'status').values_list(
-                            'status').distinct(
-                                'status')]
+
+        statuses = set(x[0] for x in self.trial_set.visible().values_list('status'))
         return [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
 
     class Meta:
@@ -51,11 +48,7 @@ class TrialManager(models.Manager):
     def status_choices(self):
         """A list of tuples representing valid choices for trial statuses
         """
-        statuses = [x[0] for x in
-                    Trial.objects.visible().order_by(
-                        'status').values_list(
-                            'status').distinct(
-                                'status')]
+        statuses = set(x[0] for x in Trial.objects.visible().values_list('status'))
         return [x for x in Trial.STATUS_CHOICES if x[0] in statuses]
 
 
