@@ -59,12 +59,10 @@ def venv_init():
     run("[ -e venv ] || python3.5 -m venv venv")
 
 
-def pip_install():
+def pip_install(path):
     with prefix("source venv/bin/activate"):
         run("pip install --upgrade pip setuptools")
-        run(
-            "pip install -q -r clinicaltrials-act-tracker/clinicaltrials/requirements.txt"
-        )
+        run("pip install -q -r %s" % path)
 
 
 def update_from_git(branch):
@@ -126,9 +124,18 @@ def deploy(environment, branch="master"):
     with cd(env.path):
         with prefix("source /etc/profile.d/%s.sh" % env.app):
             venv_init()
+            if env.environment == "staging":
+                branch = "gae-ise"
+            else:
+                branch = "master"
             update_from_git(branch)
-            setup_cron()
-            pip_install()
+            # setup_cron()  currently manually managed
+            if env.environment == "staging":
+                pip_install(
+                    "clinicaltrials-act-tracker/clinicaltrials/requirements.txt"
+                )
+            else:
+                pip_install("clinicaltrials-act-tracker/requirements.txt")
             setup_django()
             setup_nginx()
             restart_gunicorn()
