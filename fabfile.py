@@ -6,15 +6,11 @@ from fabric.api import task, env
 from fabric.contrib.files import exists
 from fabric.context_managers import cd
 
-env.hosts = ['smallweb1.openprescribing.net']
+env.hosts = ["smallweb1.openprescribing.net"]
 env.forward_agent = True
 env.colorize_errors = True
 
-environments = {
-    'live': 'fdaaa',
-    'staging': 'fdaaa_staging',
-    'test': 'fdaaa_test',
-}
+environments = {"live": "fdaaa", "staging": "fdaaa_staging", "test": "fdaaa_test"}
 
 
 def sudo_script(script, www_user=False):
@@ -27,23 +23,30 @@ def sudo_script(script, www_user=False):
 
     """
     if www_user:
-        sudo_cmd = 'sudo -u www-data '
+        sudo_cmd = "sudo -u www-data "
     else:
-        sudo_cmd = 'sudo '
-    return run(sudo_cmd +
-        os.path.join(
-            env.path,
-            'clinicaltrials-act-tracker/deploy/fab_scripts/%s' % script)
+        sudo_cmd = "sudo "
+    return run(
+        sudo_cmd
+        + os.path.join(
+            env.path, "clinicaltrials-act-tracker/deploy/fab_scripts/%s" % script
+        )
     )
+
 
 def setup_sudo():
     """Ensures members of `fabric` group can execute deployment scripts as
     root without passwords
 
     """
-    sudoer_file = '/etc/sudoers.d/fdaaa_fabric_{}'.format(env.app)
+    sudoer_file = "/etc/sudoers.d/fdaaa_fabric_{}".format(env.app)
     if not exists(sudoer_file):
-        sudo('echo "%fabric ALL = (www-data) NOPASSWD: {}/clinicaltrials-act-tracker/deploy/fab_scripts/" > {}'.format(env.path, sudoer_file))
+        sudo(
+            'echo "%fabric ALL = (www-data) NOPASSWD: {}/clinicaltrials-act-tracker/deploy/fab_scripts/" > {}'.format(
+                env.path, sudoer_file
+            )
+        )
+
 
 def make_directory():
     if not exists(env.path):
@@ -51,44 +54,58 @@ def make_directory():
         sudo("chown -R www-data:www-data %s" % env.path)
         sudo("chmod  g+w %s" % env.path)
 
+
 def venv_init():
-    run('[ -e venv ] || python3.5 -m venv venv')
+    run("[ -e venv ] || python3.5 -m venv venv")
+
 
 def pip_install():
-    with prefix('source venv/bin/activate'):
-        run('pip install --upgrade pip setuptools')
-        run('pip install -q -r clinicaltrials-act-tracker/requirements.txt')
+    with prefix("source venv/bin/activate"):
+        run("pip install --upgrade pip setuptools")
+        run(
+            "pip install -q -r clinicaltrials-act-tracker/clinicaltrials/requirements.txt"
+        )
+
 
 def update_from_git(branch):
     # clone or update code
-    if not exists('clinicaltrials-act-tracker/.git'):
+    if not exists("clinicaltrials-act-tracker/.git"):
         run("git clone -q git@github.com:ebmdatalab/clinicaltrials-act-tracker.git")
     with cd("clinicaltrials-act-tracker"):
         run("git fetch --all")
         run("git reset --hard origin/{}".format(branch))
 
+
 def setup_nginx():
-    sudo_script('setup_nginx.sh %s %s' % (env.path, env.app))
+    sudo_script("setup_nginx.sh %s %s" % (env.path, env.app))
+
 
 def setup_cron():
-    if env.environment == 'live':
-        sudo_script('setup_cron.sh %s' % (env.path))
+    if env.environment == "live":
+        sudo_script("setup_cron.sh %s" % (env.path))
+
 
 def setup_django():
-    with prefix('source venv/bin/activate'):
-        run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py collectstatic --noinput --settings=frontend.settings')
-        run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py migrate --settings=frontend.settings')
+    with prefix("source venv/bin/activate"):
+        run(
+            "cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py collectstatic --noinput --settings=frontend.settings"
+        )
+        run(
+            "cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py migrate --settings=frontend.settings"
+        )
+
 
 def restart_gunicorn():
     sudo_script("restart.sh %s" % env.app)
 
+
 def reload_nginx():
     sudo_script("reload_nginx.sh")
 
-def setup(environment, branch='master'):
+
+def setup(environment, branch="master"):
     if environment not in environments:
-        abort("Specified environment must be one of %s" %
-              ",".join(environments.keys()))
+        abort("Specified environment must be one of %s" % ",".join(environments.keys()))
     env.app = environments[environment]
     env.environment = environment
     env.path = "/var/www/%s" % env.app
@@ -97,11 +114,11 @@ def setup(environment, branch='master'):
 
 
 @task
-def deploy(environment, branch='master'):
-    if environment == 'live':
+def deploy(environment, branch="master"):
+    if environment == "live":
         # Always deploy to staging first, thanks to our update
         # workflow (below)
-        deploy('staging', branch=branch)
+        deploy("staging", branch=branch)
     env = setup(environment, branch)
 
     make_directory()
@@ -124,11 +141,10 @@ def update(environment):
     # to staging, then reviewed, then copied to live.  Longer term we
     # may miss out the moderation step and scrape directly to live.
     env = setup(environment)
-    if environment == 'staging':
-        sudo_script(
-            'kickoff_background_data_load.sh %s' % env.app, www_user=True)
-    elif environment == 'live':
-        sudo_script('copy_staging_to_live.sh')
+    if environment == "staging":
+        sudo_script("kickoff_background_data_load.sh %s" % env.app, www_user=True)
+    elif environment == "live":
+        sudo_script("copy_staging_to_live.sh")
 
 
 @task
@@ -136,5 +152,7 @@ def send_tweet(environment):
     env = setup(environment)
     with cd(env.path):
         with prefix("source /etc/profile.d/%s.sh" % env.app):
-            with prefix('source venv/bin/activate'):
-                run('cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py tweet_today --settings=frontend.settings')
+            with prefix("source venv/bin/activate"):
+                run(
+                    "cd clinicaltrials-act-tracker/clinicaltrials/ && python manage.py tweet_today --settings=frontend.settings"
+                )
