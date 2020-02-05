@@ -4,6 +4,7 @@ from lxml.etree import tostring
 import csv
 import logging
 import re
+import os
 
 from django.db import transaction
 from django.db.models import Sum

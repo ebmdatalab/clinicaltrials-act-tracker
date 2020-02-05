@@ -36,6 +36,7 @@ def ccgov_results_by_url(url):
     return mock_ccgov_results(fixture_id)
 
 
+@mock.patch("frontend.management.commands.process_data.notify_slack", mock.Mock())
 class CommandsTestCase(TestCase):
     def setUp(self):
         self.today = date(2018, 1, 1)
