@@ -110,8 +110,17 @@ def set_qa_metadata(trial):
                 qa, created = TrialQA.objects.get_or_create(
                     submitted_to_regulator=submitted,
                     trial=trial)
+                should_save = False
+                if qa.cancelled_by_sponsor:
+                    # In some cases, cancellation and resubmission happens
+                    # on the same day. We don't really care about that, so
+                    # we treat these as a simple submission
+                    qa.cancelled_by_sponsor = None
+                    should_save = True
                 if returned:
                     qa.returned_to_sponsor = returned
+                    should_save = True
+                if should_save:
                     qa.save()
     elif not table and results_text == 'Study Results':
         # This can happen where a study has published the results, but

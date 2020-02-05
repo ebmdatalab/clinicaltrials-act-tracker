@@ -327,3 +327,59 @@ class CommandsTestCase(TestCase):
         qa_count = trial.trialqa_set.count()
         self.assertEqual(qa_count, 0)
         self.assertEqual(trial.status, Trial.STATUS_OVERDUE)
+
+    @mock.patch("requests.get")
+    @mock.patch("frontend.trial_computer.date")
+    @mock.patch("frontend.models.date")
+    def test_import_and_qa_cancelled_and_submitted_on_same_day(
+        self, date_mock_1, date_mock_2, requests_mock
+    ):
+        """When a trial becomes overdue but then QA shows reporting *on the
+        same day*, its previous_status should remain `ongoing`"""
+        date_mock_1.today = date_mock_2.today = mock.Mock(return_value=self.today)
+        args = []
+        # A single trial, 2 months late, due 1st Nov 2018
+        sample_csv = os.path.join(
+            settings.BASE_DIR, "frontend/tests/fixtures/two_months_qa.csv"
+        )
+        opts = {"input_csv": sample_csv}
+
+        def month_1_results(arg):
+            # A QA after the due date which is submitted and cancelled
+            # and submitted on one day, and later returned
+            return mock_ccgov_results("overdueinqa_sameday_cancelled_then_returned")
+
+        requests_mock.side_effect = month_1_results
+        call_command("process_data", *args, **opts)
+        trial = Trial.objects.get(registry_id="overdueinqa_two_months")
+        self.assertEqual(trial.previous_status, "overdue-cancelled")
+        self.assertEqual(trial.status, "reported-late")
+
+    @mock.patch("requests.get")
+    @mock.patch("frontend.trial_computer.date")
+    @mock.patch("frontend.models.date")
+    def test_import_and_qa_cancelled_on_same_day(
+        self, date_mock_1, date_mock_2, requests_mock
+    ):
+        """When a trial becomes overdue but then QA shows reporting *on the
+        same day*, its previous_status should remain `ongoing`"""
+        date_mock_1.today = date_mock_2.today = mock.Mock(return_value=self.today)
+        args = []
+        # A single trial, 2 months late, due 1st Nov 2018
+        sample_csv = os.path.join(
+            settings.BASE_DIR, "frontend/tests/fixtures/two_months_qa.csv"
+        )
+        opts = {"input_csv": sample_csv}
+
+        def month_1_results(arg):
+            # A QA after the due date which is submitted and cancelled
+            # and submitted and cancelled many times, finally
+            # submitted, all on one day
+            return mock_ccgov_results("overdueinq_many_cancelled_single_day")
+
+        requests_mock.side_effect = month_1_results
+        call_command("process_data", *args, **opts)
+
+        trial = Trial.objects.get(registry_id="overdueinqa_two_months")
+        self.assertEqual(trial.previous_status, "overdue-cancelled")
+        self.assertEqual(trial.status, "reported-late")
