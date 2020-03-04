@@ -75,7 +75,7 @@ traitlets==4.3.2          # via ipython
 tzlocal==1.5.1            # via dateparser
 unicodecsv==0.14.1        # via djangorestframework-csv
 uritemplate==3.0.0        # via google-api-python-client
-urllib3==1.24.1           # via requests
+urllib3==1.24.2           # via requests
 wcwidth==0.1.7            # via prompt-toolkit
 werkzeug==0.14.1
 xmltodict==0.12.0
