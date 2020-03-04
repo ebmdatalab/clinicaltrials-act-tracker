@@ -139,7 +139,7 @@ def get_days_late(trial):
     return min_days_late, max_days_late
 
 
-ddef get_status(trial):
+def get_status(trial):
     overdue = trial.days_late and trial.days_late > 0
     trial_class = type(trial)
     if trial.results_due:
