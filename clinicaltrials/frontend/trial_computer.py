@@ -86,9 +86,8 @@ def qa_start_dates(trial):
 
 
 def _days_delta(effective_reporting_date, completion_date, with_grace_period=False):
-    overdue_delta = relativedelta(days=365)
     days_late = max([
-        (effective_reporting_date - completion_date - overdue_delta).days,
+        (effective_reporting_date - completion_date).days,
         0])
     if with_grace_period and (days_late - GRACE_PERIOD) <= 0:
         days_late = 0
@@ -112,34 +111,35 @@ def get_days_late(trial):
     min_days_late = max_days_late = None
     if trial.results_due:
         _datify(trial)
+        due_date = trial.calculated_due_date()
         if trial.has_results:
             assert trial.reported_date, \
                 "{} has_results but no reported date".format(trial)
             min_days_late = max_days_late = _days_delta(
-                trial.reported_date, trial.completion_date)
+                trial.reported_date, due_date)
         else:
             original_start_date, cancelled, restart_date = qa_start_dates(trial)
             if original_start_date:
                 min_days_late = max_days_late = _days_delta(
-                    original_start_date, trial.completion_date)
+                    original_start_date, due_date)
             if restart_date:
-                max_days_late = _days_delta(restart_date, trial.completion_date)
+                max_days_late = _days_delta(restart_date, due_date)
             else:
                 if cancelled:
                     max_days_late = _days_delta(
                         date.today(),
-                        trial.completion_date,
+                        due_date,
                         with_grace_period=True)
             no_qa = not original_start_date
             if no_qa:
                 min_days_late = max_days_late = _days_delta(
                     date.today(),
-                    trial.completion_date,
+                    due_date,
                     with_grace_period=True)
     return min_days_late, max_days_late
 
 
-def get_status(trial):
+ddef get_status(trial):
     overdue = trial.days_late and trial.days_late > 0
     trial_class = type(trial)
     if trial.results_due:

@@ -71,20 +71,40 @@ class CommandsTestCase(TestCase):
         self.assertEqual(overdueinqa.days_late, 12)
         self.assertEqual(qa_start_dates(overdueinqa)[0], date(2017, 11, 13))
 
-        late_sponsor_ranking = Ranking.objects.filter(
-            sponsor=overdueinqa.sponsor).first()
-        self.assertEqual(late_sponsor_ranking.days_late, 73)
-        self.assertEqual(late_sponsor_ranking.finable_days_late, 31)
-
-        self.assertEqual(Ranking.objects.first().days_late, None)
-        self.assertEqual(Ranking.objects.first().finable_days_late, None)
-
         overdueingrace = Trial.objects.get(registry_id='overdueingrace')
         self.assertEqual(overdueingrace.status, 'ongoing')
         self.assertEqual(overdueingrace.days_late, None)
 
         self.assertEqual(Ranking.objects.first().sponsor, reported.sponsor)
         self.assertEqual(Ranking.objects.count(), 3)
+
+        overdue_withexemption = Trial.objects.get(registry_id='overdue_withexemption')
+        self.assertEqual(overdue_withexemption.status, 'ongoing')
+        self.assertEqual(overdue_withexemption.days_late, None)
+
+        overdue_evenwithexemption = Trial.objects.get(registry_id='overdue_evenwithexemption')
+        self.assertEqual(overdue_evenwithexemption.status, 'overdue')
+        self.assertEqual(overdue_evenwithexemption.days_late, 31)
+
+        overdue_withexemption_reported = Trial.objects.get(registry_id='overdue_withexemption_reported')
+        self.assertEqual(overdue_withexemption_reported.status, 'reported')
+        self.assertEqual(overdue_withexemption_reported.days_late, None)
+
+        overdue_withexemption_late = Trial.objects.get(registry_id='overdue_withexemption_late')
+        self.assertEqual(overdue_withexemption_late.status, 'reported-late')
+        self.assertEqual(overdue_withexemption_late.days_late, 31)
+
+        self.assertEqual(Ranking.objects.first().sponsor, reported.sponsor)
+        self.assertEqual(Ranking.objects.count(), 3)
+        self.assertEqual(Ranking.objects.first().days_late, None)
+        self.assertEqual(Ranking.objects.first().finable_days_late, None)
+
+        late_sponsor_ranking = Ranking.objects.filter(
+            sponsor=overdueinqa.sponsor).first()  # 3M's ranking
+        self.assertEqual(late_sponsor_ranking.days_late, 135)
+        self.assertEqual(late_sponsor_ranking.finable_days_late, 33)
+
+
 
 
     @mock.patch('requests.get', mock.Mock(side_effect=ccgov_results_by_url))
@@ -141,7 +161,7 @@ class CommandsTestCase(TestCase):
         call_command('process_data', **opts)
 
         # There should be no Trials visible
-        self.assertEqual(Trial.objects.count(), 6)
+        self.assertEqual(Trial.objects.count(), 10)
         self.assertEqual(Trial.objects.visible().count(), 0)
         self.assertNotEqual(Trial.objects.first().updated_date, self.last_year)
 
