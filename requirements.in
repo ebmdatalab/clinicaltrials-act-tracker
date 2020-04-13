@@ -12,10 +12,6 @@ django-extensions
 werkzeug
 dateparser
 requests
-google-api-python-client==1.6.2
-google-cloud-bigquery==0.26.0
-google-cloud-storage==1.3.2
-xmltodict
 lxml
 coverage
 coveralls
@@ -24,3 +20,4 @@ python-twitter
 ipython
 django-extensions
 ipdb
+-e git://github.com/ebmdatalab/clinicaltrials-act-converter#egg=clinicaltrials_converter
