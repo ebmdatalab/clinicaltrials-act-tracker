@@ -13,13 +13,14 @@ env:
     CLINICALTRIALS_DB: clinicaltrials
     CLINICALTRIALS_DB_NAME: postgres
     CLINICALTRIALS_DB_PASS:
+    CLINICALTRIALS_HTTP_MANAGEMENT_SECRET: xxx
     TWITTER_CONSUMER_SECRET: x
     TWITTER_ACCESS_TOKEN_SECRET: x
     GOOGLE_APPLICATION_CREDENTIALS: "$TRAVIS_BUILD_DIR/google-credentials.json"
 before_script:
 - psql -c 'create database clinicaltrials_test;' -U postgres
 script:
-- cd clinicaltrials && coverage run --source='.' manage.py test
+- cd clinicaltrials && pip install -r requirements.txt && ./manage.py test --settings=frontend.settings_test
 notifications:
   email:
   - tech@ebmdatalab.net
