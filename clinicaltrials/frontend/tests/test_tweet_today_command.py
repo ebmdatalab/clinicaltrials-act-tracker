@@ -21,7 +21,7 @@ class TweetTodayTestCase(TestCase):
 
     @patch("frontend.trial_computer.date")
     def setUp(self, datetime_mock):
-        self.mock_today = date(2017, 1, 31)
+        self.mock_today = date(2017, 2, 1)
         datetime_mock.today = Mock(return_value=self.mock_today)
         self.sponsor = Sponsor.objects.create(
             name="Sponsor 1", updated_date=self.mock_today
@@ -56,7 +56,7 @@ class TweetTodayTestCase(TestCase):
             self.sponsor,
             results_due=True,
             has_results=True,
-            reported_date=date(2016, 12, 1),
+            reported_date=date(2014, 12, 1),
             updated_date=self.mock_today,
         )
         for _ in range(3):

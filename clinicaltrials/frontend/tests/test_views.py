@@ -20,14 +20,14 @@ from frontend.models import Trial
 class FrontendTestCase(TestCase):
     @patch("frontend.trial_computer.date")
     def setUp(self, datetime_mock):
-        datetime_mock.today = Mock(return_value=date(2017, 1, 31))
+        datetime_mock.today = Mock(return_value=date(2015, 2, 1))
         self.sponsor = Sponsor.objects.create(name="Sponsor 1")
         self.due_trial = makeTrial(self.sponsor, results_due=True, has_results=False)
         self.reported_trial = makeTrial(
             self.sponsor,
             results_due=True,
             has_results=True,
-            reported_date=date(2016, 12, 1),
+            reported_date=date(2014, 12, 1),
         )
         set_current_rankings()
 
@@ -69,7 +69,7 @@ class FrontendTestCase(TestCase):
         context = response.context
         self.assertEqual(context["trial"], self.due_trial)
         self.assertEqual(context["title"], "id_1: An overdue trial by Sponsor 1")
-        self.assertEqual(str(context["due_date"]), "2016-12-31 00:00:00")
+        self.assertEqual(str(context["due_date"]), "2015-01-01 00:00:00")
         self.assertEqual(context["annotation_html"], "")
 
     @patch("frontend.views._get_full_markdown_path")
@@ -113,7 +113,7 @@ class ApiResultsTestCase(TestCase):
 
     @patch("frontend.trial_computer.date")
     def setUp(self, datetime_mock):
-        self.mock_today = date(2017, 1, 31)
+        self.mock_today = date(2015, 2, 1)
         datetime_mock.today = Mock(return_value=self.mock_today)
         self.sponsor = Sponsor.objects.create(
             name="Sponsor 1", updated_date=self.mock_today
@@ -131,7 +131,7 @@ class ApiResultsTestCase(TestCase):
             # The following has the effect of setting
             # `previous_status` to `overdue` and status to `reported`
             status=Trial.STATUS_OVERDUE,
-            reported_date=date(2016, 12, 1),
+            reported_date=date(2014, 12, 1),
             updated_date=self.mock_today,
         )
         self.due_but_no_longer_act_trial = makeTrial(
@@ -148,7 +148,7 @@ class ApiResultsTestCase(TestCase):
             has_results=False,
             previous_status=Trial.STATUS_OVERDUE,
             status=Trial.STATUS_NO_LONGER_ACT,
-            updated_date=date(2016, 1, 1),
+            updated_date=date(2014, 1, 1),
         )
         set_current_rankings()
 
@@ -172,9 +172,9 @@ class ApiResultsTestCase(TestCase):
                 "status": "overdue",
                 "registry_id": "id_1",
                 "has_exemption": False,
-                "start_date": "2015-01-01",
+                "start_date": "2013-01-01",
                 "sponsor_name": "Sponsor 1",
-                "completion_date": "2016-01-01",
+                "completion_date": "2014-01-01",
                 "publication_url": "http://bar.com/1",
                 "results_due": True,
                 "sponsor_slug": "sponsor-1",
@@ -336,13 +336,13 @@ class ApiPerformanceResultsTestCase(TestCase):
                 registry_id="reported trial",
                 results_due=True,
                 has_results=True,
-                reported_date=date(2016, 12, 1),
+                reported_date=date(2014, 12, 1),
                 updated_date=self.mock_today,
             )
             set_current_rankings()
 
     def setUp(self):
-        self._makeRankingsForDate(date(2017, 1, 31))
+        self._makeRankingsForDate(date(2015, 2, 1))
 
     def test_performance_results(self):
         client = APIClient()
@@ -411,7 +411,7 @@ class ApiPerformanceResultsTestCase(TestCase):
         self.assertEqual(response["on_time_today"], 1)
 
         # Now simulate an import of the same data on the next day
-        self._makeRankingsForDate(date(2017, 2, 1))
+        self._makeRankingsForDate(date(2015, 2, 1))
         response = client.get("/api/performance/", format="json").json()
         self.assertEqual(response["due"], 2)
         self.assertEqual(response["overdue_today"], 0)

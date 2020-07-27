@@ -10,8 +10,8 @@ def makeTrial(sponsor, **kw):
     trial_counter = Trial.objects.count() + 1
     defaults = {
         "sponsor": sponsor,
-        "start_date": date(2015, 1, 1),
-        "completion_date": date(2016, 1, 1),
+        "start_date": date(2013, 1, 1),
+        "completion_date": date(2014, 1, 1),
         "registry_id": "id_{}".format(trial_counter),
         "publication_url": "http://bar.com/{}".format(trial_counter),
         "title": "Trial {}".format(trial_counter),
