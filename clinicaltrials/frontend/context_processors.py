@@ -14,20 +14,21 @@ logger = logging.getLogger(__name__)
 
 def google_tracking_id(request):
     google_tracking_id = None
-    if hasattr(settings, 'GOOGLE_TRACKING_ID'):
+    if hasattr(settings, "GOOGLE_TRACKING_ID"):
         google_tracking_id = settings.GOOGLE_TRACKING_ID
     else:
         logger.warn("No GOOGLE_TRACKING_ID set")
-    return {'GOOGLE_TRACKING_ID': google_tracking_id}
+    return {"GOOGLE_TRACKING_ID": google_tracking_id}
 
 
 def latest_date(request):
-    date = Ranking.objects.latest('date').date
-    return {'LATEST_DATE': date}
+    date = Ranking.objects.latest("date").date
+    return {"LATEST_DATE": date}
 
 
 def next_planned_update(request):
-    return {'NEXT_PLANNED_UPDATE': parse_date(settings.NEXT_PLANNED_UPDATE)}
+    return {"NEXT_PLANNED_UPDATE": parse_date(settings.NEXT_PLANNED_UPDATE)}
+
 
 def fine_per_day(request):
-    return {'FINE_PER_DAY': settings.FINE_PER_DAY}
+    return {"FINE_PER_DAY": settings.FINE_PER_DAY}

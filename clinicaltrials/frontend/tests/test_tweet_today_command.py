@@ -18,81 +18,90 @@ import twitter
 
 class TweetTodayTestCase(TestCase):
     maxDiff = 6000
-    @patch('frontend.trial_computer.date')
+
+    @patch("frontend.trial_computer.date")
     def setUp(self, datetime_mock):
         self.mock_today = date(2017, 1, 31)
         datetime_mock.today = Mock(return_value=self.mock_today)
         self.sponsor = Sponsor.objects.create(
-            name="Sponsor 1",
-            updated_date=self.mock_today)
+            name="Sponsor 1", updated_date=self.mock_today
+        )
         set_current_rankings()
 
-    @patch('frontend.management.commands.tweet_today.twitter')
+    @patch("frontend.management.commands.tweet_today.twitter")
     def test_all_variables(self, twitter_mock):
         self.due_trial = makeTrial(
             self.sponsor,
             results_due=True,
             has_results=False,
-            updated_date=self.mock_today)
+            updated_date=self.mock_today,
+        )
         self.invisible_ongoing_trial = makeTrial(
             self.sponsor,
             results_due=True,
             has_results=False,
             previous_status=Trial.STATUS_ONGOING,
             status=Trial.STATUS_NO_LONGER_ACT,
-            updated_date=self.mock_today)
+            updated_date=self.mock_today,
+        )
         self.invisible_overdue_trial = makeTrial(
             self.sponsor,
             results_due=True,
             has_results=False,
             previous_status=Trial.STATUS_OVERDUE,
             status=Trial.STATUS_NO_LONGER_ACT,
-            updated_date=self.mock_today)
+            updated_date=self.mock_today,
+        )
         self.reported_trial = makeTrial(
             self.sponsor,
             results_due=True,
             has_results=True,
             reported_date=date(2016, 12, 1),
-            updated_date=self.mock_today)
+            updated_date=self.mock_today,
+        )
         for _ in range(3):
             self.late_trial = makeTrial(
                 self.sponsor,
                 results_due=True,
                 has_results=True,
                 reported_date=date(2017, 12, 1),
-                updated_date=self.mock_today)
+                updated_date=self.mock_today,
+            )
         set_current_rankings()
-        api = MagicMock(twitter.api.Api, name='api')
+        api = MagicMock(twitter.api.Api, name="api")
         twitter_mock.Api.return_value = api
         out = StringIO()
-        call_command('tweet_today', stdout=out)
+        call_command("tweet_today", stdout=out)
         api.PostUpdate.assert_called_with(
-            'Since our last update, 1 trial became overdue, and 3 trials '
-            'reported late. 1 trial reported its results on time. 80% of '
-            'all due trials have reported their results.  '
-            'https://fdaaa.trialstracker.net/')
+            "Since our last update, 1 trial became overdue, and 3 trials "
+            "reported late. 1 trial reported its results on time. 80% of "
+            "all due trials have reported their results.  "
+            "https://fdaaa.trialstracker.net/"
+        )
 
-    @patch('frontend.management.commands.tweet_today.twitter')
+    @patch("frontend.management.commands.tweet_today.twitter")
     def test_single_variable(self, twitter_mock):
         self.due_trial = makeTrial(
             self.sponsor,
             results_due=True,
             has_results=False,
-            updated_date=self.mock_today)
+            updated_date=self.mock_today,
+        )
         set_current_rankings()
-        api = MagicMock(twitter.api.Api, name='api')
+        api = MagicMock(twitter.api.Api, name="api")
         twitter_mock.Api.return_value = api
         out = StringIO()
-        call_command('tweet_today', stdout=out)
+        call_command("tweet_today", stdout=out)
         api.PostUpdate.assert_called_with(
-            'Since our last update, 1 trial became overdue. 0% of all due '
-            'trials have reported their results.  '
-            'https://fdaaa.trialstracker.net/')
+            "Since our last update, 1 trial became overdue. 0% of all due "
+            "trials have reported their results.  "
+            "https://fdaaa.trialstracker.net/"
+        )
 
-    @patch('frontend.management.commands.tweet_today.twitter')
+    @patch("frontend.management.commands.tweet_today.twitter")
     def test_noop(self, twitter_mock):
-        api = MagicMock(twitter.api.Api, name='api')
+        api = MagicMock(twitter.api.Api, name="api")
         twitter_mock.Api.return_value = api
         out = StringIO()
-        call_command('tweet_today', stdout=out)
+        call_command("tweet_today", stdout=out)
         api.PostUpdate.assert_not_called()
