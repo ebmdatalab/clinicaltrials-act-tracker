@@ -254,6 +254,18 @@ class SponsorTrialsStatusTestCase(TestCase):
         self.assertEqual(list(self.sponsor.trial_set.reported_on_time()), [trial])
         self.assertEqual(list(self.sponsor.trial_set.reported_late()), [])
 
+    def test_trial_not_reported_late_with_leap_year(self):
+        trial = makeTrial(
+            self.sponsor,
+            has_results=True,
+            results_due=True,
+            completion_date="2019-04-01",
+            reported_date="2020-04-01",
+        )
+        self.assertEqual(trial.status, "reported")
+        self.assertEqual(list(self.sponsor.trial_set.reported_on_time()), [trial])
+        self.assertEqual(list(self.sponsor.trial_set.reported_late()), [])
+
     def test_trial_reported_late(self):
         trial = makeTrial(
             self.sponsor,
