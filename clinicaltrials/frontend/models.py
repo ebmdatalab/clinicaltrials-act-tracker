@@ -200,7 +200,7 @@ class Trial(models.Model):
     def calculated_due_date(self):
         if self.has_exemption:
             return self.completion_date + relativedelta(years=3)
-        return self.completion_date + relativedelta(days=365)
+        return self.completion_date + relativedelta(years=1)
 
     def calculated_reported_date(self):
         if self.reported_date:
