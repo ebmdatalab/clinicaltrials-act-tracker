@@ -11,13 +11,14 @@ from google.cloud import bigquery as gcbq
 from google.cloud import storage as gcs
 from google.cloud.exceptions import Conflict, NotFound
 
-PROJECT = 'ebmdatalab'
-BQ_LOCATION = 'EU'
+PROJECT = "ebmdatalab"
+BQ_LOCATION = "EU"
 BQ_DEFAULT_TABLE_EXPIRATION_MS = None
-DATASET_NAME = 'clinicaltrials'
+DATASET_NAME = "clinicaltrials"
+
 
 class StorageClient(object):
-    '''A dumb proxy for gcs.Client'''
+    """A dumb proxy for gcs.Client"""
 
     def __init__(self):
         self.gcs_client = gcs.Client(project=PROJECT)
@@ -30,7 +31,6 @@ class StorageClient(object):
 
     def __getattr__(self, name):
         return getattr(self.gcs_client, name)
-
 
 
 class Client(object):
@@ -56,8 +56,7 @@ class Client(object):
 
     def create_dataset(self):
         self.dataset.location = BQ_LOCATION
-        self.dataset.default_table_expiration_ms =\
-            BQ_DEFAULT_TABLE_EXPIRATION_MS
+        self.dataset.default_table_expiration_ms = BQ_DEFAULT_TABLE_EXPIRATION_MS
         self.dataset.create()
 
     def delete_dataset(self):
@@ -71,7 +70,7 @@ class Client(object):
         try:
             table.create()
         except NotFound as e:
-            if 'Not found: Dataset' not in str(e):
+            if "Not found: Dataset" not in str(e):
                 raise
             self.create_dataset()
             table.create()
@@ -93,46 +92,39 @@ class Client(object):
         gcs_client = StorageClient()
         bucket = gcs_client.bucket()
         if bucket.get_blob(gcs_path) is None:
-            raise RuntimeError('Could not find blob at {}'.format(gcs_path))
+            raise RuntimeError("Could not find blob at {}".format(gcs_path))
 
-        gcs_uri = 'gs://{}/{}'.format(self.project_name, gcs_path)
+        gcs_uri = "gs://{}/{}".format(self.project_name, gcs_path)
 
         resource = {
-            'tableReference': {'tableId': table_name},
-            'externalDataConfiguration': {
-                'sourceFormat': 'CSV',
-                'sourceUris': [gcs_uri],
-                'schema': {'fields': schema},
-                'csvOptions': {
-                    'fieldDelimiter': 'þ',
-                }
-            }
+            "tableReference": {"tableId": table_name},
+            "externalDataConfiguration": {
+                "sourceFormat": "CSV",
+                "sourceUris": [gcs_uri],
+                "schema": {"fields": schema},
+                "csvOptions": {"fieldDelimiter": "þ",},
+            },
         }
 
-        path = '/projects/{}/datasets/{}/tables'.format(
-            self.project_name,
-            self.dataset_name
+        path = "/projects/{}/datasets/{}/tables".format(
+            self.project_name, self.dataset_name
         )
 
         try:
             self.gcbq_client._connection.api_request(
-                method='POST',
-                path=path,
-                data=resource
+                method="POST", path=path, data=resource
             )
         except NotFound as e:
-            if 'Not found: Dataset' not in str(e):
+            if "Not found: Dataset" not in str(e):
                 raise
             self.create_dataset()
             self.gcbq_client._connection.api_request(
-                method='POST',
-                path=path,
-                data=resource
+                method="POST", path=path, data=resource
             )
         return self.get_table(table_name, gcs_client)
 
     def create_table_with_view(self, table_name, sql, legacy):
-        assert '{project}' in sql
+        assert "{project}" in sql
         sql = interpolate_sql(sql, project=self.project_name)
         table = self.dataset.table(table_name)
         table.view_query = sql
@@ -140,7 +132,7 @@ class Client(object):
         try:
             table.create()
         except NotFound as e:
-            if 'Not found: Dataset' not in str(e):
+            if "Not found: Dataset" not in str(e):
                 raise
             self.create_dataset()
             table.create()
@@ -171,7 +163,7 @@ class Table(object):
 
     @property
     def qualified_name(self):
-        return '{}.{}'.format(self.dataset_name, self.name)
+        return "{}.{}".format(self.dataset_name, self.name)
 
     def get_rows(self):
         self.gcbq_table.reload()
@@ -184,20 +176,18 @@ class Table(object):
         for row in self.get_rows():
             yield row_to_dict(row, field_names)
 
-    def insert_rows_from_query(self, sql, substitutions=None, legacy=False,
-                               **options):
+    def insert_rows_from_query(self, sql, substitutions=None, legacy=False, **options):
         substitutions = substitutions or {}
         sql = interpolate_sql(sql, **substitutions)
         default_options = {
-            'use_legacy_sql': legacy,
-            'allow_large_results': True,
-            'write_disposition': 'WRITE_TRUNCATE',
-            'destination': self.gcbq_table,
+            "use_legacy_sql": legacy,
+            "allow_large_results": True,
+            "write_disposition": "WRITE_TRUNCATE",
+            "destination": self.gcbq_table,
         }
 
         job = self.gcbq_client.run_async_query(
-            options.pop('job_name', gen_job_name()),
-            sql
+            options.pop("job_name", gen_job_name()), sql
         )
         set_options(job, options, default_options)
 
@@ -207,29 +197,27 @@ class Table(object):
 
     def insert_rows_from_csv(self, csv_path, **options):
         default_options = {
-            'source_format': 'text/csv',
-            'write_disposition': 'WRITE_TRUNCATE',
+            "source_format": "text/csv",
+            "write_disposition": "WRITE_TRUNCATE",
         }
 
         merge_options(options, default_options)
 
-        with open(csv_path, 'rb') as f:
+        with open(csv_path, "rb") as f:
             # This starts a job, so we don't need to call job.begin()
             job = self.gcbq_table.upload_from_file(f, **options)
 
         wait_for_job(job)
 
-
     def insert_rows_from_storage(self, gcs_path, **options):
         default_options = {
-            'write_disposition': 'WRITE_TRUNCATE',
+            "write_disposition": "WRITE_TRUNCATE",
         }
 
-        gcs_uri = 'gs://{}/{}'.format(self.project_name, gcs_path)
+        gcs_uri = "gs://{}/{}".format(self.project_name, gcs_path)
 
         job = self.gcbq_client.load_table_from_storage(
-            gen_job_name(),
-            self.gcbq_table, gcs_uri
+            gen_job_name(), self.gcbq_table, gcs_uri
         )
 
         set_options(job, options, default_options)
@@ -239,10 +227,10 @@ class Table(object):
         wait_for_job(job)
 
     def delete_all_rows(self, **options):
-        sql = 'DELETE FROM {} WHERE true'.format(self.qualified_name)
+        sql = "DELETE FROM {} WHERE true".format(self.qualified_name)
 
         default_options = {
-            'use_legacy_sql': False,
+            "use_legacy_sql": False,
         }
 
         job = self.gcbq_client.run_async_query(gen_job_name(), sql)
@@ -263,19 +251,16 @@ class TableExporter(object):
 
     def export_to_storage(self, **options):
         default_options = {
-            'compression': 'GZIP',
+            "compression": "GZIP",
         }
 
-        destination_uri = 'gs://{}/{}*.csv.gz'.format(
-            self.table.project,
-            self.storage_prefix,
+        destination_uri = "gs://{}/{}*.csv.gz".format(
+            self.table.project, self.storage_prefix,
         )
         # can we get to a client from here
         client = gcbq.Client(project=PROJECT)
         job = client.extract_table_to_storage(
-            options.pop('job_name', gen_job_name()),
-            self.table,
-            destination_uri,
+            options.pop("job_name", gen_job_name()), self.table, destination_uri,
         )
 
         set_options(job, options, default_options)
@@ -290,7 +275,7 @@ class TableExporter(object):
 
     def download_from_storage(self):
         for blob in self.storage_blobs():
-            with tempfile.NamedTemporaryFile(mode='rb+') as f:
+            with tempfile.NamedTemporaryFile(mode="rb+") as f:
                 blob.download_to_file(f)
                 f.flush()
                 f.seek(0)
@@ -306,8 +291,7 @@ class TableExporter(object):
                 # puts a header on every file, so we have to skip that
                 # header on all except the first shard.
                 cmd = "gunzip -c -f %s | tail -n +2 >> %s"
-            subprocess.check_call(
-                cmd % (f_zipped.name, f_out.name), shell=True)
+            subprocess.check_call(cmd % (f_zipped.name, f_out.name), shell=True)
 
     def delete_from_storage(self):
         for blob in self.storage_blobs():
@@ -321,11 +305,11 @@ def wait_for_job(job, timeout_s=3600):
     # version of g.c.bq.
     while True:
         job.reload()
-        if job.state == 'DONE':
+        if job.state == "DONE":
             break
 
         if time.time() - t0 > timeout_s:
-            msg = 'Timeout waiting for job {} after {} second'.format(
+            msg = "Timeout waiting for job {} after {} second".format(
                 job.name, timeout_s
             )
             raise TimeoutError(msg)
@@ -367,7 +351,7 @@ def row_to_dict(row, field_names):
     """
     dict_row = {}
     for value, field_name in zip(row, field_names):
-        if value and str(value).lower() == 'nan':
+        if value and str(value).lower() == "nan":
             value = None
         dict_row[field_name] = value
     return dict_row
@@ -385,11 +369,11 @@ def build_schema(*fields):
 
 class InterpolationDict(dict):
     def __missing__(self, key):
-        return '{' + key + '}'
+        return "{" + key + "}"
 
 
 def interpolate_sql(sql, **substitutions):
-    '''Interpolates substitutions (plus datasets defined in DATASETS) into
+    """Interpolates substitutions (plus datasets defined in DATASETS) into
     given SQL.
 
     Many of our SQL queries contain template variables, because the names of
@@ -407,7 +391,7 @@ def interpolate_sql(sql, **substitutions):
     Use of the InterpolationDict allows us to do interpolation when the SQL
     contains things in curly braces that shoudn't be interpolated (for
     instance, JS functions defined in SQL).
-    '''
+    """
     substitutions = InterpolationDict(**substitutions)
     sql = string.Formatter().vformat(sql, (), substitutions)
     sql = string.Formatter().vformat(sql, (), substitutions)

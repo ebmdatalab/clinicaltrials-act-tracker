@@ -11,4 +11,6 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 from frontend.settings import *
 
-LOGGING['handlers']['applogfile']['filename'] = os.path.join(PROJECT_ROOT, 'clinicaltrials.log')
+LOGGING["handlers"]["applogfile"]["filename"] = os.path.join(
+    PROJECT_ROOT, "clinicaltrials.log"
+)

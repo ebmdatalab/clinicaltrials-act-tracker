@@ -26,22 +26,27 @@ class DataTablesPagination(LimitOffsetPagination):
     for details of how the Django REST framework handles pagination.
 
     """
+
     default_limit = 300
-    limit_query_param = 'length'
-    offset_query_param = 'start'
+    limit_query_param = "length"
+    offset_query_param = "start"
 
     def paginate_queryset(self, queryset, request, view=None):
         self.total = queryset.count()
         return super().paginate_queryset(queryset, request, view=view)
 
     def get_paginated_response(self, data):
-        return Response(OrderedDict([
-            ('recordsFiltered', self.count),
-            ('recordsTotal', self.total),
-            ('next', self.get_next_link()),
-            ('previous', self.get_previous_link()),
-            ('results', data)
-        ]))
+        return Response(
+            OrderedDict(
+                [
+                    ("recordsFiltered", self.count),
+                    ("recordsTotal", self.total),
+                    ("next", self.get_next_link()),
+                    ("previous", self.get_previous_link()),
+                    ("results", data),
+                ]
+            )
+        )
 
 
 def get_columns(params):
@@ -73,7 +78,7 @@ def get_datatables_ordering(params):
         if dir_match:
             ordering_directions[dir_match.groups()[0]] = v
     for k, v in sorted(ordering_names.items(), key=lambda x: x[0]):
-        if ordering_directions[k] == 'desc':
+        if ordering_directions[k] == "desc":
             direction = "-"
         else:
             direction = ""
@@ -94,7 +99,7 @@ class DataTablesOrderingFilter(OrderingFilter):
         ordering = []
         params = get_datatables_ordering(request.query_params)
         if params:
-            fields = [param.strip() for param in params.split(',')]
+            fields = [param.strip() for param in params.split(",")]
             ordering = self.remove_invalid_fields(queryset, fields, view, request)
             if ordering:
                 return ordering

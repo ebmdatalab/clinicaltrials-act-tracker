@@ -7,6 +7,7 @@ class GroupWriteRotatingFileHandler(logging.handlers.RotatingFileHandler):
 
     Ref: https://stackoverflow.com/questions/1407474/
     """
+
     def _open(self):
         umask = os.umask(0o002)
         handle = logging.handlers.RotatingFileHandler._open(self)

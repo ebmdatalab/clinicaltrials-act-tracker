@@ -3,6 +3,7 @@ import math
 
 register = django.template.Library()
 
+
 def calc_bar(value, *args):
     """Calculate percentage of value out of the maximum
     of several values, for making a bar chart."""
@@ -10,6 +11,7 @@ def calc_bar(value, *args):
     top = max(args + (value,))
     percent = value / top * 100
     return percent
+
 
 def calc_mid_bar(value1, value2, *args):
     """Calculate percentage of value out of the maximum

@@ -21,8 +21,7 @@ def _datify(trial):
     So: do exactly what Django does, but sooner.
 
     """
-    for field in ['reported_date',
-                  'completion_date']:
+    for field in ["reported_date", "completion_date"]:
         _field = getattr(trial, field)
         if isinstance(_field, str):
             val = parse_date(_field)
@@ -37,9 +36,9 @@ def compute_metadata(trial):
     min_days_late, max_days_late = get_days_late(trial)
     trial.days_late = max_days_late
     if trial.days_late:
-        trial.finable_days_late = max([
-            (min_days_late or 0) - type(trial).FINES_GRACE_PERIOD,
-            0])
+        trial.finable_days_late = max(
+            [(min_days_late or 0) - type(trial).FINES_GRACE_PERIOD, 0]
+        )
         if trial.finable_days_late == 0:
             trial.finable_days_late = None
     else:
@@ -75,7 +74,7 @@ def qa_start_dates(trial):
     if first_event:
         original_start_date = first_event.submitted_to_regulator
 
-    for event in trial.trialqa_set.order_by('-submitted_to_regulator').all():
+    for event in trial.trialqa_set.order_by("-submitted_to_regulator").all():
         if event.cancelled_by_sponsor:
             cancelled = True
             break
@@ -86,9 +85,7 @@ def qa_start_dates(trial):
 
 
 def _days_delta(effective_reporting_date, completion_date, with_grace_period=False):
-    days_late = max([
-        (effective_reporting_date - completion_date).days,
-        0])
+    days_late = max([(effective_reporting_date - completion_date).days, 0])
     if with_grace_period and (days_late - GRACE_PERIOD) <= 0:
         days_late = 0
     if days_late == 0:
@@ -113,29 +110,28 @@ def get_days_late(trial):
         _datify(trial)
         due_date = trial.calculated_due_date()
         if trial.has_results:
-            assert trial.reported_date, \
-                "{} has_results but no reported date".format(trial)
-            min_days_late = max_days_late = _days_delta(
-                trial.reported_date, due_date)
+            assert trial.reported_date, "{} has_results but no reported date".format(
+                trial
+            )
+            min_days_late = max_days_late = _days_delta(trial.reported_date, due_date)
         else:
             original_start_date, cancelled, restart_date = qa_start_dates(trial)
             if original_start_date:
                 min_days_late = max_days_late = _days_delta(
-                    original_start_date, due_date)
+                    original_start_date, due_date
+                )
             if restart_date:
                 max_days_late = _days_delta(restart_date, due_date)
             else:
                 if cancelled:
                     max_days_late = _days_delta(
-                        date.today(),
-                        due_date,
-                        with_grace_period=True)
+                        date.today(), due_date, with_grace_period=True
+                    )
             no_qa = not original_start_date
             if no_qa:
                 min_days_late = max_days_late = _days_delta(
-                    date.today(),
-                    due_date,
-                    with_grace_period=True)
+                    date.today(), due_date, with_grace_period=True
+                )
     return min_days_late, max_days_late
 
 
