@@ -1,0 +1,47 @@
+name: "clinicaltrials-act-tracker CI"
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+env:
+  CLINICALTRIALS_SECRET_KEY: x
+  CLINICALTRIALS_DEBUG: 'yes'
+  CLINICALTRIALS_GOOGLE_TRACKING_ID: x
+  CLINICALTRIALS_DB: clinicaltrials
+  CLINICALTRIALS_DB_NAME: postgres
+  CLINICALTRIALS_DB_PASS: postgres
+  TWITTER_CONSUMER_SECRET: x
+  TWITTER_ACCESS_TOKEN_SECRET: x
+  GOOGLE_APPLICATION_CREDENTIALS: /home/runner/work/clinicaltrials-act-tracker/clinicaltrials-act-tracker/google-credentials.json
+
+jobs:
+  unit_test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: "Unit tests"
+        run: cd clinicaltrials && coverage run --source='.' manage.py test
