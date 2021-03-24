@@ -4,78 +4,214 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-asn1crypto==0.24.0        # via cryptography
-backcall==0.1.0           # via ipython
-bcrypt==3.1.6             # via paramiko
-cachetools==3.1.0         # via google-auth
-certifi==2018.11.29       # via requests
-cffi==1.11.5              # via bcrypt, cryptography, pynacl
-chardet==3.0.4            # via requests
+asn1crypto==0.24.0
+    # via cryptography
+backcall==0.1.0
+    # via ipython
+bcrypt==3.1.6
+    # via paramiko
+cachetools==3.1.0
+    # via google-auth
+certifi==2018.11.29
+    # via requests
+cffi==1.11.5
+    # via
+    #   bcrypt
+    #   cryptography
+    #   pynacl
+chardet==3.0.4
+    # via requests
 coverage==4.5.2
+    # via
+    #   -r requirements.in
+    #   coveralls
 coveralls==1.5.1
-cryptography==2.5         # via paramiko
+    # via -r requirements.in
+cryptography==2.5
+    # via paramiko
 csscompressor==0.9.5
+    # via -r requirements.in
 dateparser==0.7.1
-decorator==4.3.2          # via ipython, traitlets
-django-appconf==1.0.2     # via django-compressor
+    # via -r requirements.in
+decorator==4.3.2
+    # via
+    #   ipython
+    #   traitlets
+django-appconf==1.0.2
+    # via django-compressor
 django-compressor==2.2
+    # via
+    #   -r requirements.in
+    #   django-libsass
 django-extensions==2.1.5
+    # via -r requirements.in
 django-filter==2.1.0
+    # via -r requirements.in
 django-libsass==0.7
+    # via -r requirements.in
 django==2.1.7
+    # via
+    #   -r requirements.in
+    #   django-filter
 djangorestframework-csv==2.1.0
+    # via -r requirements.in
 djangorestframework==3.9.1
-docopt==0.6.2             # via coveralls
+    # via
+    #   -r requirements.in
+    #   djangorestframework-csv
+docopt==0.6.2
+    # via coveralls
 fabric3==1.14.post1
-future==0.17.1            # via python-twitter
+    # via -r requirements.in
+future==0.17.1
+    # via python-twitter
 google-api-python-client==1.6.2
-google-auth==1.6.2        # via google-cloud-bigquery, google-cloud-core, google-cloud-storage
+    # via -r requirements.in
+google-auth==1.6.2
+    # via
+    #   google-cloud-bigquery
+    #   google-cloud-core
+    #   google-cloud-storage
 google-cloud-bigquery==0.26.0
-google-cloud-core==0.26.0  # via google-cloud-bigquery, google-cloud-storage
+    # via -r requirements.in
+google-cloud-core==0.26.0
+    # via
+    #   google-cloud-bigquery
+    #   google-cloud-storage
 google-cloud-storage==1.3.2
-google-resumable-media==0.3.2  # via google-cloud-bigquery, google-cloud-storage
-googleapis-common-protos==1.5.8  # via google-cloud-core
+    # via -r requirements.in
+google-resumable-media==0.3.2
+    # via
+    #   google-cloud-bigquery
+    #   google-cloud-storage
+googleapis-common-protos==1.5.8
+    # via google-cloud-core
 gunicorn==19.9.0
-httplib2==0.12.0          # via google-api-python-client, oauth2client
-idna==2.8                 # via requests
+    # via -r requirements.in
+httplib2==0.12.0
+    # via
+    #   google-api-python-client
+    #   oauth2client
+idna==2.8
+    # via requests
 ipdb==0.11
-ipython-genutils==0.2.0   # via traitlets
+    # via -r requirements.in
+ipython-genutils==0.2.0
+    # via traitlets
 ipython==7.2.0
-jedi==0.13.2              # via ipython
-libsass==0.17.0           # via django-libsass
+    # via
+    #   -r requirements.in
+    #   ipdb
+jedi==0.13.2
+    # via ipython
+libsass==0.17.0
+    # via django-libsass
 lxml==4.3.1
+    # via -r requirements.in
 mistune==0.8.4
-oauth2client==4.1.3       # via google-api-python-client
-oauthlib==3.0.1           # via requests-oauthlib
-paramiko==2.4.2           # via fabric3
-parso==0.3.4              # via jedi
-pexpect==4.6.0            # via ipython
-pickleshare==0.7.5        # via ipython
-prompt-toolkit==2.0.8     # via ipython
-protobuf==3.6.1           # via google-cloud-core, googleapis-common-protos
+    # via -r requirements.in
+oauth2client==4.1.3
+    # via google-api-python-client
+oauthlib==3.0.1
+    # via requests-oauthlib
+paramiko==2.4.2
+    # via fabric3
+parso==0.3.4
+    # via jedi
+pexpect==4.6.0
+    # via ipython
+pickleshare==0.7.5
+    # via ipython
+prompt-toolkit==2.0.8
+    # via ipython
+protobuf==3.6.1
+    # via
+    #   google-cloud-core
+    #   googleapis-common-protos
 psycopg2-binary==2.7.7
-ptyprocess==0.6.0         # via pexpect
-pyasn1-modules==0.2.4     # via google-auth, oauth2client
-pyasn1==0.4.5             # via oauth2client, paramiko, pyasn1-modules, rsa
-pycparser==2.19           # via cffi
-pygments==2.3.1           # via ipython
-pynacl==1.3.0             # via paramiko
-python-dateutil==2.8.0    # via dateparser
+    # via -r requirements.in
+ptyprocess==0.6.0
+    # via pexpect
+pyasn1-modules==0.2.4
+    # via
+    #   google-auth
+    #   oauth2client
+pyasn1==0.4.5
+    # via
+    #   oauth2client
+    #   paramiko
+    #   pyasn1-modules
+    #   rsa
+pycparser==2.19
+    # via cffi
+pygments==2.3.1
+    # via ipython
+pynacl==1.3.0
+    # via paramiko
+python-dateutil==2.8.0
+    # via dateparser
 python-twitter==3.5
-pytz==2018.9              # via dateparser, django, tzlocal
-rcssmin==1.0.6            # via django-compressor
-regex==2019.2.7           # via dateparser
-requests-oauthlib==1.2.0  # via python-twitter
+    # via -r requirements.in
+pytz==2018.9
+    # via
+    #   dateparser
+    #   django
+    #   tzlocal
+rcssmin==1.0.6
+    # via django-compressor
+regex==2019.2.7
+    # via dateparser
+requests-oauthlib==1.2.0
+    # via python-twitter
 requests==2.21.0
-rjsmin==1.0.12            # via django-compressor
-rsa==4.0                  # via google-auth, oauth2client
-six==1.12.0               # via bcrypt, cryptography, django-extensions, djangorestframework-csv, fabric3, google-api-python-client, google-auth, google-cloud-core, google-resumable-media, libsass, oauth2client, prompt-toolkit, protobuf, pynacl, python-dateutil, tenacity, traitlets
-tenacity==4.12.0          # via google-cloud-core
-traitlets==4.3.2          # via ipython
-tzlocal==1.5.1            # via dateparser
-unicodecsv==0.14.1        # via djangorestframework-csv
-uritemplate==3.0.0        # via google-api-python-client
-urllib3==1.24.1           # via requests
-wcwidth==0.1.7            # via prompt-toolkit
+    # via
+    #   -r requirements.in
+    #   coveralls
+    #   google-cloud-bigquery
+    #   google-cloud-core
+    #   google-cloud-storage
+    #   python-twitter
+    #   requests-oauthlib
+rjsmin==1.0.12
+    # via django-compressor
+rsa==4.1
+    # via
+    #   google-auth
+    #   oauth2client
+six==1.12.0
+    # via
+    #   bcrypt
+    #   cryptography
+    #   django-extensions
+    #   djangorestframework-csv
+    #   fabric3
+    #   google-api-python-client
+    #   google-auth
+    #   google-cloud-core
+    #   google-resumable-media
+    #   libsass
+    #   oauth2client
+    #   prompt-toolkit
+    #   protobuf
+    #   pynacl
+    #   python-dateutil
+    #   tenacity
+    #   traitlets
+tenacity==4.12.0
+    # via google-cloud-core
+traitlets==4.3.2
+    # via ipython
+tzlocal==1.5.1
+    # via dateparser
+unicodecsv==0.14.1
+    # via djangorestframework-csv
+uritemplate==3.0.0
+    # via google-api-python-client
+urllib3==1.24.1
+    # via requests
+wcwidth==0.1.7
+    # via prompt-toolkit
 werkzeug==0.14.1
+    # via -r requirements.in
 xmltodict==0.12.0
+    # via -r requirements.in
