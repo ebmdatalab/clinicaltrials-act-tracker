@@ -40,11 +40,6 @@ ALLOWED_HOSTS = [
     'fdaaa.trialstracker.net']
 
 
-# Parameters
-
-GOOGLE_TRACKING_ID = common.utils.get_env_setting('CLINICALTRIALS_GOOGLE_TRACKING_ID')
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -150,7 +145,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'frontend.context_processors.google_tracking_id',
                 'frontend.context_processors.latest_date',
                 'frontend.context_processors.next_planned_update',
                 'frontend.context_processors.fine_per_day',
