@@ -114,6 +114,8 @@ Make a coverage report:
 Deployment
 ==========
 
+**NOTE** This section is out of date - please see https://github.com/ebmdatalab/clinicaltrials-act-tracker/issues/245 for work-in-progress information
+
 We use fabric to deploy over SSH to a pet server.  Deploy with
 
     fab deploy:staging
