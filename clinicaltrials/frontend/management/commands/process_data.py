@@ -1,3 +1,4 @@
+import io
 from datetime import date
 from lxml.etree import tostring
 import csv
@@ -182,13 +183,20 @@ class Command(BaseCommand):
 
     Each import updates existing Trials and Sponsors in-place with new data.
     '''
+
     def add_arguments(self, parser):
         parser.add_argument(
             '--input-csv',
+            help="Path or URL to CSV containing the data",
             type=str)
 
     def handle(self, *args, **options):
-        f = open(options['input_csv'])
+        if '://' in options['input_csv']:
+            resp = requests.get(options['input_csv'], stream=True)
+            f = io.StringIO(resp.text)
+        else:
+            f = open(options['input_csv'])
+        # if it's in GCS, download it
         logger.info("Creating new trials and sponsors from %s", options['input_csv'])
         with transaction.atomic():
             # We don't use auto_now on models for `today`, purely so
