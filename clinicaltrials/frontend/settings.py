@@ -123,7 +123,7 @@ LOGGING = {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(PROJECT_ROOT, "clinicaltrials.log"),
-            "maxBytes": 1024 * 1024 * 15,  # 15MB
+            "maxBytes": 1024 * 1024 * 50,  # 50MB
             "backupCount": 10,
             "formatter": "heroku",
         },
