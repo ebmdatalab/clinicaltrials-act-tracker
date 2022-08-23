@@ -296,7 +296,7 @@ class Command(BaseCommand):
         notify_slack(
             "Today's data uploaded to FDAAA staging: "
             "https://staging-fdaaa.ebmdatalab.net.  "
-            "If this looks good, tell ebmbot to "
-            "'@ebmbot fdaaa deploy'"
+            "If this looks good, tell bennett_bot to "
+            "'@bennett_bot fdaaa deploy'"
             ""
         )
