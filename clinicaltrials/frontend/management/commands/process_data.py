@@ -35,7 +35,7 @@ def set_qa_metadata(trial):
 
     """
     registry_id = trial.registry_id
-    url = "https://clinicaltrials.gov/ct2/show/results/{}".format(registry_id)
+    url = "https://classic.clinicaltrials.gov/ct2/show/results/{}".format(registry_id)
     content = html.fromstring(requests.get(url).text)
     table = content.xpath("//table[.//th//text()[contains(., 'Submission Cycle')]]")
     results = content.xpath('//*[@id="results"]/text()')
