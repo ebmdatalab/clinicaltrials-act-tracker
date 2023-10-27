@@ -963,31 +963,3 @@ table.prelaunch td {
 #hidden-filter {
   visibility: hidden;
 }
-
-#notifyBanner {
-  background: #002147;
-  color: white;
-  display: block;
-  padding: 1rem;
-  text-align: center;
-  width: 100%;
-
-  p {
-    font-size: 1.1em;
-    margin: 0;
-  }
-
-  p:not(:last-child) {
-    margin-block-end: 1rem;
-  }
-
-  a {
-    color: white;
-    font-weight: 700;
-
-    &:where(:hover, :focus) {
-      color: rgba(255, 255, 255, 0.9);
-      text-decoration: none;
-    }
-  }
-}
