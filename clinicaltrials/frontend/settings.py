@@ -128,7 +128,8 @@ LOGGING = {
     }
 }
 
-ADMINS = [('Seb', 'seb.bacon@gmail.com'),]  # XXX change to tech@ebmdatalab.net on launch
+# Disable admin emails
+# ADMINS = []
 
 ROOT_URLCONF = 'frontend.urls'
 
