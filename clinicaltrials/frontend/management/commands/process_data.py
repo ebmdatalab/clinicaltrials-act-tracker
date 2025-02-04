@@ -28,25 +28,36 @@ logger = logging.getLogger(__name__)
 EARLIEST_CANCELLATION_DATE = date(2018, 7, 5)
 
 def set_qa_metadata(trial):
+    
+    #Calling the API for a given trial and json-ing the output
     registry_id = trial.registry_id
     url = "https://clinicaltrials.gov/api/v2/studies/{}".format(registry_id)
     content = json.loads(requests.get(url).text)
 
+    #Accessing the data we need if it exists
     try:
         dates = content['derivedSection']['miscInfoModule']['submissionTracking']['submissionInfos']
     except KeyError:
         dates = None
 
+    #If the data exits
     if dates:
+        #Go line by line to extract the dates.
+        #The dates are in groups of 2. Either a submission and a return, or a submission and a cancellation.
         for row in dates:
+            #'unreselaseDate' is the key for when there is a cancellation
+            #So we handle that
             if 'unreleaseDate' in list(row.keys()):
                 cancelled_date = dateparser.parse(row['unreleaseDate'])
                 submitted_date = dateparser.parse(row['releaseDate'])
+                #Some old trials could have an "unknown" status in the cancellation date field.
+                #So we are accounting for that here though that should be very rare.
                 if "unknown" in cancelled_date.lower():
                     cancelled_date = EARLIEST_CANCELLATION_DATE
                     cancellation_date_inferred = True
                 else:
                     cancellation_date_inferred = False
+                #This stuff was ported in from the old funcation
                 logger.info(
                     "Setting cancellation info for %s: %s -> %s",
                     trial,
@@ -58,21 +69,28 @@ def set_qa_metadata(trial):
                 qa.cancelled_by_sponsor = cancelled_date
                 qa.cancellation_date_inferred = cancellation_date_inferred
                 qa.save()
-            elif 'unreleaseDate' not in list(row.keys()):
+            #So the only other case we have to worry about is the standard submission/return cluster of dates
+            #So we can just do an else because that will just be any bit of JSON without 'unreselaseDate' 
+            else:
+                #Just getting the submission date and the return date if it exists
                 submitted = dateparser.parse(row['releaseDate'])
                 if 'resetDate' in row.keys():
                     returned = dateparser.parse(row['resetDate'])
                 else:
                     returned = None
+                #This bit was ported in from the old function
                 qa, created = TrialQA.objects.get_or_create(
                     submitted_to_regulator=submitted,
                     trial=trial)
                 if returned:
                     qa.returned_to_sponsor = returned
                     qa.save()
+
+    #If there is no date because results were already posted since the last update, we ignore and move on
     elif not dates and content['hasResults']:
         pass
-    
+
+    #This last else was ported from the old code to handle any other cases.
     else:
         deleted, _ = trial.trialqa_set.all().delete()
         if deleted:
