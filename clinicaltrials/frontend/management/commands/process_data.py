@@ -4,6 +4,7 @@ import csv
 import datetime
 import logging
 import re
+import json
 
 from django.db import transaction
 from django.db.models import Sum
@@ -27,81 +28,69 @@ logger = logging.getLogger(__name__)
 EARLIEST_CANCELLATION_DATE = date(2018, 7, 5)
 
 def set_qa_metadata(trial):
-    """Scrape `Results Submitted` tab on website for interim reporting
-    (this means results have been submitted at some point, and are
-    under QA).
-
-    Store this data in a TrialQA table
-
-    """
+    
+    #Calling the API for a given trial and json-ing the output
     registry_id = trial.registry_id
-    url = "https://classic.clinicaltrials.gov/ct2/show/results/{}".format(registry_id)
-    content = html.fromstring(requests.get(url).text)
-    table = content.xpath("//table[.//th//text()[contains(., 'Submission Cycle')]]")
-    results = content.xpath('//*[@id="results"]/text()')
-    results_text = results and results[0].strip()
-    if table:
-        for row in table[0].xpath(".//tr"):
-            if len(row.xpath(".//td")) == 0:
-                continue
-            else:
-                # if Cancelled, loop over submitted dates. See #146
-                # for a description of cancellations
-                cancelled = re.findall(
-                    r"\n\s+([^<>]*)<br/>.*?cancell?ed.*? (?:-|on) (.*?)\)<br/>",
-                    tostring(row).decode('utf8').replace("&#13;", ""), # carriage return
-                    re.I|re.DOTALL)
-                # Oh god, sometimes it's returned and cancelled on the
-                # same day or something
-                for submitted_date, cancelled_date in cancelled:
-                    submitted_date = dateparser.parse(submitted_date)
-                    if "unknown" in cancelled_date.lower():
-                        cancelled_date = EARLIEST_CANCELLATION_DATE
-                        cancellation_date_inferred = True
-                    else:
-                        cancelled_date = dateparser.parse(cancelled_date)
-                        cancellation_date_inferred = False
-                    logger.info(
-                        "Setting cancellation info for %s: %s -> %s",
-                        trial,
-                        submitted_date,
-                        cancelled_date)
-                    # Assumes you can't submit twice on same day
-                    qa, _ = TrialQA.objects.get_or_create(
-                        submitted_to_regulator=submitted_date,
-                        trial=trial)
-                    qa.cancelled_by_sponsor = cancelled_date
-                    qa.cancellation_date_inferred = cancellation_date_inferred
-                    qa.save()
+    url = "https://clinicaltrials.gov/api/v2/studies/{}".format(registry_id)
+    content = json.loads(requests.get(url).text)
 
-                # Take the date on the last line, to cater for cases
-                # where there are many dates (specifically,
-                # cancellation; but given this was added to the output
-                # unexpectedly, and similar additions may come in the
-                # future, defaulting to the most recent date is the
-                # most conservative approach)
-                submitted = [
-                    x.strip()
-                    for x in row.xpath(".//td[1]")[0].text_content().split("\n")
-                    if x.strip()][-1]
-                if re.findall(r"cancell?ed", submitted, re.I):
-                    # The last event was a cancellation; no further submissions
-                    continue
-                submitted = submitted and dateparser.parse(submitted) or None
-                returned = row.xpath(".//td[2]")[0].text.strip()
-                returned = returned and dateparser.parse(returned) or None
+    #Accessing the data we need if it exists
+    try:
+        dates = content['derivedSection']['miscInfoModule']['submissionTracking']['submissionInfos']
+    except KeyError:
+        dates = None
+
+    #If the data exits
+    if dates:
+        #Go line by line to extract the dates.
+        #The dates are in groups of 2. Either a submission and a return, or a submission and a cancellation.
+        for row in dates:
+            #'unreselaseDate' is the key for when there is a cancellation
+            #So we handle that
+            if 'unreleaseDate' in list(row.keys()):
+                cancelled_date = dateparser.parse(row['unreleaseDate'])
+                submitted_date = dateparser.parse(row['releaseDate'])
+                #Some old trials could have an "unknown" status in the cancellation date field.
+                #So we are accounting for that here though that should be very rare.
+                if "unknown" in cancelled_date.lower():
+                    cancelled_date = EARLIEST_CANCELLATION_DATE
+                    cancellation_date_inferred = True
+                else:
+                    cancellation_date_inferred = False
+                #This stuff was ported in from the old funcation
+                logger.info(
+                    "Setting cancellation info for %s: %s -> %s",
+                    trial,
+                    submitted_date,
+                    cancelled_date)
+                qa, _ = TrialQA.objects.get_or_create(
+                    submitted_to_regulator=submitted_date,
+                    trial=trial)
+                qa.cancelled_by_sponsor = cancelled_date
+                qa.cancellation_date_inferred = cancellation_date_inferred
+                qa.save()
+            #So the only other case we have to worry about is the standard submission/return cluster of dates
+            #So we can just do an else because that will just be any bit of JSON without 'unreselaseDate' 
+            else:
+                #Just getting the submission date and the return date if it exists
+                submitted = dateparser.parse(row['releaseDate'])
+                if 'resetDate' in row.keys():
+                    returned = dateparser.parse(row['resetDate'])
+                else:
+                    returned = None
+                #This bit was ported in from the old function
                 qa, created = TrialQA.objects.get_or_create(
                     submitted_to_regulator=submitted,
                     trial=trial)
                 if returned:
                     qa.returned_to_sponsor = returned
                     qa.save()
-    elif not table and results_text == 'Study Results':
-        # This can happen where a study has published the results, but
-        # the data dump doesn't yet reflect this. We assume the state
-        # is the same as the last time QA results were checked. See
-        # #198 for background.
+
+    #If there is no date because results were already posted since the last update, we ignore and move on
+    elif not dates and content['hasResults']:
         pass
+
+    #This last else was ported from the old code to handle any other cases.
     else:
         deleted, _ = trial.trialqa_set.all().delete()
         if deleted:
