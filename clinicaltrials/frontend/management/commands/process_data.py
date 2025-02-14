@@ -52,7 +52,7 @@ def set_qa_metadata(trial):
                 submitted_date = dateparser.parse(row['releaseDate'])
                 #Some old trials could have an "unknown" status in the cancellation date field.
                 #So we are accounting for that here though that should be very rare.
-                if "unknown" in cancelled_date.lower():
+                if not cancelled_date and "unknown" in row['unreleaseDate'].lower():
                     cancelled_date = EARLIEST_CANCELLATION_DATE
                     cancellation_date_inferred = True
                 else:
