@@ -28,8 +28,7 @@ EARLIEST_CANCELLATION_DATE = date(2018, 7, 5)
 
 
 def notify_slack(message):
-    """Posts the message to #general
-    """
+    """Posts the message to #general"""
     # Set the webhook_url to the one provided by Slack when you create
     # the webhook at
     # https://my.slack.com/services/new/incoming-webhook/
@@ -44,70 +43,84 @@ def notify_slack(message):
         )
 
 
+def _update_qa(trial, submitted_date, cancelled_date, cancellation_date_inferred):
+    # This stuff was ported in from the old funcation
+    logger.info(
+        "Setting cancellation info for %s: %s -> %s",
+        trial,
+        submitted_date,
+        cancelled_date,
+    )
+    qa, _ = TrialQA.objects.get_or_create(
+        submitted_to_regulator=submitted_date, trial=trial
+    )
+    qa.cancelled_by_sponsor = cancelled_date
+    qa.cancellation_date_inferred = cancellation_date_inferred
+    qa.save()
+
+
 def set_qa_metadata(trial):
-    
-    #Calling the API for a given trial and json-ing the output
+    # Calling the API for a given trial and json-ing the output
     registry_id = trial.registry_id
     url = "https://clinicaltrials.gov/api/v2/studies/{}".format(registry_id)
     content = json.loads(requests.get(url).text)
 
-    #Accessing the data we need if it exists
+    # Accessing the data we need if it exists
     try:
-        dates = content['derivedSection']['miscInfoModule']['submissionTracking']['submissionInfos']
+        dates = content["derivedSection"]["miscInfoModule"]["submissionTracking"][
+            "submissionInfos"
+        ]
     except KeyError:
         dates = None
 
-    #If the data exits
+    # If the data exists
     if dates:
-        #Go line by line to extract the dates.
-        #The dates are in groups of 2. Either a submission and a return, or a submission and a cancellation.
+        # Go line by line to extract the dates.
+        # The dates are in groups of 2. Either a submission and a return, or
+        # a submission and a cancellation.
         for row in dates:
-            #'unreselaseDate' is the key for when there is a cancellation
-            #So we handle that
-            if 'unreleaseDate' in list(row.keys()):
-                cancelled_date = dateparser.parse(row['unreleaseDate'])
-                submitted_date = dateparser.parse(row['releaseDate'])
-                #Some old trials could have an "unknown" status in the cancellation date field.
-                #So we are accounting for that here though that should be very rare.
-                if "unknown" in cancelled_date.lower():
-                    cancelled_date = EARLIEST_CANCELLATION_DATE
-                    cancellation_date_inferred = True
-                else:
-                    cancellation_date_inferred = False
-                #This stuff was ported in from the old funcation
-                logger.info(
-                    "Setting cancellation info for %s: %s -> %s",
-                    trial,
-                    submitted_date,
-                    cancelled_date)
-                qa, _ = TrialQA.objects.get_or_create(
-                    submitted_to_regulator=submitted_date,
-                    trial=trial)
-                qa.cancelled_by_sponsor = cancelled_date
-                qa.cancellation_date_inferred = cancellation_date_inferred
-                qa.save()
-            #So the only other case we have to worry about is the standard submission/return cluster of dates
-            #So we can just do an else because that will just be any bit of JSON without 'unreselaseDate' 
+            submitted_date = dateparser.parse(row["releaseDate"])
+
+            # 'unreleaseDate' is the key for when there is a cancellation
+            # So we handle that
+            if "unreleaseDate" in list(row.keys()):
+                cancelled_date = dateparser.parse(row["unreleaseDate"])
+                cancellation_date_inferred = False
+                _update_qa(
+                    trial, submitted_date, cancelled_date, cancellation_date_inferred
+                )
+            elif "unreleaseDateUnknown" in list(row.keys()):
+                # Some old trials could have an "unknown" date of cancellation.
+                # So we are accounting for that here, though it should be very rare.
+                cancelled_date = EARLIEST_CANCELLATION_DATE
+                cancellation_date_inferred = True
+                _update_qa(
+                    trial, submitted_date, cancelled_date, cancellation_date_inferred
+                )
+            # So the only other case we have to worry about is the standard
+            # submission/return cluster of dates
+            # So we can just do an else because that will just be any bit of JSON
+            # without 'unreleaseDate' or 'unreleaseDateUnknown'
             else:
-                #Just getting the submission date and the return date if it exists
-                submitted = dateparser.parse(row['releaseDate'])
-                if 'resetDate' in row.keys():
-                    returned = dateparser.parse(row['resetDate'])
+                # Just getting the submission date and the return date if it exists
+                if "resetDate" in row.keys():
+                    returned = dateparser.parse(row["resetDate"])
                 else:
                     returned = None
-                #This bit was ported in from the old function
+                # This bit was ported in from the old function
                 qa, created = TrialQA.objects.get_or_create(
-                    submitted_to_regulator=submitted,
-                    trial=trial)
+                    submitted_to_regulator=submitted_date, trial=trial
+                )
                 if returned:
                     qa.returned_to_sponsor = returned
                     qa.save()
 
-    #If there is no date because results were already posted since the last update, we ignore and move on
-    elif not dates and content['hasResults']:
+    # If there is no date because results were already posted since the last update,
+    # we ignore and move on
+    elif not dates and content["hasResults"]:
         pass
 
-    #This last else was ported from the old code to handle any other cases.
+    # This last else was ported from the old code to handle any other cases.
     else:
         deleted, _ = trial.trialqa_set.all().delete()
         if deleted:
@@ -182,8 +195,7 @@ def set_current_rankings():
 
 
 def truthy(val):
-    """Turn a one or zero value into a boolean.
-    """
+    """Turn a one or zero value into a boolean."""
     return bool(int(val))
 
 
